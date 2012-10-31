@@ -1,7 +1,12 @@
 var examples =
     [
-        { title: "Dannes superkompus",
-          content:
+        { title: "Dannes superkorpus",
+          word_nav: "word_punkt",
+          sentence_nav: "sentence_custom",
+          sentence_tag: "s",
+          paragraph_nav: "paragraph_custom",
+          paragraph_tag: "p",
+          corpus_xml:
 '<text title="Dannes Superkorpus">\n\
   <chapter name="Dan berättar om korpusen">\n\
     <p name="Första paragrafen">\n\
