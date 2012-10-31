@@ -8,7 +8,7 @@ var examples =
       <s mood="glada">\n\
         Malin och Dan skriver en korpus.\n\
       </s>\n\
-      <s mood="förväntasfulla">\n\
+      <s mood="förväntansfulla">\n\
         Den blir bra.\n\
       </s>\n\
     </p>\n\
