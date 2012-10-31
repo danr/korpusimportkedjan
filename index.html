@@ -57,25 +57,29 @@
   <body>
     <div class="container">
       <div class="header">
-      <h2>Korpusimportkedjan
-        <span rel="tooltip" id="title_t" title="Text">T</span><span rel="tooltip" id="title_a" title="annotation">a</span><span rel="tooltip" id="title_x" title="XML">x</span><span rel="tooltip" id="title_i" title="import">i</span>
-      </h2>
+        <h2>Korpusimportkedjan
+          <span rel="tooltip" id="title_t" title="Text">T</span><span rel="tooltip" id="title_a" title="annotation">a</span><span rel="tooltip" id="title_x" title="XML">x</span><span rel="tooltip" id="title_i" title="import">i</span>
+        </h2>
+      </div>
+
+      <div class="row">
+        <div class="span12" id="example_buttons" style="text-align: right; margin-bottom: 10px;">
+          <span>Ladda exempel: </span>
+        </div>
       </div>
 
       <form id="text_form">
         <div class="row">
           <div class="span12">
-            <textarea id="textarea_text" rows="4"></textarea>
+            <textarea id="corpus_xml" rows="4"></textarea>
           </div>
         </div>
 
         <div class="row" id="dynamic">
         </div>
 
-
-          <div class="span12 pull-right">
-            <button class="btn" id="text_submit" style="float:right; margin-right:20px;">Kör!</button>
-          </div>
+        <div class="span12 pull-right">
+          <button class="btn" id="text_submit" style="float:right; margin-right:20px;">Kör!</button>
         </div>
 
       </form>

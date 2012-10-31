@@ -1,31 +1,30 @@
 function main() {
     $('.header span').tooltip({placement: "bottom"});
-    var codeMirror = CodeMirror.fromTextArea(document.getElementById("textarea_text"), {
+    var xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
         lineNumbers: true
     });
-    if (!codeMirror.getValue()) {
-        codeMirror.setValue(examples[0].content);
-    }
 
     mkSection("Ord", "word_nav", [
-        { id: "punkt_word", label: "punkt ord", active: true },
-        { id: "whitespace", label: "blanktecken" },
-        { id: "word_custom_tag", label: "egen tagg...", obj: mkTagForm("word_tag") }
+        { id: "word_punkt", label: "punkt ord", active: true },
+        { id: "word_whitespace", label: "blanktecken" },
+        { id: "word_blanklines", label: "radbrytning" },
+        { id: "word_custom", label: "egen tagg...", obj: mkTagForm("word_tag") }
     ]).appendTo($('#dynamic'));
 
     mkSection("Meningar", "sentence_nav", [
-        { id: "punkt_sentence", label: "punkt mening", active: true },
-        { id: "whitespace", label: "radbrytning" },
-        { id: "blanklines", label: "blankrader" },
-        { id: "sentence_custom_tag", label: "egen tagg...", obj: mkTagForm("sentence_tag") }
+        { id: "sentence_punkt", label: "punkt mening", active: true },
+        { id: "sentence_whitespace", label: "radbrytning" },
+        { id: "sentence_blanklines", label: "blankrader" },
+        { id: "sentence_custom", label: "egen tagg...", obj: mkTagForm("sentence_tag") }
     ]).appendTo($('#dynamic'));
 
     mkSection("Stycken", "paragraph_nav", [
-        { id: "none", label: "icke" },
-        { id: "whitespace", label: "radbrytning" },
-        { id: "blanklines", label: "blankrader", active: true },
-        { id: "paragraph_custom_tag", label: "egen tagg...", obj: mkTagForm("paragraph_tag") }
+        { id: "paragraph_none", label: "icke" },
+        { id: "paragraph_whitespace", label: "radbrytning" },
+        { id: "paragraph_blanklines", label: "blankrader", active: true },
+        { id: "paragraph_custom", label: "egen tagg...", obj: mkTagForm("paragraph_tag") }
     ]).appendTo($('#dynamic'));
+
 
     // Activate all navs
     $('ul.nav li').click(function (e) {
@@ -33,6 +32,32 @@ function main() {
         $(this).tab('show');
     });
 
+    $.each(examples, function (idx, val) {
+        var button_id = "example" + idx;
+        var foo = $('<button class="btn btn-small"/>')
+            .attr("id",button_id)
+            .text(val.title)
+            .appendTo('#example_buttons');
+        $('#' + button_id).click(function () {
+            console.log("click!");
+            loadExample(xml_editor, examples[idx]);
+        })
+    });
+}
+
+function loadExample(xml_editor, ex) {
+    $.each(ex, function (k,v) {
+        var is_nav = k.indexOf("nav") != -1;
+        if (k == "corpus_xml") {
+            xml_editor.setValue(v);
+        } else if (is_nav) {
+            var tab = $('li[data-target=#' + v + ']');
+            tab.tab('show');
+            tab.addClass('active');
+        } else if (k != "title") {
+            $('#' + k).val(v);
+        }
+    });
 }
 
 function mkTagForm(id) {
@@ -75,10 +100,10 @@ function mkTabButton(bar, tab_content, id, text, obj, active) {
 }
 
 // Makes a li button for nav.
-function mkButton(href, text, active) {
+function mkButton(data_target, text, active) {
     return $('<li/>', {
         class: "btn" + (active ? " active" : ""),
-        href: href,
+        "data-target": data_target,
         text: text
     });
 }
