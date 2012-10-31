@@ -1,5 +1,14 @@
+var lasbart_xml = lasbart_xml || "";
+
 var examples =
     [
+        { title: "Läsbart",
+          word_nav: "word_custom",
+          word_tag: "w",
+          sentence_nav: "sentence_punkt",
+          paragraph_nav: "paragraph_none",
+          corpus_xml: lasbart_xml
+        },
         { title: "Dannes superkorpus",
           word_nav: "word_punkt",
           sentence_nav: "sentence_custom",
@@ -30,4 +39,5 @@ var examples =
       </s>\n\
     </p>\n\
   </chapter>\n\
-</text>'}];
+</text>'}
+    ];

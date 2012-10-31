@@ -1,9 +1,13 @@
 function main() {
+    // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});
+
+    // Make the xml editor
     var xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
         lineNumbers: true
     });
 
+    // Make sections for word, sentence, and paragraph
     mkSection("Ord", "word_nav", [
         { id: "word_punkt", label: "punkt ord", active: true },
         { id: "word_whitespace", label: "blanktecken" },
@@ -25,31 +29,36 @@ function main() {
         { id: "paragraph_custom", label: "egen tagg...", obj: mkTagForm("paragraph_tag") }
     ]).appendTo($('#dynamic'));
 
-
     // Activate all navs
     $('ul.nav li').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });
 
+    // Add example buttons
     $.each(examples, function (idx, val) {
         var button_id = "example" + idx;
-        var foo = $('<button class="btn btn-small"/>')
+        $('<button class="btn btn-small" style="margin:5px"/>')
             .attr("id",button_id)
             .text(val.title)
             .appendTo('#example_buttons');
         $('#' + button_id).click(function () {
-            console.log("click!");
             loadExample(xml_editor, examples[idx]);
         })
     });
 }
 
+// Loads an example and sets the form accordingly
 function loadExample(xml_editor, ex) {
     $.each(ex, function (k,v) {
         var is_nav = k.indexOf("nav") != -1;
         if (k == "corpus_xml") {
             xml_editor.setValue(v);
+            /*
+            for (var i=0; i<xml_editor.lineCount(); i++) {
+                xml_editor.indentLine(i)
+            }
+            */
         } else if (is_nav) {
             var tab = $('li[data-target=#' + v + ']');
             tab.tab('show');
@@ -60,6 +69,7 @@ function loadExample(xml_editor, ex) {
     });
 }
 
+// Makes the form for tags
 function mkTagForm(id) {
     return $('<div class="form-horizontal"/>').append(mkControlGroupText(id, "taggnamn:"));
 }
