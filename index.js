@@ -3,15 +3,28 @@ function main() {
     var codeMirror = CodeMirror.fromTextArea(document.getElementById("textarea_text"), {
         lineNumbers: true
     });
-    codeMirror.setValue(examples[0].content);
-
-    var word_tag_form = $('<div class="form-horizontal"/>')
-    word_tag_form.append(mkControlGroupText("word_tag", "taggnamn:"));
+    if (!codeMirror.getValue()) {
+        codeMirror.setValue(examples[0].content);
+    }
 
     mkSection("Ord", "word_nav", [
         { id: "punkt_word", label: "punkt ord", active: true },
         { id: "whitespace", label: "blanktecken" },
-        { id: "word_custom_tag", label: "egen tagg...", obj: word_tag_form }
+        { id: "word_custom_tag", label: "egen tagg...", obj: mkTagForm("word_tag") }
+    ]).appendTo($('#dynamic'));
+
+    mkSection("Meningar", "sentence_nav", [
+        { id: "punkt_sentence", label: "punkt mening", active: true },
+        { id: "whitespace", label: "radbrytning" },
+        { id: "blanklines", label: "blankrader" },
+        { id: "sentence_custom_tag", label: "egen tagg...", obj: mkTagForm("sentence_tag") }
+    ]).appendTo($('#dynamic'));
+
+    mkSection("Stycken", "paragraph_nav", [
+        { id: "none", label: "icke" },
+        { id: "whitespace", label: "radbrytning" },
+        { id: "blanklines", label: "blankrader", active: true },
+        { id: "paragraph_custom_tag", label: "egen tagg...", obj: mkTagForm("paragraph_tag") }
     ]).appendTo($('#dynamic'));
 
     // Activate all navs
@@ -20,6 +33,10 @@ function main() {
         $(this).tab('show');
     });
 
+}
+
+function mkTagForm(id) {
+    return $('<div class="form-horizontal"/>').append(mkControlGroupText(id, "taggnamn:"));
 }
 
 // Makes a section with a title and tabs, which is an array of objects like this:
