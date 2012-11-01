@@ -90,17 +90,16 @@ function mkSection(title, id, tabs) {
         return mkTabButton(ul, tab_content, dict.id, dict.label, dict.obj, dict.active);
     });
 
-    return $('<div/>', { class: "span12" })
-        .append($('<h3>' + title + '</h3>'))
-        .append(ul)
-        .append(tab_content);
+    return $('<div class="row"/>')
+        .append($('<div class="span2" style="text-align: right;"/>').append($('<strong/>').text(title)))
+        .append($('<div class="span10"/>').append(ul,tab_content))
 }
 
 // Make a text input with an id and a label to a control group.
 function mkControlGroupText(id, label) {
-    var lbl  = $('<label class="control-label"></label>', { for: id }).text(label);
-    var cdiv = $('<div class="controls"><input type="text" id="' + id + '"></div>');
-    return $('<div class="control-group"/>').append(lbl,cdiv);
+    return $('<div class="control-group"/>')
+        .append($('<label class="control-label"></label>', { for: id }).text(label))
+        .append($('<div class="controls"><input type="text" id="' + id + '"></div>'));
 }
 
 // Adds a button and an empty tab to a nav.
