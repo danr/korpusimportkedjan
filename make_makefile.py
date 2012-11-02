@@ -6,12 +6,18 @@ import sb.util
 
 pp = pprint.PrettyPrinter()
 
+def is_str_str_tuple(t):
+    """Is this object is a tuple of two strings?"""
+    return (isinstance(t,tuple) and len(t) == 2
+            and isinstance(t[0],basestring)
+            and isinstance(t[1],basestring))
+
 def linearise_Makefile(content):
     res = []
     for i in content:
         if isinstance(i,basestring):
             res.append(i)
-        elif isinstance(i,tuple) and len(i) == 2 and isinstance(i[0],basestring) and isinstance(i[1],basestring):
+        elif is_str_str_tuple(i):
             res.append("%s = %s" % (i[0], i[1]))
         elif isinstance(i,list):
             res += align_table([ [k,"="] + v for (k,v) in i ])
@@ -49,11 +55,24 @@ def make_Makefile(settings):
                 ('dephead.ref','dephead','-'),
                 ('deprel','deprel','-')]
 
-    # remove positional attributes that should not be generated
-    vrt_cols = filter(lambda u : u[0] in settings['attributes'],vrt_cols)
+    # Remove positional attributes that should not be generated
+    vrt_cols = filter(lambda u : u[1] in settings['attributes'],vrt_cols)
+
+    # The root tag
+    text = settings['root_tag']['tag']
+
+    # Initial parents and chains. All tags are assumed to have the root node as parent
+    parents = []
+    chains = []
 
     # xml_elements and xml_annotations as column-by-column
     xml_cols = []
+
+    def add_parent(tag):
+        parents.append("token.{0}|token|{0}".format(tag))
+
+    def add_chain(tag,attr):
+        chains.append("token.{0}.{1}".format(tag,attr))
 
     def mk_xml_attr(tag,attr):
         return tag + ":" + attr
@@ -61,23 +80,27 @@ def make_Makefile(settings):
     def mk_file_attr(tag,attr):
         return tag + "." + attr
 
-    def add_structural_attributes(tag,attributes):
+    def add_structural_attributes(tag,attributes,chains_and_parents=False):
         xml_cols.append((tag,tag))
+        chains_and_parents and add_parent(tag)
         for attr in attributes:
-            add_attribute(tag,attr)
+            add_attribute(tag,attr,structural=True,mk_chain=chains_and_parents)
 
-    def add_attribute(tag,attr,structural=True):
+    def add_attribute(tag,attr,structural,mk_chain,filename=None):
+        filename = filename or tag
         xml_attr = mk_xml_attr(tag,attr)
-        file_attr = mk_file_attr(tag,attr)
+        file_attr = mk_file_attr(filename,attr)
+        struct_attr = mk_xml_attr(filename,attr)
         xml_cols.append((xml_attr,file_attr))
         if structural:
-            vrt_cols.append((file_attr,"-",xml_attr))
+            vrt_cols.append((file_attr,"-",struct_attr))
         else:
-            vrt_cols.append((file_attr,xml_attr,"-"))
+            vrt_cols.append((file_attr,struct_attr,"-"))
+        mk_chain and add_chain(filename,attr)
 
     # Word (token) segmentation
     ws = settings['word_segmenter']
-    if isinstance(ws,str):
+    if isinstance(ws,basestring):
         """Example: word_segmenter: "punkt_word"""
         token = [("token_chunk","sentence"),
                  ("token_segmenter",ws),
@@ -105,19 +128,12 @@ def make_Makefile(settings):
                                  mk_file_attr('token',attr)))
                 vrt_cols.append((mk_file_attr('token',attr),attr,'-'))
 
-                """
-                # Adds w:language -> w.language in xml and
-                #      w.language -> (w:language, -) in vrt
-                # add_attribute(ws['tag'],attr,structural=False)
-                # Probably wrong. Mailed Martin about it
-                """
-
     # add the obligatory structural attribute sentence.id
     vrt_cols.append(('sentence.id','-','sentence:id'))
 
     # Add the root tag to xml and its attributes
-    add_structural_attributes(settings['root_tag']['tag'],
-                              settings['root_tag']['attributes'])
+    add_structural_attributes(text,settings['root_tag']['attributes'],
+                              chains_and_parents=True)
 
     # Sentence and Paragraph segmentation
     def add_segmenter(setting,name,chunk,model=None):
@@ -135,21 +151,27 @@ def make_Makefile(settings):
                                    }
             """
             xml_cols.append((setting['tag'],name))
+            add_parent(name)
             for attr in setting['attributes']:
-                add_attribute(setting['tag'],attr)
+                add_attribute(setting['tag'],attr,
+                              structural=True,mk_chain=True,
+                              filename=name)
             return [makefile_comment("Using tag " + setting['tag'] + " for " + name)]
 
     sentence = add_segmenter(settings['sentence_segmenter'],
                              "sentence","paragraph","$(punkt_model)")
     paragraph = add_segmenter(settings['paragraph_segmenter'],
-                              "paragraph",settings['root_tag']['tag'])
+                              "paragraph",text)
 
-    # other tags + root node
+    # Extra tags
+    for t in settings['extra_tags']:
+        add_structural_attributes(t['tag'],t['attributes'],chains_and_parents=True)
 
     # Add the magic 'n' annotation
     vrt_cols.append(('n','-','-'))
 
-    hdr = [("corpus",settings['corpus']),
+    # Assemble the makefile
+    hdr = [("corpus",settings['corpus']),  # TODO: escaping of non-filename characters!
            ("original_dir","original"),
            ("files","$(basename $(notdir $(wildcard $(original_dir)/*.xml)))")]
 
@@ -163,9 +185,13 @@ def make_Makefile(settings):
     xml = [zip(["xml_elements","xml_annotations"],
                map(list,zip(*xml_cols)))]
 
+    parents_and_chains = [("parents"," ".join(parents)),
+                          ("chains"," ".join(chains))]
+
+    # Add a blank row between sections
     res = []
     [ res.extend(row + [""])
-      for row in (hdr, vrt, xml, common, token, sentence, paragraph, rules) ]
+      for row in (hdr, vrt, xml, common, token, sentence, paragraph, parents_and_chains, rules) ]
 
     return res
 
@@ -186,7 +212,8 @@ def json_to_Makefile(filename):
 
     makefile = make_Makefile(settings)
 
-    settings_str = makefile_comment(pp.pformat(settings))
+    settings_str = re.sub(r"u'",r"'", # remove ugly u in u'strings'
+                          makefile_comment(pp.pformat(settings)))
 
     sb.util.log.info("Writing Makefile...")
     with open("Makefile","w") as f:
@@ -196,6 +223,7 @@ def json_to_Makefile(filename):
 if __name__ == '__main__':
     sb.util.run.main(json_to_Makefile)
 
+# An example makefile which can be run on linearise_Makefile
 example = [
     ("corpus","dannes_superkorpus"),
     ("original_dir","original"),
@@ -233,6 +261,7 @@ example = [
     "include ../Makefile.rules",
     ]
 
+# Example settings for make_Makefile
 settings = {'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
             'corpus': 'corpus title',
             'dateformat': '%d%h%ms',

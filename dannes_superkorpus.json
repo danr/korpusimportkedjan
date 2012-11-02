@@ -1,0 +1,23 @@
+{
+    corpus: "Dannes Superkorpus",
+    word_segmenter: "punkt_word",
+    root_tag:
+    { tag: "text",
+      attributes: ["korpusnamn"]
+    },
+    sentence_segmenter:
+    { tag: "s",
+      attributes: ["mood"]
+    },
+    paragraph_segmenter:
+    { tag: "p",
+      attributes: ["namn"]
+    },
+    extra_tags:
+    [
+        { tag: "kaptiel",
+          attributes: ["namn"]
+        }
+    ],
+    attributes: ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"]
+}
