@@ -1,0 +1,81 @@
+
+// SEGMENTERS are "punkt_word", "punkt_sentence", "blanklines", "newlines", "whitespace"
+
+{
+    // Corpus name
+    corpus: "corpus title",
+
+    // Can be any of the SEGMENTERS, or a tuple of tag, and a dictionary of attributes
+    // These attributes can correspond either to a default positional attribute, or
+    // a custom one, indicated by null.
+    word_segmenter:
+    { tag: "w",
+      attributes:
+      { egennamn: null,
+        pos: "msd"
+        prefix: null // will cause a conflict: is generated as user_prefix
+      }
+    },
+
+    // Can be any of the SEGMENTERS, or a tuple of tag and an array of structural attribute names.
+    sentence_segmenter:
+    { tag: "s",
+      attributes: ["mood","id"]
+    },
+
+    // Paragraph segmenter. Same settings as for sentence_segmenter
+    paragraph_segmenter: "blanklines",
+
+    // The root tag and its structural attribute names
+    root_tag:
+    { tag: "text",
+      attributes: ["title","author"]
+    },
+
+    // List of extra tags and their structural attribute names
+    extra_tags:
+    [
+        { tag: "chapter",
+          attributes: ["name"]
+        },
+        { tag: "section",
+          attributes: ["name"]
+        }
+    ],
+
+    // Making from and to dates to korp
+    datefrom: "chapter.date",
+    dateto: "chapter.date",
+    dateformat: "%d%h%ms",
+    datesplitter: null,
+    dateregex: null,
+
+    // Suppressing warnings
+    xml_skip:
+    [
+        { tag: "some_tag",
+          attributes: []
+        },
+        { tag: "footnote",
+          attributes: ["content"]
+        }
+    ],
+
+    // {null, "sentence", "paragraph"}
+    random: "sentence",
+
+    // Which attributes to generate, also including those that are obtained from word attributes.
+    attributes: ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"]
+
+}
+
+// Internally used positinal attributes:
+//     word, pos, msd, lemma, lex, saldo, prefix, suffix, ref, dephead, deprel
+//
+// Internally used tags:
+//     sentence, paragraph
+//
+// Internally used structural attributes:
+//     sentence.id
+//   in Korp:
+//     text.dateto, text.datefrom
