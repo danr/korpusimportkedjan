@@ -1,20 +1,45 @@
 var lasbart_xml = lasbart_xml || "";
 
+var all_attributes = ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
+
 var examples =
     [
-        { title: "Läsbart",
-          word_nav: "word_custom",
-          word_tag: "w",
-          sentence_nav: "sentence_punkt",
-          paragraph_nav: "paragraph_none",
+        { corpus: "Läsbart",
+		  word_segmenter:
+		  { tag: "w",
+			attributes: []
+		  },
+		  sentence_segmenter: "sentence_punkt",
+		  paragraph_segmenter: "none",
+		  root:
+		  { tag: "text",
+			attributes: []
+		  },
+		  extra_tags: [],
+		  attributes: all_attributes,
           corpus_xml: lasbart_xml
         },
-        { title: "Dannes superkorpus",
-          word_nav: "word_punkt",
-          sentence_nav: "sentence_custom",
-          sentence_tag: "s",
-          paragraph_nav: "paragraph_custom",
-          paragraph_tag: "p",
+        { corpus: "Dannes Superkorpus",
+		  word_segmenter: "punkt_word",
+		  root:
+		  { tag: "text",
+			attributes: []
+		  },
+		  sentence_segmenter:
+		  { tag: "s",
+			attributes: ["mood"]
+		  },
+		  paragraph_segmenter:
+		  { tag: "p",
+			attributes: ["namn"]
+		  },
+		  extra_tags:
+		  [
+			  { tag: "kapitel",
+				attributes: ["namn"]
+			  }
+		  ],
+		  attributes: all_attributes,
           corpus_xml:
 '<text title="Dannes Superkorpus">\n\
   <chapter name="Dan berättar om korpusen">\n\

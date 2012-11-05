@@ -60,7 +60,7 @@ def make_Makefile(settings):
     vrt_cols = filter(lambda u : u[1] in settings['attributes'],vrt_cols)
 
     # The root tag
-    text = settings['root_tag']['tag']
+    text = settings['root']['tag']
 
     # Initial parents and chains. All tags are assumed to have the root node as parent
     parents = []
@@ -166,7 +166,7 @@ def make_Makefile(settings):
         add_structural_attributes(t['tag'],t['attributes'])
 
     # Add the root tag to xml and its attributes
-    add_structural_attributes(text,settings['root_tag']['attributes'])
+    add_structural_attributes(text,settings['root']['attributes'])
 
     # Add the magic 'n' annotation
     vrt_cols.append(('n','-','-'))
@@ -274,7 +274,7 @@ settings = {'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefi
                            {'attributes': ['name'], 'tag': 'section'}],
             'paragraph_segmenter': 'blanklines',
             'random': 'sentence',
-            'root_tag': {'attributes': ['title', 'author'], 'tag': 'text'},
+            'root': {'attributes': ['title', 'author'], 'tag': 'text'},
             'sentence_segmenter': {'attributes': ['mood', 'id'], 'tag': 's'},
             'word_segmenter': {'attributes': {'egennamn': None, 'pos': 'msd'},
                                'tag': 'w'},
