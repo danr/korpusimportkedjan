@@ -1,3 +1,4 @@
+
 import re
 import json
 import pprint
@@ -80,12 +81,6 @@ def make_Makefile(settings):
     def mk_file_attr(tag,attr):
         return tag + "." + attr
 
-    def add_structural_attributes(tag,attributes,chains_and_parents=False):
-        xml_cols.append((tag,tag))
-        chains_and_parents and add_parent(tag)
-        for attr in attributes:
-            add_attribute(tag,attr,structural=True,mk_chain=chains_and_parents)
-
     def add_attribute(tag,attr,structural,mk_chain,filename=None):
         filename = filename or tag
         xml_attr = mk_xml_attr(tag,attr)
@@ -131,10 +126,6 @@ def make_Makefile(settings):
     # add the obligatory structural attribute sentence.id
     vrt_cols.append(('sentence.id','-','sentence:id'))
 
-    # Add the root tag to xml and its attributes
-    add_structural_attributes(text,settings['root_tag']['attributes'],
-                              chains_and_parents=True)
-
     # Sentence and Paragraph segmentation
     def add_segmenter(setting,name,chunk,model=None):
         if isinstance(setting,basestring):
@@ -163,9 +154,19 @@ def make_Makefile(settings):
     paragraph = add_segmenter(settings['paragraph_segmenter'],
                               "paragraph",text)
 
+    def add_structural_attributes(tag,attributes):
+        if len(attributes) > 0:
+            xml_cols.append((tag,tag))
+            add_parent(tag)
+            for attr in attributes:
+                add_attribute(tag,attr,structural=True,mk_chain=True)
+
     # Extra tags
     for t in settings['extra_tags']:
-        add_structural_attributes(t['tag'],t['attributes'],chains_and_parents=True)
+        add_structural_attributes(t['tag'],t['attributes'])
+
+    # Add the root tag to xml and its attributes
+    add_structural_attributes(text,settings['root_tag']['attributes'])
 
     # Add the magic 'n' annotation
     vrt_cols.append(('n','-','-'))
