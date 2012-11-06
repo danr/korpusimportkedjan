@@ -20,7 +20,7 @@ function main() {
         $('<hr/>'),
 
         mkSection("Meningar", "sentence_nav", [
-            { id: "sentence_punkt", label: "punkt mening", active: true },
+            { id: "sentence_punkt_sentence", label: "punkt mening", active: true },
             { id: "sentence_whitespace", label: "radbrytning" },
             { id: "sentence_blanklines", label: "blankrader" },
             { id: "sentence_custom", label: "egen tagg...", obj: mkTagForm("sentence") }
@@ -40,8 +40,6 @@ function main() {
         mkRow("Rot", mkTagForm("root"))
 
     );
-
-
 
     // Activate all navs
     $('ul.nav li').click(function (e) {
@@ -77,14 +75,19 @@ function activeTab(str) {
     return res;
 }
 
+function tagSetting(str) {
+    return {
+        tag: $('#' + str + '_tag').val(),
+        attributes: $('.' + str + '-attribute').map(function () { return $(this).val(); }).get()
+    };
+}
+
+
 // str is one of "word", "sentence", "paragraph"
 function segmenterSetting(str) {
     var active = activeTab(str);
     if (active.indexOf('custom') != -1) {
-        return {
-            tag: $('#' + str + '_tag').val(),
-            attributes: []
-        };
+		return tagSetting(str);
     } else {
         return active;
     }
@@ -96,10 +99,7 @@ function mkJsonSetting() {
         word_segmenter: segmenterSetting('word'),
         sentence_segmenter: segmenterSetting('sentence'),
         paragraph_segmenter: segmenterSetting('paragraph'),
-        root_tag:
-        { tag: "text",
-          attributes: []
-        },
+        root_tag: tagSetting('root'),
         extra_tags:
         [
             { tag: "kaptiel",
@@ -112,14 +112,22 @@ function mkJsonSetting() {
 
 // Loads an example and sets the form accordingly
 function loadExample(xml_editor, ex) {
+
+	function setTag(t,v) {
+        $("#" + t + "_tag").val(v.tag);
+		$("#" + t + "_controls").replaceWith(mkAttributes(t,v.attributes));
+	}
+
+	setTag("root",ex.root);
+
     $.each(["word","sentence","paragraph"], function(_ix,segmenter) {
         v = ex[segmenter + "_segmenter"];
         if (typeof v == "string") {
             var tabstring = v;
         } else {
             var tabstring = 'custom';
-            $("#" + segmenter + "_tag").val(v.tag);
         }
+		setTag(segmenter,v);
         var tab = $('li[data-target=#' + segmenter + "_" + tabstring + ']');
         tab.tab('show');
         tab.addClass('active');
@@ -138,37 +146,60 @@ function mkRow(left, right) {
         .append($('<div class="span10"/>').append(right));
 }
 
+function newIcon(icon) {
+	return $('<i/>').addClass(icon);
+}
+
+// Makes the new buttons in the input fields
+function mkNewButton(id) {
+    return $('<button class="btn btn-success row-button"/>')
+		.append(newIcon("icon-plus-sign"))
+        .click(function () {
+			var par = $(this).parent()
+            par.after(mkAttribute(id));
+			if (par.hasClass("temp")) {
+				par.remove();
+			}
+            return false;
+        });
+};
+
+// Makes the input field, and close and add button, possibly with initial text
+function mkAttribute(id, initial_text) {
+	var input = $('<input type="text"/>')
+		.addClass(id + "-attribute")
+		.attr('value',initial_text || "");
+    var close_button = $('<button class="btn btn-danger row-button"/>')
+		.append(newIcon("icon-minus-sign"))
+        .click(function () {
+            var grandpa = $(this).parent().parent();
+            $(this).parent().remove();
+            if (grandpa.children().length == 0) {
+                grandpa.append($('<div class="temp">').append(mkNewButton(id)));
+            }
+            return false;
+        });
+    return $('<div style="margin-bottom:10px;"/>')
+		.addClass(id + "-row")
+		.append(input,close_button,mkNewButton(id));
+}
+
+function mkAttributes(id, texts) {
+	var div = $('<div class="controls"/>').attr("id",id + "_controls");
+	if (!texts || texts.length == 0) {
+		div.append($('<div class="temp">').append(mkNewButton(id)));
+	} else {
+		texts.map(function (text) { return div.append(mkAttribute(id,text)); });
+	}
+	return div;
+}
+
 // Makes the form for tags
 function mkTagForm(id) {
-    var mk_attribute = function () {
-        var div = $('<div><input type="text"></input></div>').addClass(id + "-row");
-        var close_button = $('<button class="btn btn-danger row-button"><i class="icon-minus-sign"></i></button>')
-            .click(function () {
-                var grandpa = $(this).parent().parent();
-                $(this).parent().remove();
-                if (grandpa.children().length == 0) {
-                    grandpa.append($('<div class="temp">').append(new_button()));
-                }
-                return false;
-            });
-        var new_button = function () {
-            return $('<button class="btn btn-success row-button"><i class="icon-plus-sign"></i></button>')
-                .click(function () {
-					var par = $(this).parent()
-                    par.after(mk_attribute());
-					if (par.hasClass("temp")) {
-						par.remove();
-					}
-                    return false;
-                });
-        };
-
-        return div.append(close_button,new_button()).css("margin-bottom","10px");
-    };
     return $('<div class="form-horizontal"/>')
         .append(mkControlGroupText(id + "_tag", "taggnamn:"))
         .append(mkControlGroupText(id + "_attr", "attribut:", function () {
-            return $('<div class="controls"/>').append(mk_attribute());
+			return mkAttributes(id, [""]);
         }));
 
 }

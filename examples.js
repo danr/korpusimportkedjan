@@ -7,13 +7,13 @@ var examples =
         { corpus: "Läsbart",
 		  word_segmenter:
 		  { tag: "w",
-			attributes: []
+			attributes: ["pos"]
 		  },
-		  sentence_segmenter: "sentence_punkt",
+		  sentence_segmenter: "punkt_sentence",
 		  paragraph_segmenter: "none",
 		  root:
 		  { tag: "text",
-			attributes: []
+			attributes: ["source","age","author","type","title"]
 		  },
 		  extra_tags: [],
 		  attributes: all_attributes,
@@ -23,7 +23,7 @@ var examples =
 		  word_segmenter: "punkt_word",
 		  root:
 		  { tag: "text",
-			attributes: []
+			attributes: ["title"]
 		  },
 		  sentence_segmenter:
 		  { tag: "s",
