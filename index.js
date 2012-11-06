@@ -77,10 +77,27 @@ function activeTab(str) {
 }
 
 function tagSetting(str) {
-    return {
+    var attributes = null;
+    $('.' + str + '-attribute').map(function (idx) {
+        var positional = $(this).siblings().find('input[type=hidden]');
+        if (positional.length == 1) {
+            attributes = attributes || {};
+            var p = positional.val();
+            if (p == "custom") {
+                p = null;
+            }
+            attributes[$(this).val()] = p
+        } else {
+            attributes = attributes || [];
+            attributes[idx] = $(this).val();
+        }
+    });
+    var ret = {
         tag: $('#' + str + '_tag').val(),
-        attributes: $('.' + str + '-attribute').map(function () { return $(this).val(); }).get()
+        attributes: attributes
     };
+    console.log(str, ret);
+    return ret;
 }
 
 
@@ -169,14 +186,14 @@ function mkNewButton(id, positional) {
 
 // Positional attributes select option
 function mkPosOption(id) {
-    var select = $('<select/>').addClass(id + "-position");
+    var select = $('<select/>');
     function newOption(val,txt) {
         select.append($('<option/>').attr("value",val).text(txt));
     }
     newOption("custom","ny");
     $.each(attributes, function (_,a) { select.append(newOption(a,a)) });
-	var span = $('<span/>').append(select);
-	select.buttonSelect(true);
+    var span = $('<span/>').append(select);
+    select.buttonSelect(true);
     return span;
 }
 
@@ -196,11 +213,11 @@ function mkAttribute(id, positional, initial_text) {
             }
             return false;
         });
-	var div = $('<div style="margin-bottom:10px;"/>').addClass(id + "-row").append(input);
+    var div = $('<div style="margin-bottom:10px;"/>').addClass(id + "-row").append(input);
     if (positional) {
-		div.append(mkPosOption(id))
-	}
-	return div.append(close_button,mkNewButton(id, positional));
+        div.append(mkPosOption(id))
+    }
+    return div.append(close_button,mkNewButton(id, positional));
 }
 
 function mkAttributes(id, positional, texts) {
@@ -233,7 +250,7 @@ function mkSection(title, id, tabs) {
         id: id
     });
 
-	// Must set overflow to visible or else popdown menus will get scrollbars
+    // Must set overflow to visible or else popdown menus will get scrollbars
     var tab_content = $('<div class="tab-content" style="overflow:visible"/>');
 
     $.each(tabs, function (_index, dict) {
