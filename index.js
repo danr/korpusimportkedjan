@@ -110,7 +110,7 @@ function mkJsonSetting() {
     };
 }
 
-// Loads an example and sets the form accordingly
+/* Loads an example and sets the form accordingly */
 function loadExample(xml_editor, ex) {
 
 	function setTag(t,v) {
@@ -246,7 +246,7 @@ function mkButton(data_target, text, active) {
     });
 }
 
-// Makes an tab for nav.
+// Makes a tab for nav.
 function mkTab(id, active, obj) {
     return $('<div/>', {
         class: "tab-pane" + (active ? " active" : ""),
