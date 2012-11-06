@@ -83,21 +83,16 @@ function tagSetting(str) {
         if (positional.length == 1) {
             attributes = attributes || {};
             var p = positional.val();
-            if (p == "custom") {
-                p = null;
-            }
-            attributes[$(this).val()] = p
+            attributes[$(this).val()] = p == "custom" ? null : p;
         } else {
             attributes = attributes || [];
             attributes[idx] = $(this).val();
         }
     });
-    var ret = {
+    return {
         tag: $('#' + str + '_tag').val(),
         attributes: attributes
     };
-    console.log(str, ret);
-    return ret;
 }
 
 
@@ -199,7 +194,8 @@ function mkPosOption(id) {
 
 
 // Makes the input field, and close and add button, possibly with initial text
-function mkAttribute(id, positional, initial_text) {
+function mkAttribute(id, positional, initial_ix, initial_val) {
+    var initial_text = positional ? initial_ix : initial_val;
     var input = $('<input type="text"/>')
         .addClass(id + "-attribute")
         .attr('value',initial_text || "");
@@ -215,17 +211,22 @@ function mkAttribute(id, positional, initial_text) {
         });
     var div = $('<div style="margin-bottom:10px;"/>').addClass(id + "-row").append(input);
     if (positional) {
-        div.append(mkPosOption(id))
+        var options = mkPosOption(id);
+        var sel = options.find('input[type=hidden]');
+        sel.val(initial_val ? initial_val : "custom").change();
+        div.append(options);
     }
     return div.append(close_button,mkNewButton(id, positional));
 }
 
-function mkAttributes(id, positional, texts) {
+function mkAttributes(id, positional, initials) {
     var div = $('<div class="controls"/>').attr("id",id + "_controls");
-    if (!texts || texts.length == 0) {
-        div.append($('<div class="temp">').append(mkNewButton(id)));
+    if (!initials || initials.length == 0) {
+        div.append($('<div class="temp">').append(mkNewButton(id, positional)));
     } else {
-        texts.map(function (text) { return div.append(mkAttribute(id, positional, text)); });
+        $.each(initials,function (ix,val) {
+            return div.append(mkAttribute(id, positional, ix, val));
+        });
     }
     return div;
 }

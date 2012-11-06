@@ -7,7 +7,7 @@ var examples =
         { corpus: "Läsbart",
 		  word_segmenter:
 		  { tag: "w",
-			attributes: ["pos"]
+			attributes: { pos: "msd" }
 		  },
 		  sentence_segmenter: "punkt_sentence",
 		  paragraph_segmenter: "none",
