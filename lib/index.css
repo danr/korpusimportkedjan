@@ -1,0 +1,41 @@
+
+input[type=text] {
+    height: 2em;
+}
+
+button.dropdown-toggle {
+    height: 2em;
+}
+
+hr {
+    margin: 0 0 20px;
+}
+
+.row-button {
+    margin-left: .5em;
+    padding: 0.45em 0.5em 0.2em;
+}
+
+.dropdown-toggle>.caret {
+	float: right;
+	position: relative;
+	top: -20px;
+}
+
+.dropdown-toggle span:first-child {
+	float: left;
+}
+
+.dropdown-toggle {
+	min-width: 8em;
+}
+
+/*
+.btn-success {
+    display: none;
+}
+
+.root-row:last-of-type .btn-success {
+    display: inline;
+}
+*/

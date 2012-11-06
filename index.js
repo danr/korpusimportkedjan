@@ -1,4 +1,5 @@
 function main() {
+
     // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});
 
@@ -14,7 +15,7 @@ function main() {
             { id: "word_punkt_word", label: "punkt ord", active: true },
             { id: "word_whitespace", label: "blanktecken" },
             { id: "word_blanklines", label: "radbrytning" },
-            { id: "word_custom", label: "egen tagg...", obj: mkTagForm("word") }
+            { id: "word_custom", label: "egen tagg...", obj: mkTagForm("word", true) }
         ]),
 
         $('<hr/>'),
@@ -87,7 +88,7 @@ function tagSetting(str) {
 function segmenterSetting(str) {
     var active = activeTab(str);
     if (active.indexOf('custom') != -1) {
-		return tagSetting(str);
+        return tagSetting(str);
     } else {
         return active;
     }
@@ -113,12 +114,12 @@ function mkJsonSetting() {
 /* Loads an example and sets the form accordingly */
 function loadExample(xml_editor, ex) {
 
-	function setTag(t,v) {
+    function setTag(t,v) {
         $("#" + t + "_tag").val(v.tag);
-		$("#" + t + "_controls").replaceWith(mkAttributes(t,v.attributes));
-	}
+        $("#" + t + "_controls").replaceWith(mkAttributes(t,t == "word",v.attributes));
+    }
 
-	setTag("root",ex.root);
+    setTag("root",ex.root);
 
     $.each(["word","sentence","paragraph"], function(_ix,segmenter) {
         v = ex[segmenter + "_segmenter"];
@@ -127,7 +128,7 @@ function loadExample(xml_editor, ex) {
         } else {
             var tabstring = 'custom';
         }
-		setTag(segmenter,v);
+        setTag(segmenter,v);
         var tab = $('li[data-target=#' + segmenter + "_" + tabstring + ']');
         tab.tab('show');
         tab.addClass('active');
@@ -138,6 +139,8 @@ function loadExample(xml_editor, ex) {
 
 /* Making the form */
 
+var attributes = ["pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
+
 // Make a row in the form ("ord" and its buttons, and so on...)
 function mkRow(left, right) {
     return $('<div class="row"/>')
@@ -147,59 +150,75 @@ function mkRow(left, right) {
 }
 
 function newIcon(icon) {
-	return $('<i/>').addClass(icon);
+    return $('<i/>').addClass(icon);
 }
 
 // Makes the new buttons in the input fields
-function mkNewButton(id) {
+function mkNewButton(id, positional) {
     return $('<button class="btn btn-success row-button"/>')
-		.append(newIcon("icon-plus-sign"))
+        .append(newIcon("icon-plus-sign"))
         .click(function () {
-			var par = $(this).parent()
-            par.after(mkAttribute(id));
-			if (par.hasClass("temp")) {
-				par.remove();
-			}
+            var par = $(this).parent()
+            par.after(mkAttribute(id, positional));
+            if (par.hasClass("temp")) {
+                par.remove();
+            }
             return false;
         });
-};
+}
+
+// Positional attributes select option
+function mkPosOption(id) {
+    var select = $('<select/>').addClass(id + "-position");
+    function newOption(val,txt) {
+        select.append($('<option/>').attr("value",val).text(txt));
+    }
+    newOption("custom","ny");
+    $.each(attributes, function (_,a) { select.append(newOption(a,a)) });
+	var span = $('<span/>').append(select);
+	select.buttonSelect(true);
+    return span;
+}
+
 
 // Makes the input field, and close and add button, possibly with initial text
-function mkAttribute(id, initial_text) {
-	var input = $('<input type="text"/>')
-		.addClass(id + "-attribute")
-		.attr('value',initial_text || "");
+function mkAttribute(id, positional, initial_text) {
+    var input = $('<input type="text"/>')
+        .addClass(id + "-attribute")
+        .attr('value',initial_text || "");
     var close_button = $('<button class="btn btn-danger row-button"/>')
-		.append(newIcon("icon-minus-sign"))
+        .append(newIcon("icon-minus-sign"))
         .click(function () {
             var grandpa = $(this).parent().parent();
             $(this).parent().remove();
             if (grandpa.children().length == 0) {
-                grandpa.append($('<div class="temp">').append(mkNewButton(id)));
+                grandpa.append($('<div class="temp">').append(mkNewButton(id, positional)));
             }
             return false;
         });
-    return $('<div style="margin-bottom:10px;"/>')
-		.addClass(id + "-row")
-		.append(input,close_button,mkNewButton(id));
+	var div = $('<div style="margin-bottom:10px;"/>').addClass(id + "-row").append(input);
+    if (positional) {
+		div.append(mkPosOption(id))
+	}
+	return div.append(close_button,mkNewButton(id, positional));
 }
 
-function mkAttributes(id, texts) {
-	var div = $('<div class="controls"/>').attr("id",id + "_controls");
-	if (!texts || texts.length == 0) {
-		div.append($('<div class="temp">').append(mkNewButton(id)));
-	} else {
-		texts.map(function (text) { return div.append(mkAttribute(id,text)); });
-	}
-	return div;
+function mkAttributes(id, positional, texts) {
+    var div = $('<div class="controls"/>').attr("id",id + "_controls");
+    if (!texts || texts.length == 0) {
+        div.append($('<div class="temp">').append(mkNewButton(id)));
+    } else {
+        texts.map(function (text) { return div.append(mkAttribute(id, positional, text)); });
+    }
+    return div;
 }
 
 // Makes the form for tags
-function mkTagForm(id) {
+function mkTagForm(id, positional) {
     return $('<div class="form-horizontal"/>')
         .append(mkControlGroupText(id + "_tag", "taggnamn:"))
         .append(mkControlGroupText(id + "_attr", "attribut:", function () {
-			return mkAttributes(id, [""]);
+            return mkAttributes(id, positional, [""]);
         }));
 
 }
@@ -214,7 +233,8 @@ function mkSection(title, id, tabs) {
         id: id
     });
 
-    var tab_content = $('<div class="tab-content"/>');
+	// Must set overflow to visible or else popdown menus will get scrollbars
+    var tab_content = $('<div class="tab-content" style="overflow:visible"/>');
 
     $.each(tabs, function (_index, dict) {
         return mkTabButton(ul, tab_content, dict.id, dict.label, dict.obj, dict.active);
