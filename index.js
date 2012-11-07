@@ -38,7 +38,11 @@ function main() {
 
         $('<hr/>'),
 
-        mkRow("Rot", mkTagForm("root"))
+        mkRow("Rot", mkTagForm("root")),
+
+        $('<hr/>'),
+
+        mkRow("Uppmärkning", mkGenerateBoxes())
 
     );
 
@@ -59,6 +63,12 @@ function main() {
         $('#' + button_id).click(function () {
             loadExample(xml_editor, examples[idx]);
         })
+    });
+
+    // Show query button
+    $('#show_query').click(function () {
+        console.log(mkJsonSetting(), JSON.stringify(mkJsonSetting()));
+        return false;
     });
 }
 
@@ -107,6 +117,7 @@ function segmenterSetting(str) {
 }
 
 function mkJsonSetting() {
+    active_attributes = $('#generate').find('.active').map(function () { return $(this).text(); }).get();
     return {
         corpus: "",
         word_segmenter: segmenterSetting('word'),
@@ -119,7 +130,7 @@ function mkJsonSetting() {
               attributes: ["namn"]
             }
         ],
-        attributes: ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"]
+        attributes: ["word"].concat(active_attributes)
     };
 }
 
@@ -146,12 +157,41 @@ function loadExample(xml_editor, ex) {
         tab.addClass('active');
 
     });
+
     xml_editor.setValue(ex.corpus_xml);
+
+    $('#generate').children().removeClass("active");
+    $.each(ex.attributes,function (_ix,attr) {
+        $('#generate_' + attr).addClass("active");
+    });
+
+    updateGenerateBoxes();
 }
 
 /* Making the form */
 
 var attributes = ["pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
+
+
+function mkGenerateBoxes() {
+    var div = $('<div class="btn-group" data-toggle="buttons-checkbox" id="generate">');
+    $.each(attributes,function (_ix,attr) {
+        div.append($('<button type="button" class="btn active">')
+                   .attr("id","generate_" + attr).text(attr));
+    });
+    return div;
+}
+
+function updateGenerateBoxes() {
+    $('#generate').children().attr("disabled",false);
+    $('.word-row').find('input:hidden').map(function () {
+        var v = $(this).val();
+        if (v != "custom") {
+            $('#generate_' + v).attr("disabled",true).addClass("active");
+        }
+    });
+    return false;
+}
 
 // Make a row in the form ("ord" and its buttons, and so on...)
 function mkRow(left, right) {
@@ -212,7 +252,8 @@ function mkAttribute(id, positional, initial_ix, initial_val) {
     var div = $('<div style="margin-bottom:10px;"/>').addClass(id + "-row").append(input);
     if (positional) {
         var options = mkPosOption(id);
-        var sel = options.find('input[type=hidden]');
+        var sel = options.find('input:hidden');
+        sel.change(updateGenerateBoxes);
         sel.val(initial_val ? initial_val : "custom").change();
         div.append(options);
     }
@@ -236,7 +277,7 @@ function mkTagForm(id, positional) {
     return $('<div class="form-horizontal"/>')
         .append(mkControlGroupText(id + "_tag", "taggnamn:"))
         .append(mkControlGroupText(id + "_attr", "attribut:", function () {
-            return mkAttributes(id, positional, [""]);
+            return mkAttributes(id, positional, []);
         }));
 
 }
