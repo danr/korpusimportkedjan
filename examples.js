@@ -66,7 +66,7 @@ var examples =
 		  attributes: all_attributes,
           corpus_xml: lasbart_xml
         },
-        { corpus: "Dannes Superkorpus",
+        { corpus: "Exempelkorpus",
 		  word_segmenter: "punkt_word",
 		  root:
 		  { tag: "text",
@@ -78,12 +78,12 @@ var examples =
 		  },
 		  paragraph_segmenter:
 		  { tag: "p",
-			attributes: ["namn"]
+			attributes: ["name"]
 		  },
 		  extra_tags:
 		  [
-			  { tag: "kapitel",
-				attributes: ["namn"]
+			  { tag: "chapter",
+				attributes: ["name"]
 			  }
 		  ],
 		  attributes: all_attributes,
