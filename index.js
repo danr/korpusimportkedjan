@@ -70,6 +70,7 @@ function main() {
     // Show query button
     $('#show_query').click(function () {
         console.log(mkJsonSetting(), JSON.stringify(mkJsonSetting()));
+        submit(xml_editor,true);
         return false;
     });
 
@@ -77,10 +78,15 @@ function main() {
     $('#text_submit').click(function () { return submit(xml_editor); });
 }
 
-function submit(xml_editor) {
+function submit(xml_editor,only_makefile) {
 
     var text = xml_editor.getValue();
-    var req_url = "http://localhost:8051"; // + "settings=" + JSON.stringify(mkJsonSetting());
+    var req_url = "http://localhost:8051"
+        + "?settings=" + JSON.stringify(mkJsonSetting())
+        + "&incremental=false"
+        + "&fmt=xml"
+        + "&only_makefile=" + (only_makefile ? "true" : "false")
+        + "&add_root_tag=false";
 
     $.ajax({
         url: req_url,
@@ -89,7 +95,11 @@ function submit(xml_editor) {
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
-			console.log("success:", data);
+            if (only_makefile) {
+				$('#query').text(data);
+            } else {
+                $('#result').text(data);
+            }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             console.log("error", jqXHR, textStatus, errorThrown);

@@ -27,7 +27,7 @@ def linearise_Makefile(content):
     return '\n'.join(res)
 
 def align_table(rows, empty="-"):
-    max_row_len = max(map(len,rows))
+    max_row_len = max(map(len,rows) + [0])
     rows = [ row + [empty] * (max_row_len - len(row)) for row in rows ]
     cols = zip(*rows)
     col_widths = [ max(map(len,col)) for col in cols ]
@@ -97,15 +97,15 @@ def make_Makefile(settings):
     ws = settings['word_segmenter']
     if isinstance(ws,basestring):
         """Example: word_segmenter: "punkt_word"""
-        token = [("token_chunk","sentence"),
-                 ("token_segmenter",ws),
-                 ("token_model","$(punkt_model)")]
+        token = ([("token_chunk","sentence"),
+                  ("token_segmenter",ws)] +
+                ([("token_model","$(punkt_model)")] if "punkt" in ws else []))
     else:
         """Example:
 
-           word_segmenter: { tag: "w",
-                             attributes: { pos: "msd", "language": null }
-                           }
+        word_segmenter: { tag: "w",
+        attributes: { pos: "msd", "language": null }
+        }
         """
         token = [makefile_comment("Using tag " + ws['tag'] + " for words")]
         # Adds w -> token in xml
@@ -128,18 +128,20 @@ def make_Makefile(settings):
 
     # Sentence and Paragraph segmentation
     def add_segmenter(setting,name,chunk,model=None):
+        if setting == "none":
+            return [makefile_comment("No segmentation for " + name)]
         if isinstance(setting,basestring):
             res = [(name + "_chunk",chunk),
                    (name + "_segmenter",setting)]
-            if model:
+            if model and "punkt" in setting:
                 res.append((name + "_model",model))
             return res
         else:
             """Example
 
-               sentence_segmenter: { tag: "s",
-                                     attributes: ["mood","id"]
-                                   }
+            sentence_segmenter: { tag: "s",
+            attributes: ["mood","id"]
+            }
             """
             xml_cols.append((setting['tag'],name))
             add_parent(name)
@@ -149,13 +151,14 @@ def make_Makefile(settings):
                               filename=name)
             return [makefile_comment("Using tag " + setting['tag'] + " for " + name)]
 
+    sentence_chunk = text if settings['paragraph_segmenter'] == "none" else "paragraph"
     sentence = add_segmenter(settings['sentence_segmenter'],
-                             "sentence","paragraph","$(punkt_model)")
+                             "sentence",sentence_chunk,"$(punkt_model)")
     paragraph = add_segmenter(settings['paragraph_segmenter'],
                               "paragraph",text)
 
-    def add_structural_attributes(tag,attributes):
-        if len(attributes) > 0:
+    def add_structural_attributes(tag,attributes,add_xml=False):
+        if len(attributes) > 0 or add_xml:
             xml_cols.append((tag,tag))
             add_parent(tag)
             for attr in attributes:
@@ -166,7 +169,7 @@ def make_Makefile(settings):
         add_structural_attributes(t['tag'],t['attributes'])
 
     # Add the root tag to xml and its attributes
-    add_structural_attributes(text,settings['root']['attributes'])
+    add_structural_attributes(text,settings['root']['attributes'],add_xml=True)
 
     # Add the magic 'n' annotation
     vrt_cols.append(('n','-','-'))
@@ -234,12 +237,12 @@ example = [
         ("vrt_annotations", ["word", "pos", "msd", "baseform", "lemgram", "saldo", "prefix", "suffix", "ref", "dephead.ref", "deprel", "egennamn.value", "sentence.id", "sentence.mood", "paragraph.namn", "kapitel.namn", "text.korpusnamn", "n"]),
         ("vrt_columns",     ["word", "pos", "msd", "lemma",    "lex",     "saldo", "prefix", "suffix", "ref", "dephead",     "deprel", "egennamn"]),
         ("vrt_structs",     ["-",    "-",   "-",   "-",        "-",       "-",     "-",      "-",      "-",   "-",           "-",      "-",              "sentence:id", "sentence:mood", "paragraph:namn", "kapitel:namn", "text:korpusnamn"])
-    ],
+        ],
     "",
     [
         ("xml_elements",    ["text", "p",         "p:namn",         "s",        "s:mood",        "text:korpusnamn", "kapitel:namn", "egennamn:value"]),
         ("xml_annotations", ["text", "paragraph", "paragraph.namn", "sentence", "sentence.mood", "text.korpusnamn", "kapitel.namn", "egennamn.value"])
-    ],
+        ],
     "",
     "include ../Makefile.common",
     "",
@@ -261,6 +264,32 @@ example = [
     "",
     "include ../Makefile.rules",
     ]
+
+def merge_defaults(settings):
+    """Populates a settings dictionary with default settings for missing fields"""
+    s = settings.copy()
+    for k in defaults:
+        s[k] = s.get(k,defaults[k])
+    return s
+
+def makefile(d):
+    return str(linearise_Makefile(make_Makefile(merge_defaults(d))))
+
+def makefile_from_json_string(s):
+    return makefile(json.loads(s))
+
+defaults = {
+    'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
+    'corpus': '',
+    'extra_tags': [],
+    'paragraph_segmenter': 'blanklines',
+    'root': {
+        'tag': 'text',
+        'attributes': []
+        },
+    'sentence_segmenter': 'punkt_sentence',
+    'word_segmenter': 'punkt_word'
+    }
 
 # Example settings for make_Makefile
 settings = {'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
