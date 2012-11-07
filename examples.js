@@ -1,9 +1,56 @@
 var lasbart_xml = lasbart_xml || "";
+var talbanken_xml = talbanken_xml || "";
 
 var all_attributes = ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
 
 var examples =
     [
+        { corpus: "Drama",
+		  word_segmenter: "punkt_word",
+		  sentence_segmenter: "punkt_sentence",
+		  paragraph_segmenter: {
+			  tag: "p",
+			  attributes: []
+		  },
+		  root:
+		  { tag: "text",
+			attributes: [],
+		  },
+		  extra_tags: [],
+		  attributes: all_attributes,
+          corpus_xml: drama_xml
+        },
+        { corpus: "Åtta sidor",
+		  word_segmenter: "punkt_word",
+		  sentence_segmenter: "punkt_sentence",
+		  paragraph_segmenter: "blanklines",
+		  root:
+		  { tag: "text",
+			attributes: ["date","title"],
+		  },
+		  extra_tags: [],
+		  attributes: all_attributes,
+          corpus_xml: attasidor_xml
+        },
+        { corpus: "Talbanken",
+		  word_segmenter:
+		  { tag: "w",
+			attributes: {
+				ref: "ref",
+				deprel: "deprel",
+				dephead: "dephead"
+			}
+		  },
+		  sentence_segmenter: "blanklines",
+		  paragraph_segmenter: "none",
+		  root:
+		  { tag: "text",
+			attributes: [],
+		  },
+		  extra_tags: [],
+		  attributes: all_attributes,
+          corpus_xml: talbanken_xml
+        },
         { corpus: "Läsbart",
 		  word_segmenter:
 		  { tag: "w",
