@@ -13,6 +13,12 @@ def make_hash(text):
     import hashlib
     return hashlib.sha1(text).hexdigest()
 
+def make(settings):
+    from subprocess import Popen, PIPE
+    return Popen(['/usr/bin/make'] + settings,
+                 shell=False, close_fds=False,
+                 stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
 def pipeline(pipeline_dir, processes, text, settings, fmt, add_root_tag=False, incremental=False):
     text_hash = make_hash(text)
     util.log.info('%s: "%s"', text_hash, text)
@@ -65,22 +71,19 @@ def pipeline(pipeline_dir, processes, text, settings, fmt, add_root_tag=False, i
 
     launches = 0
     if incremental:
-        stdout, _ = util.system.call_binary('/usr/bin/make', make_settings + ['--dry-run'], verbose=True)
+        stdout, _ = make(make_settings + ['--dry-run']).communicate("")
         launches = stdout.count("catalaunch")
         yield '<result>\n'
         yield '<incremental steps="' + str(launches) + '">\n'
 
-    from subprocess import Popen, PIPE
-    cmd = Popen(['/usr/bin/make'] + ['vrt'] + make_settings,
-                shell=False, close_fds=False,
-                stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    process = make(['vrt'] + make_settings)
     try:
         make_out = []
         util.log.info("Incremental: %s", incremental)
 
         n = 0;
-        for line in iter (cmd.stdout.readline, ''):
-            print line
+        for line in iter (process.stdout.readline, ''):
+            print line.rstrip()
             make_out += [line]
             if incremental and "catalaunch" in line:
                 n += 1;
@@ -91,8 +94,8 @@ def pipeline(pipeline_dir, processes, text, settings, fmt, add_root_tag=False, i
 
         # Send errors
         errs = []
-        for line in iter (cmd.stderr.readline, ''):
-            print "err:" + line
+        for line in iter (process.stderr.readline, ''):
+            print "err:" + line.rstrip()
             yield '<error>' + line.rstrip() + '</error>\n'
 
         with open(out_file, 'r') as f:
