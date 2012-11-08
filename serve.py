@@ -1,34 +1,39 @@
-from cgi import parse_qs, escape, FieldStorage
-from wsgiref.simple_server import make_server
-from make_makefile import makefile
-import json
-
 import sb.util as util
 
-import errno
+import cgi
+import json
+
 import os
-import shutil
 import sys
 import traceback
-from pipeline import pipeline
+
+from make_makefile import makefile
+from pipeline import run_pipeline
+
+# Where the models are hosted. Replaces SB_MODELS environment variable if it does not exist
+os.environ['SB_MODELS'] = os.environ.get('SB_MODELS','/export/htdocs/dan/annotate/models')
+
+# Static pipeline settings
+pipeline = dict()
 
 # Where the pipeline is hosted
-PIPELINE_DIR = '/dev/shm/pipeline'
+pipeline['dir'] = '/dev/shm/pipeline/'
 
-# The socket file
-PIPELINE_SOCK = os.path.join(PIPELINE_DIR, 'pipeline.sock')
+# Socket file
+pipeline['sockfile'] = os.path.join(pipeline['dir'], 'pipeline.sock')
 
-# Where the models are hosted
-os.environ['SB_MODELS'] = '/home/dan/code/annotate/models'
-
-# processes
-PROCESSES=2
+# The catalaunch binary
+catalaunch = os.path.join(pipeline['dir'],'catalaunch')
 
 # The "python" interpreter, replaced with catalaunch
-os.environ['PYTHON'] = "%s %s" % (os.path.join(PIPELINE_DIR,'catalaunch'), PIPELINE_SOCK)
+pipeline['python'] = "%s %s" % (catalaunch, pipeline['sockfile'])
+
+# The number of processes
+pipeline['processes'] = 2
 
 def application(environ,start_response):
-    query_dict = parse_qs(environ['QUERY_STRING'])
+
+    query_dict = cgi.parse_qs(environ['QUERY_STRING'])
 
     post = ""
     try:
@@ -52,7 +57,7 @@ def application(environ,start_response):
     add_root_tag = query_dict.get('add_root_tag', [''])[0]
     add_root_tag = add_root_tag.lower() == 'true'
 
-    settings = json.loads(query_dict['settings'][0])
+    settings = json.loads(query_dict.get('settings',['{}'])[0])
 
     status = '200 OK'
     response_headers = [('Content-Type', 'text/plain'),
@@ -65,11 +70,13 @@ def application(environ,start_response):
     else:
         try:
             util.log.info("Running pipeline with text: %s (settings: %s fmt: %s, incremental: %s)", post, settings, fmt, incremental)
-            return pipeline(PIPELINE_DIR, PROCESSES, post, settings, fmt, add_root_tag, incremental)
+            return run_pipeline(pipeline, post, settings, fmt, add_root_tag, incremental)
         except:
             util.log.error('Error in handling code: %s', sys.exc_info()[1])
             traceback.print_exception(*sys.exc_info())
             return 'Error in pipeline: "%s"\n' % sys.exc_info()[1]
 
-httpd = make_server('localhost', 8051, application)
-httpd.serve_forever()
+if __name__ == "__main__":
+    from wsgiref.simple_server import make_server
+    httpd = make_server('localhost', 8051, application)
+    httpd.serve_forever()

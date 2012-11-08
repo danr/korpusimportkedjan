@@ -15,15 +15,27 @@ def make_hash(text):
 
 def make(settings):
     from subprocess import Popen, PIPE
+    util.log.info("CALL: /usr/bin/make %s", ' '.join(settings))
     return Popen(['/usr/bin/make'] + settings,
                  shell=False, close_fds=False,
-                 stdin=PIPE, stdout=PIPE, stderr=PIPE)
+                 stdin=None, stdout=PIPE, stderr=PIPE)
 
-def pipeline(pipeline_dir, processes, text, settings, fmt, add_root_tag=False, incremental=False):
+def take(n,xs):
+    if len(xs) > n:
+        return xs[:n] + "..."
+    else:
+        return xs
+
+def run_pipeline(pipeline, text, settings, fmt, add_root_tag=False, incremental=False):
+    """
+    Runs the `text` throught the pipeline creating a makefile from `settings`.
+    `pipeline` should be a dict containing 'dir', 'python' and 'processes'.
+    """
     text_hash = make_hash(text)
-    util.log.info('%s: "%s"', text_hash, text)
+    util.log.info('%s: "%s"', text_hash, take(100,text))
+    util.log.info('%s', settings)
 
-    text_dir = os.path.join(pipeline_dir, text_hash)
+    text_dir = os.path.join(pipeline['dir'], text_hash)
     original_dir = os.path.join(text_dir, 'original')
     annotations_dir = os.path.join(text_dir, 'annotations')
     export_dir = os.path.join(text_dir, 'export')
@@ -52,13 +64,16 @@ def pipeline(pipeline_dir, processes, text, settings, fmt, add_root_tag=False, i
             else:
                 f.write(text)
 
-    make_settings = ['-C', text_dir, 'dir_chmod=777', '-j', str(processes)]
+    make_settings = ['-C', text_dir,
+                     'dir_chmod=777',
+                     '-j', str(pipeline['processes']),
+                     "python=%s" % pipeline['python']]
 
     if fmt == 'vrt':
-        make_settings += ['vrt']
+        make_settings = ['vrt'] + make_settings
         out_file = os.path.join(annotations_dir, 'text.vrt')
     else:
-        make_settings += ['export']
+        make_settings = ['export'] + make_settings
         out_file = os.path.join(export_dir, 'text.xml')
 
     try:
@@ -76,7 +91,7 @@ def pipeline(pipeline_dir, processes, text, settings, fmt, add_root_tag=False, i
         yield '<result>\n'
         yield '<incremental steps="' + str(launches) + '">\n'
 
-    process = make(['vrt'] + make_settings)
+    process = make(make_settings)
     try:
         make_out = []
         util.log.info("Incremental: %s", incremental)
