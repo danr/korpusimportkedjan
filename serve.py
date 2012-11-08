@@ -1,6 +1,6 @@
 import sb.util as util
 
-import cgi
+import urlparse
 import json
 
 import os
@@ -33,7 +33,7 @@ pipeline['processes'] = 2
 
 def application(environ,start_response):
 
-    query_dict = cgi.parse_qs(environ['QUERY_STRING'])
+    query_dict = urlparse.parse_qs(environ['QUERY_STRING'])
 
     post = ""
     try:
