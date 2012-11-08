@@ -1,3 +1,5 @@
+var attasidor_xml = attasidor_xml || "";
+var drama_xml = drama_xml || "";
 var lasbart_xml = lasbart_xml || "";
 var talbanken_xml = talbanken_xml || "";
 
