@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import sb.util as util
 
@@ -20,20 +21,13 @@ def make(settings):
                  shell=False, close_fds=False,
                  stdin=None, stdout=PIPE, stderr=PIPE)
 
-def take(n,xs):
-    if len(xs) > n:
-        return xs[:n] + "..."
-    else:
-        return xs
-
 def run_pipeline(pipeline, text, settings, fmt, add_root_tag=False, incremental=False):
     """
     Runs the `text` throught the pipeline creating a makefile from `settings`.
     `pipeline` should be a dict containing 'dir', 'python' and 'processes'.
     """
     text_hash = make_hash(text)
-    util.log.info('%s: "%s"', text_hash, take(100,text))
-    util.log.info('%s', settings)
+    util.log.info('%s (length: %s, settings: %s)', text_hash, len(text), settings)
 
     text_dir = os.path.join(pipeline['dir'], text_hash)
     original_dir = os.path.join(text_dir, 'original')
