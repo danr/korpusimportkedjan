@@ -103,9 +103,12 @@ function mkAttributes(id, positional, initials) {
 }
 
 // Makes the form for tags
-function mkTagForm(id, positional) {
+function mkTagForm(id, positional, initial_value) {
     return $('<div class="form-horizontal"/>')
-        .append(mkControlGroupText(id + "_tag", "taggnamn:"))
+        .append(mkControlGroupText(id + "_tag", "taggnamn:", function (div) {
+			div.find('input:text').val(initial_value);
+			return div;
+		}))
         .append(mkControlGroupText(id + "_attr", "attribut:", function () {
             return mkAttributes(id, positional, []);
         }));

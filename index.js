@@ -10,6 +10,8 @@ function main() {
         lineNumbers: true
     });
 
+    xml_editor.setValue("<text>En exempeltext kommer lastad. Med vadå?</text>");
+
     // Make sections for word, sentence, and paragraph
     $('#dynamic').append(
 
@@ -40,7 +42,7 @@ function main() {
 
         $('<hr/>'),
 
-        mkRow("Rot", mkTagForm("root")),
+        mkRow("Rot", mkTagForm("root", false, "text")),
 
         $('<hr/>'),
 
