@@ -2,7 +2,7 @@
 
 while true
 do
-	python serve.py &
+	python index.wsgi &
 	PID=$!
 	inotifywait *.py -e modify
 	kill $PID
