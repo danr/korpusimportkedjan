@@ -78,7 +78,10 @@ function segmenterSetting(str) {
 }
 
 function mkJsonSetting() {
-    active_attributes = $('#generate').find('.active').map(function () { return $(this).text(); }).get();
+    var active_attributes = $('#generate').find('.active').map(function () { return $(this).text(); }).get();
+    $('.word-attribute').siblings().find('input:hidden').map(function () {
+		active_attributes.concat($(this).val());
+	});
     return {
         corpus: "",
         word_segmenter: segmenterSetting('word'),
