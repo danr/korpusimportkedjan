@@ -8,27 +8,15 @@ function to_array(x) {
     }
 }
 
-function array_to_rows(array) {
-    return array.map(function (row)
-                     { return tr(row.map(td).join('')); }
-                    ).join('');
+function array_to_rows(tbl, array) {
+    $.each(array, function (_ix, row) {
+        var tr = $('<tr/>');
+        $.each(row, function (_ix, col) {
+            tr.append($('<td>').append(col));
+        });
+        tbl.append(tr);
+    });
 }
-
-function enclose(t) {
-    return function(s) {
-        return "<" + t + ">" + s + "</" + t + ">";
-    }
-}
-
-tr = enclose("tr");
-td = enclose("td");
-th = enclose("th");
-pre = enclose("pre");
-
-function table(s) {
-    return '<table class="table table-striped table-bordered table-condensed">' + s + '</table>';
-}
-
 function split_pipes(f) {
     return function(s) {
         // s without surrounding pipes
@@ -49,6 +37,9 @@ function lemgram_link(s) {
     return '<a href="http://spraakbanken.gu.se/karp/#search=lemgram%7C' + s + '">' + s + '</a>';
 }
 
+function span(w) {
+    return $('<span/>').html(w);
+}
 
 function id(x) {
     return x;
@@ -68,15 +59,12 @@ function handle_progress(data) {
         var step = i.increment ? i.increment.length : 0;
         progress = step / steps * 100;
     }
-    $('#progress').html('\
-       <div class="progress progress-striped active">\
-         <div class="bar" style="width: ' + progress + '%;"></div>\
-       </div>');
+    $('#progress-bar').css("width",progress + '%');
 }
 
-function make_table(data) {
+function make_table(data, attributes) {
 
-    $('#progress').html('');
+    $('#progress-div').css("display","none");
 
     var col = function(s) { return { name: s, id: s }; }
     var columns = ["msd","lemma","lex","saldo","prefix","suffix","ref"].map(col);
@@ -93,28 +81,51 @@ function make_table(data) {
         suffix : split_pipes(lemgram_link)
     };
 
+	// Remove those columns that are not part of the generated attributes
+	columns = $.grep(columns, function (col, _ix) {
+		return $.inArray(col.name, attributes) != -1;
+	});
 
     var rows = [];
     json = $.xml2json(data);
 
-    var tbl = tr(columns.map(function(col) { return th(col.name);}).join(''));
-
-    var wide_row = function(s) {
-        return tr('<td colspan="' + columns.length + '">' + s + '</td>');
-    }
+    var tables = $('<div/>');
 
     var make_deptrees = true;
     deptrees = []
 
+    var max_sents = 10;
+
     sentences = to_array(json.corpus.sentence);
     sentences.map(function(sent) {
+        var table = $('<table class="table table-striped table-bordered table-condensed">');
+
+        var header = $('<tr/>');
+
+        $.each(columns,function(_ix, col) {
+            header.append($('<th/>').text(col.name));
+        });
+
+        table.append(header);
+
+        var wide_row = function(s) {
+            return $('<tr/>').append($('<td/>').attr("colspan",columns.length).append(s));
+        }
+
+        max_sents--;
+        if (max_sents < 0) {
+            return;
+        }
         var words = to_array(sent.w);
         var div_id = "div-" + sent.id;
-        tbl += wide_row('<div id="' + div_id + '"></div>');
-        tbl += array_to_rows(words.map(function(word) {
+        var deprel_div = $('<div/>').attr("id", div_id);
+
+        table.append(wide_row(deprel_div));
+
+        array_to_rows(table,words.map(function(word) {
             return columns.map(function(col) {
                 var f = correct[col.id] || id;
-                return f(word[col.id] || "&nbsp;");
+                return span(f(word[col.id] || "&nbsp;"));
             });
         }));
 
@@ -137,61 +148,16 @@ function make_table(data) {
                         nodes[i].parent = nodes[parent];
                     }
                 }
-	        var img = go_from_root(roots, nodes);
-                $('#' + div_id).empty(img);
-                $('#' + div_id).append(img);
-                $('#' + div_id).css("text-align","center");
-                $('#' + div_id).css("overflow","auto");
+                var img = go_from_root(roots, nodes);
+                deprel_div
+                    .empty(img)
+					.append(img)
+                    .css("text-align","center")
+                    .css("overflow","auto");
             });
         }
+        tables.append(table);
     });
 
-    return { html : table(tbl), deptrees : deptrees };
+    return { table : tables, deptrees : deptrees };
 }
-
-/*
-    $('#text_submit').click(function() {
-        var $text = $('#textarea_text').val();
-        var fmt = get_fmt();
-        var raw = fmt != "table" && get_raw();
-        var req_url = "http://demo.spraakdata.gu.se/dan/pipeline/";
-        var req_fmt = fmt == "vrt" ? "vrt" : "xml";
-        var new_url = req_url + "?text=" + encodeURI($text) + "&fmt=" + encodeURI(req_fmt);
-        if (raw) {
-            window.location = new_url;
-        } else {
-            $.ajax({
-                url: req_url,
-                dataType: "text",
-                timeout: 300000,
-                type: "GET",
-                data: {
-                    text: $text,
-                    fmt: req_fmt,
-                    incremental: (fmt == "table").toString()
-                },
-                success: function(data, textStatus, xhr) {
-                    var fmt = $("#text_form input[name=fmt]");
-                    var checked = fmt.filter(':checked')[0];
-                    if (checked.id == "table") {
-                        var res = make_table(data);
-                        $('#result').html(res.html);
-                        res.deptrees.map(function (fn) { fn(); });
-                    } else {
-                        $('#result').html('<pre id="result_code" class="code"></pre>');
-                        $('#result_code').text(data);
-                    }
-                },
-                progress: function(data, e) {
-                    if (fmt == "table") {
-                        handle_progress(e.target.response);
-                    }
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.log("error", jqXHR, textStatus, errorThrown);
-                }
-            });
-        }
-        return false;
-    });
-*/

@@ -1,13 +1,18 @@
 
 function submit(xml_editor,only_makefile) {
 
+	settings = mkJsonSetting();
+
     var text = xml_editor.getValue();
     var req_url = "http://localhost:8051"
-        + "?settings=" + JSON.stringify(mkJsonSetting())
+        + "?settings=" + JSON.stringify(settings)
         + "&incremental=true"
         + "&fmt=xml"
         + "&only_makefile=" + (only_makefile ? "true" : "false")
         + "&add_root_tag=false";
+
+    $('#progress-div').css("display","");
+	$('#progress-bar').css("width","0%");
 
     $.ajax({
         url: req_url,
@@ -17,8 +22,8 @@ function submit(xml_editor,only_makefile) {
         data: text,
         success: function(data, textStatus, xhr) {
             console.log("Success:", data)
-            var res = make_table(data);
-            $('#result').html(res.html);
+            var res = make_table(data, settings.attributes);
+            $('#result').empty().append(res.table);
             res.deptrees.map(function (fn) { fn(); });
         },
         progress: function(data, e) {
