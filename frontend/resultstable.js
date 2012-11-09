@@ -63,7 +63,7 @@ function draw_sentence_tree(words) {
             nodes[i].parent = nodes[parent];
         }
     }
-	return go_from_root(roots, nodes);
+    return go_from_root(roots, nodes);
 }
 
 function handle_progress(data) {
@@ -81,6 +81,54 @@ function handle_progress(data) {
         progress = step / steps * 100;
     }
     $('#progress-bar').css("width",progress + '%');
+}
+
+function tabulate_sentence(columns, sent, make_deptrees) {
+
+    var table = $('<table class="table table-striped table-bordered table-condensed">');
+
+    var header = $('<tr/>');
+
+    $.each(columns,function(_ix, col) {
+        header.append($('<th/>').text(col.name));
+    });
+
+    table.append(header);
+
+    var wide_row = function(s) {
+        return $('<tr/>').append($('<td/>').attr("colspan",columns.length).append(s));
+    }
+
+    var words = to_array(sent.w);
+    var deprel_div = $('<div/>');
+
+    table.append(wide_row(deprel_div));
+
+    array_to_rows(table,words.map(function(word) {
+        return columns.map(function(col) {
+            return span(col.correct(word[col.id] || "&nbsp;"));
+        });
+    }));
+
+    if (make_deptrees) {
+        console.log("Adding a waypoint for " + sent.id);
+        deprel_div.waypoint(function() {
+            console.log("Drawing a tree for " + sent.id);
+            var img = draw_sentence_tree(words);
+            deprel_div
+                .empty(img)
+                .append(img)
+                .css("text-align","center")
+                .css("overflow","auto");
+        }, {
+            offset: '100%',
+            triggerOnce: true,
+            onlyOnScroll: true
+        });
+    }
+
+    return table;
+
 }
 
 function make_table(data, attributes) {
@@ -107,6 +155,10 @@ function make_table(data, attributes) {
         return $.inArray(col.name, attributes) != -1;
     });
 
+    $.each(columns, function (_ix, col) {
+		col.correct = correct[col.id] || id;
+	});
+
     var rows = [];
     json = $.xml2json(data);
 
@@ -115,50 +167,9 @@ function make_table(data, attributes) {
     var make_deptrees = true;
 
     sentences = to_array(json.corpus.sentence);
+
     sentences.map(function(sent) {
-        var table = $('<table class="table table-striped table-bordered table-condensed">');
-
-        var header = $('<tr/>');
-
-        $.each(columns,function(_ix, col) {
-            header.append($('<th/>').text(col.name));
-        });
-
-        table.append(header);
-
-        var wide_row = function(s) {
-            return $('<tr/>').append($('<td/>').attr("colspan",columns.length).append(s));
-        }
-
-        var words = to_array(sent.w);
-        var deprel_div = $('<div/>');
-
-        table.append(wide_row(deprel_div));
-
-        array_to_rows(table,words.map(function(word) {
-            return columns.map(function(col) {
-                var f = correct[col.id] || id;
-                return span(f(word[col.id] || "&nbsp;"));
-            });
-        }));
-
-        if (make_deptrees) {
-            console.log("Adding a waypoint for " + sent.id);
-            deprel_div.waypoint(function() {
-                console.log("Drawing a tree for " + sent.id);
-                var img = draw_sentence_tree(words);
-                deprel_div
-                    .empty(img)
-                    .append(img)
-                    .css("text-align","center")
-                    .css("overflow","auto");
-            }, {
-                offset: '100%',
-                triggerOnce: true,
-                onlyOnScroll: true
-            });
-        }
-        tables.append(table);
+        tables.append(tabulate_sentence(columns, sent, make_deptrees));
     });
 
     $('#result').empty().append(tables);
