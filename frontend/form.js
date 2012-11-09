@@ -1,6 +1,56 @@
 
 /* Making the form */
 
+// Makes the form and return the editor
+function mkForm() {
+
+    // Make the xml editor
+    var xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
+        lineNumbers: true
+    });
+
+    // Make sections for word, sentence, and paragraph
+    $('#dynamic').append(
+
+        mkSection("Ord", "word_nav", [
+            { id: "word_punkt_word", label: "punkt ord", active: true },
+            { id: "word_whitespace", label: "blanktecken" },
+            { id: "word_blanklines", label: "radbrytning" },
+            { id: "word_custom", label: "egen tagg...", obj: mkTagForm("word", true) }
+        ]),
+
+        $('<hr/>'),
+
+        mkSection("Meningar", "sentence_nav", [
+            { id: "sentence_punkt_sentence", label: "punkt mening", active: true },
+            { id: "sentence_whitespace", label: "radbrytning" },
+            { id: "sentence_blanklines", label: "blankrader" },
+            { id: "sentence_custom", label: "egen tagg...", obj: mkTagForm("sentence") }
+        ]),
+
+        $('<hr/>'),
+
+        mkSection("Stycken", "paragraph_nav", [
+            { id: "paragraph_none", label: "icke" },
+            { id: "paragraph_whitespace", label: "radbrytning" },
+            { id: "paragraph_blanklines", label: "blankrader", active: true },
+            { id: "paragraph_custom", label: "egen tagg...", obj: mkTagForm("paragraph") }
+        ]),
+
+        $('<hr/>'),
+
+        mkRow("Rot", mkTagForm("root", false, "text")),
+
+        $('<hr/>'),
+
+        mkRow("Uppmärkning", mkGenerateBoxes())
+
+    );
+
+	return xml_editor;
+
+}
+
 var attributes = ["pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
 
 function mkGenerateBoxes() {

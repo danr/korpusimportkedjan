@@ -1,0 +1,3 @@
+[submodule "frontend/lib/jquery-ajaxprogress"]
+	path = frontend/lib/jquery-ajaxprogress
+	url = https://github.com/kpozin/jquery-ajaxprogress.git
