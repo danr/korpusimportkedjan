@@ -10,14 +10,15 @@ PROCESSES=2
 VERBOSE=true
 
 export PIPELINE_DIR=/dev/shm/pipeline
-export MAKEFILE_DIR=/home/dan/code/annotate/pipeline
+export MAKEFILE_DIR=.
+export CATALAUNCH_DIR=.
 
 rm -rf $PIPELINE_DIR
 mkdir -p $PIPELINE_DIR -m 777 -v
 
 cp $MAKEFILE_DIR/Makefile* $PIPELINE_DIR -v
 
-cp $MAKEFILE_DIR/catalaunch $PIPELINE_DIR -v
+cp $CATALAUNCH_DIR/catalaunch $PIPELINE_DIR -v
 chmod 755 $PIPELINE_DIR/catalaunch -v
 
 PIPELINE_SOCK=$PIPELINE_DIR/pipeline.sock
