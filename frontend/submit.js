@@ -1,30 +1,40 @@
 
 function submit(xml_editor,only_makefile) {
 
-    settings = mkJsonSetting();
+    var settings = mkJsonSetting();
+
+    var incremental = !only_makefile;
 
     var text = xml_editor.getValue();
+
     var req_url = "http://localhost:8051"
         + "?settings=" + JSON.stringify(settings)
-        + "&incremental=true"
+        + "&incremental=" + (incremental ? "true" : "false")
         + "&fmt=xml"
-        + "&only_makefile=" + (only_makefile ? "true" : "false")
-        + "&add_root_tag=false";
+        + "&only_makefile=" + (only_makefile ? "true" : "false");
 
-    $('#progress-div').css("display","");
-    $('#progress-bar').css("width","0%");
+    if (incremental) {
+        $('#progress-div').css("display","");
+        $('#progress-bar').css("width","0%");
+    }
 
     $.ajax({
         url: req_url,
-        dataType: "text",
+        dataType: only_makefile ? "text" : "xml",
         timeout: 300000,
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
-            make_table(data, settings.attributes);
+            if (only_makefile) {
+                $('#query').text(data).css("display","");
+            } else {
+                make_table(data, settings.attributes);
+            }
         },
         progress: function(data, e) {
-            handle_progress(e.target.response);
+            if (incremental) {
+                handle_progress(e.target.response);
+            }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             console.log("error", jqXHR, textStatus, errorThrown);

@@ -10,7 +10,7 @@ function main() {
 
     // Set the initial text
 	v = ""
-    for (var i=0; i<50; i++) {
+    for (var i=0; i<1; i++) {
 		v = v + "En exempeltext kommer lastad. Med vadå? \n";
     }
     xml_editor.setValue(v);

@@ -137,9 +137,8 @@ function make_table(data, attributes) {
 
     var col = function(s) { return { name: s, id: s }; }
     var columns = ["msd","lemma","lex","saldo","prefix","suffix","ref"].map(col);
-    columns.push({ name: "head", id: "dephead" });
-    columns.push({ name: "rel", id: "deprel" });
-    columns.unshift({ name: "word", id: "text" });
+    columns.push({ name: "huvud", id: "dephead" });
+    columns.push({ name: "relation", id: "deprel" });
 
     var correct = {
         msd : function (s) { return s.split(".").join(". "); },
@@ -152,21 +151,29 @@ function make_table(data, attributes) {
 
     // Remove those columns that are not part of the generated attributes
     columns = $.grep(columns, function (col, _ix) {
-        return $.inArray(col.name, attributes) != -1;
+        return $.inArray(col.id, attributes) != -1;
     });
 
+	// Always write the word
+    columns.unshift({ name: "ord", id: "text" });
+
+	// How to present the different columns (link to Karp etc)
     $.each(columns, function (_ix, col) {
         col.correct = correct[col.id] || id;
     });
-
-    var rows = [];
-    json = $.xml2json(data);
 
     var tables = $('<div/>');
 
     var make_deptrees = true;
 
-    sentences = to_array(json.corpus.sentence);
+	// Get sentences by looking for xml tags named "sentence"...
+	var xml_sentences = data.getElementsByTagName("sentence")
+
+	// ... then convert them to json
+	var sentences = [];
+    $.each(xml_sentences, function (_, s) {
+		sentences.push($.xml2json(s));
+    });
 
     var SLICE_SIZE = 8;
 
@@ -178,7 +185,7 @@ function make_table(data, attributes) {
            };
 
     function show_from(ix) {
-		var next = ix + SLICE_SIZE;
+        var next = ix + SLICE_SIZE;
         if (sentences.length > ix) {
             for (var i=ix; i < next; i++) {
                 if (i < sentences.length) {
@@ -201,6 +208,27 @@ function make_table(data, attributes) {
     }
 
     show_from(0);
+
+    function new_window(mime, content) {
+        var w = window.open(",")
+        w.document.open(mime, "replace");
+        w.document.write(content);
+        w.document.close();
+    }
+
+    $('#extra_buttons').empty().append(
+
+        $('<button class="btn">').text("Visa JSON").click(function () {
+			var json = $.xml2json(data);
+            new_window("application/json", JSON.stringify(json));
+            return false;
+        }),
+
+        $('<button class="btn">').text("Visa XML").click(function () {
+            new_window("application/xml", data);
+            return false;
+        })
+    );
 
     $('#result').empty().append(tables);
 }
