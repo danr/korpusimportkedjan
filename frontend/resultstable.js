@@ -45,6 +45,27 @@ function id(x) {
     return x;
 }
 
+function draw_sentence_tree(words) {
+    var roots = [];
+    var nodes = new Array(words.length);
+    for (var i=0; i<words.length; i++) {
+        nodes[i] = new Node();
+        nodes[i].pos = i;
+    }
+    for (var i=0; i<words.length; i++) {
+        nodes[i].value = words[i].text;
+        nodes[i].rel = words[i].deprel;
+        if (words[i].dephead == "") {
+            roots.push(nodes[i]);
+        } else {
+            var parent = words[i].dephead-1;
+            nodes[i].rel = words[i].deprel;
+            nodes[i].parent = nodes[parent];
+        }
+    }
+	return go_from_root(roots, nodes);
+}
+
 function handle_progress(data) {
     var footer = '</incremental></result>'
     var finished = data.indexOf('</result>') != -1;
@@ -81,10 +102,10 @@ function make_table(data, attributes) {
         suffix : split_pipes(lemgram_link)
     };
 
-	// Remove those columns that are not part of the generated attributes
-	columns = $.grep(columns, function (col, _ix) {
-		return $.inArray(col.name, attributes) != -1;
-	});
+    // Remove those columns that are not part of the generated attributes
+    columns = $.grep(columns, function (col, _ix) {
+        return $.inArray(col.name, attributes) != -1;
+    });
 
     var rows = [];
     json = $.xml2json(data);
@@ -92,9 +113,6 @@ function make_table(data, attributes) {
     var tables = $('<div/>');
 
     var make_deptrees = true;
-    deptrees = []
-
-    var max_sents = 10;
 
     sentences = to_array(json.corpus.sentence);
     sentences.map(function(sent) {
@@ -112,13 +130,8 @@ function make_table(data, attributes) {
             return $('<tr/>').append($('<td/>').attr("colspan",columns.length).append(s));
         }
 
-        max_sents--;
-        if (max_sents < 0) {
-            return;
-        }
         var words = to_array(sent.w);
-        var div_id = "div-" + sent.id;
-        var deprel_div = $('<div/>').attr("id", div_id);
+        var deprel_div = $('<div/>');
 
         table.append(wide_row(deprel_div));
 
@@ -130,34 +143,23 @@ function make_table(data, attributes) {
         }));
 
         if (make_deptrees) {
-            deptrees.push(function() {
-                var roots = [];
-                var nodes = new Array(words.length);
-                for (var i=0; i<words.length; i++) {
-                    nodes[i] = new Node();
-                    nodes[i].pos = i;
-                }
-                for (var i=0; i<words.length; i++) {
-                    nodes[i].value = words[i].text;
-                    nodes[i].rel = words[i].deprel;
-                    if (words[i].dephead == "") {
-                        roots.push(nodes[i]);
-                    } else {
-                        var parent = words[i].dephead-1;
-                        nodes[i].rel = words[i].deprel;
-                        nodes[i].parent = nodes[parent];
-                    }
-                }
-                var img = go_from_root(roots, nodes);
+            console.log("Adding a waypoint for " + sent.id);
+            deprel_div.waypoint(function() {
+                console.log("Drawing a tree for " + sent.id);
+                var img = draw_sentence_tree(words);
                 deprel_div
                     .empty(img)
-					.append(img)
+                    .append(img)
                     .css("text-align","center")
                     .css("overflow","auto");
+            }, {
+                offset: '100%',
+                triggerOnce: true,
+                onlyOnScroll: true
             });
         }
         tables.append(table);
     });
 
-    return { table : tables, deptrees : deptrees };
+    $('#result').empty().append(tables);
 }

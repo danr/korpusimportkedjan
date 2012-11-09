@@ -1,7 +1,7 @@
 
 function submit(xml_editor,only_makefile) {
 
-	settings = mkJsonSetting();
+    settings = mkJsonSetting();
 
     var text = xml_editor.getValue();
     var req_url = "http://localhost:8051"
@@ -12,7 +12,7 @@ function submit(xml_editor,only_makefile) {
         + "&add_root_tag=false";
 
     $('#progress-div').css("display","");
-	$('#progress-bar').css("width","0%");
+    $('#progress-bar').css("width","0%");
 
     $.ajax({
         url: req_url,
@@ -21,13 +21,9 @@ function submit(xml_editor,only_makefile) {
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
-            console.log("Success:", data)
-            var res = make_table(data, settings.attributes);
-            $('#result').empty().append(res.table);
-            res.deptrees.map(function (fn) { fn(); });
+            make_table(data, settings.attributes);
         },
         progress: function(data, e) {
-			console.log("Progress!", e.target.response);
             handle_progress(e.target.response);
         },
         error: function(jqXHR, textStatus, errorThrown) {
