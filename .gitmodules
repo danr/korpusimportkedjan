@@ -1,3 +1,6 @@
 [submodule "frontend/lib/jquery-ajaxprogress"]
 	path = frontend/lib/jquery-ajaxprogress
 	url = https://github.com/kpozin/jquery-ajaxprogress.git
+[submodule "frontend/lib/jquery-waypoints"]
+	path = frontend/lib/jquery-waypoints
+	url = https://github.com/imakewebthings/jquery-waypoints.git
