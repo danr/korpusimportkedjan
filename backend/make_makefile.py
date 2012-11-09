@@ -160,6 +160,7 @@ def make_Makefile(settings):
     def add_structural_attributes(tag,attributes,add_xml=False):
         if len(attributes) > 0 or add_xml:
             xml_cols.append((tag,tag))
+        if len(attributes) > 0:
             add_parent(tag)
             for attr in attributes:
                 add_attribute(tag,attr,structural=True,mk_chain=True)
