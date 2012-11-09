@@ -5,11 +5,15 @@ function main() {
     // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});
 
-	// Make the form
-	xml_editor = mkForm()
+    // Make the form
+    xml_editor = mkForm()
 
     // Set the initial text
-    xml_editor.setValue("En exempeltext kommer lastad. Med vadå?");
+	v = ""
+    for (var i=0; i<50; i++) {
+		v = v + "En exempeltext kommer lastad. Med vadå? \n";
+    }
+    xml_editor.setValue(v);
 
     // Activate all navs
     $('ul.nav li').click(function (e) {

@@ -111,20 +111,20 @@ function tabulate_sentence(columns, sent, make_deptrees) {
     }));
 
     if (make_deptrees) {
-        console.log("Adding a waypoint for " + sent.id);
-        deprel_div.waypoint(function() {
-            console.log("Drawing a tree for " + sent.id);
-            var img = draw_sentence_tree(words);
-            deprel_div
-                .empty(img)
-                .append(img)
-                .css("text-align","center")
-                .css("overflow","auto");
-        }, {
-            offset: '100%',
-            triggerOnce: true,
-            onlyOnScroll: true
-        });
+        //        console.log("Adding a waypoint for " + sent.id);
+        //        deprel_div.waypoint(function() {
+        //            console.log("Drawing a tree for " + sent.id);
+        var img = draw_sentence_tree(words);
+        deprel_div
+            .empty(img)
+            .append(img)
+            .css("text-align","center")
+            .css("overflow","auto");
+        //        }, {
+        //            offset: '100%',
+        //            triggerOnce: true,
+        //            onlyOnScroll: true
+        //        });
     }
 
     return table;
@@ -156,8 +156,8 @@ function make_table(data, attributes) {
     });
 
     $.each(columns, function (_ix, col) {
-		col.correct = correct[col.id] || id;
-	});
+        col.correct = correct[col.id] || id;
+    });
 
     var rows = [];
     json = $.xml2json(data);
@@ -168,9 +168,39 @@ function make_table(data, attributes) {
 
     sentences = to_array(json.corpus.sentence);
 
-    sentences.map(function(sent) {
-        tables.append(tabulate_sentence(columns, sent, make_deptrees));
-    });
+    var SLICE_SIZE = 8;
+
+    var loading = $("<div class='loading'><p>Laddar fler meningar&hellip;</p></div>");
+
+    opts = { offset: '100%',
+             triggerOnce: true,
+             onlyOnScroll: true
+           };
+
+    function show_from(ix) {
+		var next = ix + SLICE_SIZE;
+        if (sentences.length > ix) {
+            for (var i=ix; i < next; i++) {
+                if (i < sentences.length) {
+                    tables.append(tabulate_sentence(columns, sentences[i], make_deptrees));
+                }
+            }
+        }
+        if (sentences.length > next) {
+            var link = $('<a href="#"/>').text("Ladda fler meningar...");
+            var load_more = $('<div/>').append(link);
+            tables.append(load_more);
+            function show_more () {
+                load_more.detach();
+                show_from(next);
+                return false;
+            }
+            load_more.waypoint(show_more, opts);
+            link.click(show_more);
+        }
+    }
+
+    show_from(0);
 
     $('#result').empty().append(tables);
 }
