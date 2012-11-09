@@ -200,34 +200,6 @@ def make_Makefile(settings):
 
     return res
 
-def jsjson_to_json(s):
-    """JavaScript JSON to JSON (as strings)"""
-    def stringifyKeys(s):
-        return re.sub(r'(\w+):',r'"\1":',s)
-
-    return '\n'.join(filter(lambda l : "//" not in l,
-                            map(stringifyKeys,s.split('\n'))))
-
-def json_to_Makefile(filename):
-    """Makes a makefile from a javascript json description in filename"""
-    with open(filename,"r") as f:
-        initial_json = f.read()
-
-    settings = json.loads(jsjson_to_json(initial_json))
-
-    makefile = make_Makefile(settings)
-
-    settings_str = re.sub(r"u'",r"'", # remove ugly u in u'strings'
-                          makefile_comment(pp.pformat(settings)))
-
-    sb.util.log.info("Writing Makefile...")
-    with open("Makefile","w") as f:
-        f.write(linearise_Makefile([settings_str,""] + makefile))
-    sb.util.log.info("... done!")
-
-if __name__ == '__main__':
-    sb.util.run.main(json_to_Makefile)
-
 # An example makefile which can be run on linearise_Makefile
 example = [
     ("corpus","dannes_superkorpus"),
@@ -274,10 +246,36 @@ def merge_defaults(settings):
     return s
 
 def makefile(d):
-    return str(linearise_Makefile(make_Makefile(merge_defaults(d))))
+    settings_str = re.sub(r"u'",r"'", # remove ugly u in u'strings'
+                          makefile_comment(pp.pformat(d)))
+    return str(linearise_Makefile([settings_str,""] + make_Makefile(merge_defaults(d))))
 
 def makefile_from_json_string(s):
     return makefile(json.loads(s))
+
+def jsjson_to_json(s):
+    """JavaScript JSON to JSON (as strings)"""
+    def stringifyKeys(s):
+        return re.sub(r'(\w+):',r'"\1":',s)
+
+    return '\n'.join(filter(lambda l : "//" not in l,
+                            map(stringifyKeys,s.split('\n'))))
+
+def json_to_Makefile(filename):
+    """Makes a makefile from a javascript json description in filename"""
+    with open(filename,"r") as f:
+        initial_json = f.read()
+
+    settings = json.loads(jsjson_to_json(initial_json))
+
+    sb.util.log.info("Writing Makefile...")
+    with open("Makefile","w") as f:
+        f.write(makefile(settings))
+    sb.util.log.info("... done!")
+
+if __name__ == '__main__':
+    sb.util.run.main(json_to_Makefile)
+
 
 defaults = {
     'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
