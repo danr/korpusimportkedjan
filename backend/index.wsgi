@@ -54,9 +54,6 @@ def application(environ,start_response):
     incremental = query_dict.get('incremental', [''])[0]
     incremental = incremental.lower() == 'true'
 
-    add_root_tag = query_dict.get('add_root_tag', [''])[0]
-    add_root_tag = add_root_tag.lower() == 'true'
-
     settings = json.loads(query_dict.get('settings',['{}'])[0])
 
     status = '200 OK'
@@ -70,7 +67,7 @@ def application(environ,start_response):
     else:
         try:
             util.log.info("Running pipeline with text: %s (settings: %s fmt: %s, incremental: %s)", post, settings, fmt, incremental)
-            return run_pipeline(pipeline, post, settings, fmt, add_root_tag, incremental)
+            return run_pipeline(pipeline, post, settings, fmt, incremental)
         except:
             util.log.error('Error in handling code: %s', sys.exc_info()[1])
             traceback.print_exception(*sys.exc_info())

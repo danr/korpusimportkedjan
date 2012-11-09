@@ -21,7 +21,7 @@ def make(settings):
                  shell=False, close_fds=False,
                  stdin=None, stdout=PIPE, stderr=PIPE)
 
-def run_pipeline(pipeline, text, settings, fmt, add_root_tag=False, incremental=False):
+def run_pipeline(pipeline, text, settings, fmt, incremental=False):
     """
     Runs the `text` throught the pipeline creating a makefile from `settings`.
     `pipeline` should be a dict containing 'dir', 'python' and 'processes'.
@@ -53,10 +53,7 @@ def run_pipeline(pipeline, text, settings, fmt, add_root_tag=False, incremental=
         util.log.info("File exists and is not rewritten: %s", text_hash)
     else:
         with open(text_file, 'w') as f:
-            if add_root_tag:
-                f.write('<text>' + text + '</text>')
-            else:
-                f.write(text)
+            f.write(text)
 
     make_settings = ['-C', text_dir,
                      'dir_chmod=777',
