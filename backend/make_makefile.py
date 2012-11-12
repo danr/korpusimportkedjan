@@ -69,6 +69,9 @@ def make_Makefile(settings):
     # xml_elements and xml_annotations as column-by-column
     xml_cols = []
 
+    # custom rules (used for dephead.ref)
+    custom_rules = []
+
     def add_parent(tag):
         parents.append("token.{0}|token|{0}".format(tag))
 
@@ -114,6 +117,11 @@ def make_Makefile(settings):
             replace = ws['attributes'][attr]
             if replace:
                 # Adds w:pos -> msd in xml
+                if attr == "dephead":
+                    custom_rules += [("token.dephead",
+"""%.token.dephead: %.children.sentence.token %.token.ref %.token.{0}.ref
+	python $(root)dephead.py --out $@ --sentence $(1) --ref $(2) --dephead_ref $(3)""".format(replace))]
+                    replace += ".ref"
                 xml_cols.append((mk_xml_attr(ws['tag'],attr),
                                  mk_file_attr('token',replace)))
             else:
@@ -180,10 +188,6 @@ def make_Makefile(settings):
            ("original_dir","original"),
            ("files","$(basename $(notdir $(wildcard $(original_dir)/*.xml)))")]
 
-    common = ["include ../Makefile.common"]
-
-    rules = ["include ../Makefile.rules"]
-
     vrt = [zip(["vrt_annotations","vrt_columns","vrt_structs"],
                map(list,zip(*vrt_cols)))]
 
@@ -192,6 +196,16 @@ def make_Makefile(settings):
 
     parents_and_chains = [("parents"," ".join(parents)),
                           ("chains"," ".join(chains))]
+
+    common = ["include ../Makefile.common"]
+
+    rules = ["include ../Makefile.rules"] # is prependend with custom_rules if there are any, see below
+
+    custom_rule_names = map(lambda t:t[0],custom_rules)
+    if len(custom_rule_names) > 0:
+        for custom in custom_rules:
+            rules = [makefile_comment("Custom rule for " + custom[0] + ":"),custom[1],""] + rules
+        rules = [("custom_rules",' '.join(custom_rule_names))] + [""] + rules
 
     # Add a blank row between sections
     res = []
