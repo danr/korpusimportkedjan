@@ -1,3 +1,19 @@
+function dismiss_button() {
+    return $('<button type="button" class="close" data-dismiss="alert">')
+        .append($('<i class="icon-remove"/>'));
+}
+
+function show_errors(data) {
+    var errors = data.getElementsByTagName("error")
+    $.each(errors, function (_ix, error) {
+        console.log(error.textContent);
+        $('#errors')
+            .append($('<div class="alert alert-error"/>')
+                    .append(dismiss_button(),
+                            $('<span>').text("Importkedjan gav följande varningar:"),
+                            $('<pre class="original-pre">').text(error.textContent)));
+    });
+}
 
 function submit(xml_editor,only_makefile) {
 
@@ -24,14 +40,14 @@ function submit(xml_editor,only_makefile) {
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
-			clear_progress_bar();
+            clear_progress_bar();
             if (only_makefile) {
-                $('#query').text(data).css("display","");
-				$('#query').click(function () {
-					$(this).css("display","none");
-					return false;
-				});
+                $('#query')
+                    .append($('<div class="alert"/>')
+                            .append(dismiss_button(),
+                                    $('<pre class="original-pre">').text(data)));
             } else {
+                show_errors(data);
                 make_table(data, settings.attributes);
             }
         },
@@ -41,7 +57,7 @@ function submit(xml_editor,only_makefile) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-			clear_progress_bar();
+            clear_progress_bar();
             console.log("error", jqXHR, textStatus, errorThrown);
         }
     });

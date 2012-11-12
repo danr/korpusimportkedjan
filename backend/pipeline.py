@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from xml.sax.saxutils import escape
+
 import sb.util as util
 
 import sys
@@ -67,13 +69,16 @@ def run_pipeline(pipeline, text, settings, fmt, incremental=False):
         make_settings = ['export'] + make_settings
         out_file = os.path.join(export_dir, 'text.xml')
 
-    try:
-        os.remove(out_file)
-    except OSError as exc:
-        if exc.errno == errno.ENOENT:
-            pass
-        else:
-            raise
+    warnings_log_file = os.path.join(text_dir,'warnings.log');
+
+    for f in [out_file,warnings_log_file]:
+        try:
+            os.remove(f)
+        except OSError as exc:
+            if exc.errno == errno.ENOENT:
+                pass
+            else:
+                raise
 
     launches = 0
     if incremental:
@@ -99,11 +104,12 @@ def run_pipeline(pipeline, text, settings, fmt, incremental=False):
         if incremental:
             yield '</incremental>\n'
 
-        # Send errors
-        errs = []
-        for line in iter (process.stderr.readline, ''):
-            print "err:" + line.rstrip()
-            yield '<error>' + line.rstrip() + '</error>\n'
+        # Send errors (process.stderr is ignored for now)
+        try:
+            with open(warnings_log_file) as f:
+                yield '<error>' + escape(f.read().rstrip()) + '</error>'
+        except IOError as e:
+            pass
 
         with open(out_file, 'r') as f:
             out = f.read()
