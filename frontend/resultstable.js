@@ -100,9 +100,6 @@ function tabulate_sentence(columns, sent, make_deptrees) {
     }
 
     var words = to_array(sent.w);
-    var deprel_div = $('<div/>');
-
-    table.append(wide_row(deprel_div));
 
     array_to_rows(table,words.map(function(word) {
         return columns.map(function(col) {
@@ -111,20 +108,14 @@ function tabulate_sentence(columns, sent, make_deptrees) {
     }));
 
     if (make_deptrees) {
-        //        console.log("Adding a waypoint for " + sent.id);
-        //        deprel_div.waypoint(function() {
-        //            console.log("Drawing a tree for " + sent.id);
+        var deprel_div = $('<div/>');
+        table.prepend(wide_row(deprel_div));
         var img = draw_sentence_tree(words);
         deprel_div
             .empty(img)
             .append(img)
             .css("text-align","center")
             .css("overflow","auto");
-        //        }, {
-        //            offset: '100%',
-        //            triggerOnce: true,
-        //            onlyOnScroll: true
-        //        });
     }
 
     return table;
@@ -154,25 +145,27 @@ function make_table(data, attributes) {
         return $.inArray(col.id, attributes) != -1;
     });
 
-	// Always write the word
+    // Always write the word
     columns.unshift({ name: "ord", id: "text" });
 
-	// How to present the different columns (link to Karp etc)
+    // How to present the different columns (link to Karp etc)
     $.each(columns, function (_ix, col) {
         col.correct = correct[col.id] || id;
     });
 
-    var tables = $('<div/>');
-
+    // Only make dependency trees if all three required attributes are present
     var make_deptrees = true;
+    $.each(["ref", "dephead", "deprel"], function (_ix, a) {
+        make_deptrees = make_deptrees && $.inArray(a, attributes) != -1;
+    });
 
-	// Get sentences by looking for xml tags named "sentence"...
-	var xml_sentences = data.getElementsByTagName("sentence")
+    // Get sentences by looking for xml tags named "sentence"...
+    var xml_sentences = data.getElementsByTagName("sentence")
 
-	// ... then convert them to json
-	var sentences = [];
+    // ... then convert them to json
+    var sentences = [];
     $.each(xml_sentences, function (_, s) {
-		sentences.push($.xml2json(s));
+        sentences.push($.xml2json(s));
     });
 
     var SLICE_SIZE = 8;
@@ -183,6 +176,8 @@ function make_table(data, attributes) {
              triggerOnce: true,
              onlyOnScroll: true
            };
+
+    var tables = $('<div/>');
 
     function show_from(ix) {
         var next = ix + SLICE_SIZE;
@@ -219,7 +214,7 @@ function make_table(data, attributes) {
     $('#extra_buttons').empty().append(
 
         $('<button class="btn">').text("Visa JSON").click(function () {
-			var json = $.xml2json(data);
+            var json = $.xml2json(data);
             new_window("application/json", JSON.stringify(json));
             return false;
         }),
