@@ -14,8 +14,7 @@ function submit(xml_editor,only_makefile) {
         + "&only_makefile=" + (only_makefile ? "true" : "false");
 
     if (incremental) {
-        $('#progress-div').css("display","");
-        $('#progress-bar').css("width","0%");
+        initialize_progress_bar();
     }
 
     $.ajax({
@@ -25,6 +24,7 @@ function submit(xml_editor,only_makefile) {
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
+			clear_progress_bar();
             if (only_makefile) {
                 $('#query').text(data).css("display","");
             } else {
@@ -37,6 +37,7 @@ function submit(xml_editor,only_makefile) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
+			clear_progress_bar();
             console.log("error", jqXHR, textStatus, errorThrown);
         }
     });

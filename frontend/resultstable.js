@@ -66,23 +66,6 @@ function draw_sentence_tree(words) {
     return go_from_root(roots, nodes);
 }
 
-function handle_progress(data) {
-    var footer = '</incremental></result>'
-    var finished = data.indexOf('</result>') != -1;
-    if (!finished) {
-        data = data + footer;
-    }
-    var json = $.xml2json(data);
-    var progress = 100;
-    var i = json.incremental;
-    if (i && !finished) {
-        var steps = i.steps;
-        var step = i.increment ? i.increment.length : 0;
-        progress = step / steps * 100;
-    }
-    $('#progress-bar').css("width",progress + '%');
-}
-
 function tabulate_sentence(columns, sent, make_deptrees) {
 
     var table = $('<table class="table table-striped table-bordered table-condensed">');
@@ -123,8 +106,6 @@ function tabulate_sentence(columns, sent, make_deptrees) {
 }
 
 function make_table(data, attributes) {
-
-    $('#progress-div').css("display","none");
 
     var col = function(s) { return { name: s, id: s }; }
     var columns = ["msd","lemma","lex","saldo","prefix","suffix","ref"].map(col);

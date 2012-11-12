@@ -93,7 +93,8 @@ def run_pipeline(pipeline, text, settings, fmt, incremental=False):
             make_out += [line]
             if incremental and "catalaunch" in line:
                 n += 1;
-                yield '<increment>' + str(n) + '</increment>\n'
+                cmd = line.split(" ")[3]
+                yield '<increment command="%s">%s</increment>\n' % (cmd, n)
 
         if incremental:
             yield '</incremental>\n'
