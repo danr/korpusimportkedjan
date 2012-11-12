@@ -220,7 +220,7 @@ function make_table(data, attributes) {
         }),
 
         $('<button class="btn">').text("Visa XML").click(function () {
-            new_window("application/xml", data);
+            new_window("application/xml", (new XMLSerializer()).serializeToString(data));
             return false;
         })
     );
