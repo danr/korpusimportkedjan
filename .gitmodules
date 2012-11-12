@@ -4,3 +4,6 @@
 [submodule "frontend/lib/jquery-waypoints"]
 	path = frontend/lib/jquery-waypoints
 	url = https://github.com/imakewebthings/jquery-waypoints.git
+[submodule "frontend/lib/brat"]
+	path = frontend/lib/brat
+	url = https://github.com/nlplab/brat.git
