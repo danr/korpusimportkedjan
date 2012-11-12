@@ -9,11 +9,7 @@ function main() {
     xml_editor = mkForm()
 
     // Set the initial text
-	v = ""
-    for (var i=0; i<1; i++) {
-		v = v + "En exempeltext kommer lastad. Med vadå? \n";
-    }
-    xml_editor.setValue(v);
+    xml_editor.setValue("En exempeltext kommer lastad. Med vadå?");
 
     // Activate all navs
     $('ul.nav li').click(function (e) {
@@ -36,7 +32,6 @@ function main() {
 
     // Show query button
     $('#show_query').click(function () {
-        console.log(mkJsonSetting(), JSON.stringify(mkJsonSetting()));
         submit(xml_editor,true);
         return false;
     });

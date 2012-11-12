@@ -27,6 +27,10 @@ function submit(xml_editor,only_makefile) {
 			clear_progress_bar();
             if (only_makefile) {
                 $('#query').text(data).css("display","");
+				$('#query').click(function () {
+					$(this).css("display","none");
+					return false;
+				});
             } else {
                 make_table(data, settings.attributes);
             }
