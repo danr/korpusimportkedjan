@@ -23,7 +23,7 @@ function submit(xml_editor,only_makefile) {
 
     var text = xml_editor.getValue();
 
-    var req_url = "http://" + window.location.host + ":8051"
+    var req_url = "http://demo.spraakdata.gu.se/dan/backend/"
         + "?settings=" + JSON.stringify(settings)
         + "&incremental=" + (incremental ? "true" : "false")
         + "&fmt=xml"
