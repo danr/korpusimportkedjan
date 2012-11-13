@@ -13,6 +13,7 @@ function main() {
 
     init_brat();
 
+	/*
     head.ready(function () {
         draw_brat_tree(
             [s("En"				, "DT", 1, 2, "DT"),
@@ -20,8 +21,9 @@ function main() {
              s("kommer"			, "VB", 3, null, "ROOT"),
              s("lastad"			, "PC", 4, 3, "SP"),
              s("."				, "MAD", 5, 3, "IP"),
-            ], 'result');
+            ], 'example_tree');
     });
+	*/
 
     // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});

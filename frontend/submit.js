@@ -23,7 +23,7 @@ function submit(xml_editor,only_makefile) {
 
     var text = xml_editor.getValue();
 
-    var req_url = "http://localhost:8051"
+    var req_url = "http://" + window.location.host + ":8051"
         + "?settings=" + JSON.stringify(settings)
         + "&incremental=" + (incremental ? "true" : "false")
         + "&fmt=xml"

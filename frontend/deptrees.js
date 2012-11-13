@@ -2,7 +2,7 @@ var webFontURLs;
 
 function init_brat() {
 
-    var bratLocation = 'http://localhost/lib/brat';
+    var bratLocation = 'lib/brat';
 
     head.js(
         // External libraries
@@ -38,7 +38,7 @@ function make_entity_from_pos (p) {
     var min = "A".charCodeAt(0) * 1.0;
     var max = "Z".charCodeAt(0) * 1.0 - min;
     var hue = Math.floor((p.charCodeAt(0) - min) * (100.0 / max));
-    var sat = Math.floor((p.charCodeAt(1) - min) * (50.0 / max)) + 25;
+    var sat = Math.floor((p.charCodeAt(1) - min) * (30.0 / max)) + 70;
     // console.log(p, hue, sat);
     var rgb = $.colors('hsl(' + hue + ',' + sat + '%,70%)').toString('hex');
     // console.log(p + " gets " + rgb);
@@ -54,7 +54,8 @@ function make_relation_from_rel (r) {
     return {
         type: r,
         labels: [r],
-        color: "black",
+		dashArray: "3,3",
+        color: "purple",
         args: [ { role: "parent", targets: [] },
                 { role: "child", targets: [] }
               ]
@@ -94,7 +95,7 @@ function draw_brat_tree(words, to_div) {
 
     }
 
-    var text = words.join(" ")
+    var text = words.join(" ");
 
     var ix = 0;
     $.map(words, function (word) {
