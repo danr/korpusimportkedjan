@@ -34,71 +34,89 @@ function init_brat() {
   including rel, dephead and deprel and pos
 */
 
+function make_entity_from_pos (p) {
+    var min = "A".charCodeAt(0) * 1.0;
+    var max = "Z".charCodeAt(0) * 1.0 - min;
+    var hue = Math.floor((p.charCodeAt(0) - min) * (100.0 / max));
+    var sat = Math.floor((p.charCodeAt(1) - min) * (50.0 / max)) + 25;
+    // console.log(p, hue, sat);
+    var rgb = $.colors('hsl(' + hue + ',' + sat + '%,70%)').toString('hex');
+    // console.log(p + " gets " + rgb);
+    return {
+        type: p,
+        labels: [p],
+        bgColor: rgb,
+        borderColor: 'darken'
+    }
+};
+
+function make_relation_from_rel (r) {
+    return {
+        type: r,
+        labels: [r],
+        color: "black",
+        args: [ { role: "parent", targets: [] },
+                { role: "child", targets: [] }
+              ]
+    }
+}
+
 function draw_brat_tree(words, to_div) {
 
-    var posses = $.unique($.map(words, function (w) { return w.pos; }));
+    var entity_types = [];
+    var relation_types = [];
+    var event_types = [];
+    var entities = [];
+    var relations = [];
+    var triggers = [];
+    var events = [];
 
-    var rels = $.unique($.map(words, function (w) { return w.deprel; }));
+    var added_pos = [];
+    var added_rel = [];
 
-    function make_entity_from_pos (p) {
-        var min = "A".charCodeAt(0) * 1.0;
-        var max = "Z".charCodeAt(0) * 1.0 - min;
-        var hue = Math.floor((p.charCodeAt(0) - min) * (100.0 / max));
-        var sat = Math.floor((p.charCodeAt(1) - min) * (50.0 / max)) + 25;
-        // console.log(p, hue, sat);
-        var rgb = $.colors('hsl(' + hue + ',' + sat + '%,70%)').toString('hex');
-        // console.log(p + " gets " + rgb);
-        return {
-            type: p,
-            labels: [p],
-            bgColor: rgb,
-            borderColor: 'darken'
+    function add_word (word, start, stop) {
+        if ($.inArray(word.pos, added_pos) == -1) {
+            added_pos.push(word.pos);
+            entity_types.push(make_entity_from_pos(word.pos));
         }
-    };
-
-    function make_relation_from_rel (r) {
-        return {
-            type: r,
-            labels: [r],
-            color: "black",
-            args: [ { role: "parent", targets: [] },
-                    { role: "child", targets: [] }
-                  ]
+        if ($.inArray(word.deprel, added_rel) == -1) {
+            added_rel.push(word.deprel);
+            relation_types.push(make_relation_from_rel(word.rel));
         }
+
+        var entity = ["T" + word.ref, word.pos, [[start, stop]]];
+		entities.push(entity);
+
+        if (word.deprel != "ROOT") {
+            var relation = ["R" + word.ref, word.deprel, [["parent", "T" + word.dephead],["child", "T" + word.ref]]];
+            relations.push(relation);
+        }
+
     }
-
-    var collData = {
-        entity_types: $.map(posses, make_entity_from_pos),
-        relation_types: $.map(rels, make_relation_from_rel)
-    };
 
     var text = words.join(" ")
 
-    var pos = 0;
-    var entities = []
-    var relations = []
-    $.map(words, function (w) {
-        var entity = ["T" + w.ref, w.pos, [[pos, pos + w.length]]];
-        entities = [].concat(entities,[entity]);
-
-        if (w.deprel != "ROOT") {
-            var relation = ["R" + w.ref, w.deprel, [["parent", "T" + w.dephead],["child", "T" + w.ref]]];
-            relations = [].concat(relations,[relation]);
-        }
-
-        // advance position index
-        pos += w.length + 1;
+    var ix = 0;
+    $.map(words, function (word) {
+		add_word(word, ix, ix + word.length);
+        ix += word.length + 1;
     });
 
-    var docData = {
-        // Our text of choice
-        text: text,
-        // The entities entry holds all entity annotations
-        entities: entities,
-        relations: relations
+    var collData = {
+        entity_types: entity_types,
+        relation_types: relation_types,
+        event_types: event_types
     };
 
-    // console.log("collData", collData, "docData", docData);
+    var docData = {
+        text: text,
+        entities: entities,
+        relations: relations,
+        triggers: triggers,
+        events: events
+    };
+
+    console.log("collData", collData, "docData", docData);
 
     Util.embed(to_div, collData, docData, webFontURLs);
 }
