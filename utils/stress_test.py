@@ -6,21 +6,18 @@ import time
 import sys
 from urllib import quote
 
-pipeline = "http://localhost:8051"
+import httplib
 
-def curl(address):
-    from subprocess import Popen, PIPE
-    p = Popen(["curl",address,"--max-time","300"],
-              stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = p.communicate()
-    print stdout
-    if '<corpus>' not in stdout or '</corpus>' not in stdout:
-        print stderr
-        print p.returncode
-        sys.exit(p.returncode)
+server = "demo.spraakdata.gu.se:80"
+directory = "/dan/backend/"
 
 def invoke(text,settings):
-    curl(pipeline + "?text=" + quote(text) + "&settings=" + quote(json.dumps(settings)))
+    address = directory + "?text=" + quote(text) + "&settings=" + quote(json.dumps(settings))
+    h = httplib.HTTPConnection(server)
+    headers = {"Content-type": "application/xml", "Accept": "text/plain"}
+    h.request('POST', address, text, headers)
+    print h.getresponse().read()
+
 
 # 'word' is not listed here, it is added later
 attributes = ['pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel']
