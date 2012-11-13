@@ -12,7 +12,7 @@ server = "demo.spraakdata.gu.se:80"
 directory = "/dan/backend/"
 
 def invoke(text,settings):
-    address = directory + "?text=" + quote(text) + "&settings=" + quote(json.dumps(settings))
+    address = directory + "?settings=" + quote(json.dumps(settings))
     h = httplib.HTTPConnection(server)
     headers = {"Content-type": "application/xml", "Accept": "text/plain"}
     h.request('POST', address, text, headers)
