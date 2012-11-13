@@ -91,14 +91,24 @@ function tabulate_sentence(columns, sent, make_deptrees) {
     }));
 
     if (make_deptrees) {
-        var deprel_div = $('<div/>');
+        var deprel_div = $('<div/>').attr("id", sent.id);
         table.prepend(wide_row(deprel_div));
-        var img = draw_sentence_tree(words);
-        deprel_div
-            .empty(img)
-            .append(img)
-            .css("text-align","center")
-            .css("overflow","auto");
+        var opts = { offset: '100%',
+					 onlyOnScroll: true,
+                     triggerOnce: true,
+                   };
+        deprel_div.waypoint(function () {
+            console.log("Drawing a brat tree!");
+            draw_brat_tree(words, sent.id);
+        }, opts);
+        /*
+          var img = draw_sentence_tree(words);
+          deprel_div
+          .empty(img)
+          .append(img)
+          .css("text-align","center")
+          .css("overflow","auto");
+        */
     }
 
     return table;

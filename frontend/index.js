@@ -1,6 +1,27 @@
 $(document).ready(main);
 
+function s(str, pos, ref, head, rel) {
+    var res = new String(str);
+    res.pos = pos;
+    res.ref = ref;
+    res.dephead = head;
+    res.deprel = rel;
+    return res;
+}
+
 function main() {
+
+    init_brat();
+
+    head.ready(function () {
+        draw_brat_tree(
+            [s("En"				, "DT", 1, 2, "DT"),
+             s("exempeltext"	, "NN", 2, 3, "SS"),
+             s("kommer"			, "VB", 3, null, "ROOT"),
+             s("lastad"			, "PC", 4, 3, "SP"),
+             s("."				, "MAD", 5, 3, "IP"),
+            ], 'result');
+    });
 
     // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});

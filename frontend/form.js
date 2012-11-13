@@ -75,10 +75,15 @@ function updateGenerateBoxes() {
 
 // Make a row in the form ("ord" and its buttons, and so on...)
 function mkRow(left, right) {
-    return $('<div class="row"/>')
-        .append($('<div class="span2" style="text-align: right;"/>')
-                .append($('<strong/>').css("line-height","30px").text(left)))
-        .append($('<div class="span10"/>').append(right));
+
+	var left_div = $('<div class="span2" style="text-align: right;"/>')
+                .append($('<strong/>').css("line-height","30px").text(left));
+
+	var right_div = $('<div class="span10"/>');
+	right_div.append.apply(right_div, right)
+
+    return $('<div class="row"/>').append(left_div, right_div);
+
 }
 
 function newIcon(icon) {
@@ -182,7 +187,7 @@ function mkSection(title, id, tabs) {
         return mkTabButton(ul, tab_content, dict.id, dict.label, dict.obj, dict.active);
     });
 
-    return mkRow(title, [ul,tab_content]);
+    return mkRow(title, [ul, tab_content]);
 }
 
 // Make a text input with an id and a label to a control group.
