@@ -120,6 +120,7 @@ function draw_brat_tree(words, to_div) {
     console.log("collData", collData, "docData", docData);
 
     Util.embed(to_div, collData, docData, webFontURLs);
+
 }
 
 function draw_sentence_tree(words) {

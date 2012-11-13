@@ -17,33 +17,41 @@ hr {
 }
 
 .dropdown-toggle>.caret {
-	float: right;
-	position: relative;
-	top: -20px;
+    float: right;
+    position: relative;
+    top: -20px;
 }
 
 .dropdown-toggle span:first-child {
-	float: left;
+    float: left;
 }
 
 .dropdown-toggle {
-	min-width: 8em;
+    min-width: 8em;
 }
 
 .original-pre {
-	background-color: inherit;
-	font-size: inherit;
-	border: none;
-	padding: 0;
+    background-color: inherit;
+    font-size: inherit;
+    border: none;
+    padding: 0;
+}
+
+svg {
+    border: none;
+}
+
+.sentnum {
+    display: none;
 }
 
 
 /*
-.btn-success {
-    display: none;
-}
+  .btn-success {
+  display: none;
+  }
 
 .root-row:last-of-type .btn-success {
-    display: inline;
+display: inline;
 }
 */

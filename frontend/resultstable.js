@@ -78,10 +78,6 @@ function tabulate_sentence(columns, sent, make_deptrees) {
 
     table.append(header);
 
-    var wide_row = function(s) {
-        return $('<tr/>').append($('<td/>').attr("colspan",columns.length).append(s));
-    }
-
     var words = to_array(sent.w);
 
     array_to_rows(table,words.map(function(word) {
@@ -92,23 +88,17 @@ function tabulate_sentence(columns, sent, make_deptrees) {
 
     if (make_deptrees) {
         var deprel_div = $('<div/>').attr("id", sent.id);
-        table.prepend(wide_row(deprel_div));
-        var opts = { offset: '100%',
-					 onlyOnScroll: true,
-                     triggerOnce: true,
-                   };
-        deprel_div.waypoint(function () {
+
+        table.prepend($('<tr/>')
+                      .append($('<td/>')
+                              .attr("colspan",columns.length)
+                              .css("background-color", "#FFFFFF")
+                              .append(deprel_div)));
+
+        deprel_div.show('slow',function () {
             console.log("Drawing a brat tree!");
             draw_brat_tree(words, sent.id);
-        }, opts);
-        /*
-          var img = draw_sentence_tree(words);
-          deprel_div
-          .empty(img)
-          .append(img)
-          .css("text-align","center")
-          .css("overflow","auto");
-        */
+        });
     }
 
     return table;
