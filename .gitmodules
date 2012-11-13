@@ -10,6 +10,6 @@
 [submodule "frontend/lib/jquery-svg"]
 	path = frontend/lib/jquery-svg
 	url = https://github.com/kbwood/svg.git
-[submodule "frontend/lib/jquery-colors"]
-	path = frontend/lib/jquery-colors
-	url = https://github.com/Enideo/jquery-colors.git
+[submodule "frontend/lib/jquery-color"]
+	path = frontend/lib/jquery-color
+	url = https://github.com/jquery/jquery-color.git

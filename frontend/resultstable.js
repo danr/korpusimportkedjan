@@ -96,7 +96,6 @@ function tabulate_sentence(columns, sent, make_deptrees) {
                               .append(deprel_div)));
 
         deprel_div.show('slow',function () {
-            console.log("Drawing a brat tree!");
             draw_brat_tree(words, sent.id);
         });
     }

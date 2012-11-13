@@ -34,18 +34,30 @@ function init_brat() {
   including rel, dephead and deprel and pos
 */
 
+function color_from_chars (w, sat_min, sat_max, lightness) {
+    var v = 1.0;
+    var hue = 0.0;
+    var sat = 0.0;
+    var len = w.length;
+    for (var i=0; i < len; i++) {
+        v = v / 26.0;
+        sat += ((w.charCodeAt(i)) % 26) * v;
+        hue += ((w.charCodeAt(i)) % 26) * (1.0 / 26 / len);
+    }
+
+	hue = hue * 360;
+	sat = sat * (sat_max - sat_min) + sat_min;
+
+	var color = $.Color({ hue: hue, saturation: sat, lightness: lightness})
+
+    return color.toHexString(0);
+}
+
 function make_entity_from_pos (p) {
-    var min = "A".charCodeAt(0) * 1.0;
-    var max = "Z".charCodeAt(0) * 1.0 - min;
-    var hue = Math.floor((p.charCodeAt(0) - min) * (100.0 / max));
-    var sat = Math.floor((p.charCodeAt(1) - min) * (30.0 / max)) + 70;
-    // console.log(p, hue, sat);
-    var rgb = $.colors('hsl(' + hue + ',' + sat + '%,70%)').toString('hex');
-    // console.log(p + " gets " + rgb);
     return {
         type: p,
         labels: [p],
-        bgColor: rgb,
+        bgColor: color_from_chars(p, 0.8, 0.95, 0.8),
         borderColor: 'darken'
     }
 };
@@ -54,8 +66,7 @@ function make_relation_from_rel (r) {
     return {
         type: r,
         labels: [r],
-		dashArray: "3,3",
-        color: "purple",
+        color: color_from_chars(r, 0.5, 0.6, 0.2),
         args: [ { role: "parent", targets: [] },
                 { role: "child", targets: [] }
               ]
@@ -66,11 +77,8 @@ function draw_brat_tree(words, to_div) {
 
     var entity_types = [];
     var relation_types = [];
-    var event_types = [];
     var entities = [];
     var relations = [];
-    var triggers = [];
-    var events = [];
 
     var added_pos = [];
     var added_rel = [];
@@ -82,11 +90,11 @@ function draw_brat_tree(words, to_div) {
         }
         if ($.inArray(word.deprel, added_rel) == -1) {
             added_rel.push(word.deprel);
-            relation_types.push(make_relation_from_rel(word.rel));
+            relation_types.push(make_relation_from_rel(word.deprel));
         }
 
         var entity = ["T" + word.ref, word.pos, [[start, stop]]];
-		entities.push(entity);
+        entities.push(entity);
 
         if (word.deprel != "ROOT") {
             var relation = ["R" + word.ref, word.deprel, [["parent", "T" + word.dephead],["child", "T" + word.ref]]];
@@ -99,28 +107,22 @@ function draw_brat_tree(words, to_div) {
 
     var ix = 0;
     $.map(words, function (word) {
-		add_word(word, ix, ix + word.length);
+        add_word(word, ix, ix + word.length);
         ix += word.length + 1;
     });
 
     var collData = {
         entity_types: entity_types,
         relation_types: relation_types,
-        event_types: event_types
     };
 
     var docData = {
         text: text,
         entities: entities,
         relations: relations,
-        triggers: triggers,
-        events: events
     };
 
-    console.log("collData", collData, "docData", docData);
-
     Util.embed(to_div, collData, docData, webFontURLs);
-
 }
 
 function draw_sentence_tree(words) {
