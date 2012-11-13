@@ -122,5 +122,6 @@ def run_pipeline(pipeline, text, settings, fmt, incremental=False):
         traceback.print_exception(*sys.exc_info())
         for i in make_out:
             yield '<output>' + i.rstrip() + '</output>\n'
+        yield '<error>' + escape(process.stderr.read().rstrip()) + '</error>'
         yield '<error>Error in pipeline: "%s"</error>\n' % sys.exc_info()[1]
         return

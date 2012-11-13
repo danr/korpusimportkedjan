@@ -1,4 +1,4 @@
-import sb.util as util
+# -*- mode: python; coding: utf-8 -*-
 
 import urlparse
 import json
@@ -7,11 +7,6 @@ import os
 import sys
 import traceback
 
-from make_makefile import makefile
-from pipeline import run_pipeline
-
-# Where the models are hosted. Replaces SB_MODELS environment variable if it does not exist
-os.environ['SB_MODELS'] = os.environ.get('SB_MODELS','/export/htdocs/dan/annotate/models')
 
 # Static pipeline settings
 pipeline = dict()
@@ -31,7 +26,46 @@ pipeline['python'] = "%s %s" % (catalaunch, pipeline['sockfile'])
 # The number of processes
 pipeline['processes'] = 2
 
+# Append path to annotate and backend
+paths = ['/home/dan/annotate/python','/export/htdocs/dan/backend']
+for path in paths:
+    if path not in sys.path:
+        sys.path.append(path)
+
+os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
+
+# Where the models are hosted. Replaces SB_MODELS environment variable if it does not exist
+os.environ['SB_MODELS'] = os.environ.get('SB_MODELS','/home/dan/annotate/models')
+
+
+import sb.util as util
+
+from make_makefile import makefile
+from pipeline import run_pipeline
+
+class Writer(object):
+    def __init__(self, mode='a'):
+        self.log = open(os.path.join(pipeline['dir'], 'log'), mode)
+
+    def write(self, msg):
+        self.log.write(msg)
+        self.flush()
+
+    def flush(self):
+        self.log.flush()
+
+    def close(self):
+        self.log.close()
+
+w = Writer('w')
+sys.stdout = w
+sys.stderr = w
+
 def application(environ,start_response):
+
+    w = Writer()
+    sys.stdout = w
+    sys.stderr = w
 
     query_dict = urlparse.parse_qs(environ['QUERY_STRING'])
 
