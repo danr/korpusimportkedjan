@@ -4,7 +4,7 @@ export PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}/home/dan/annotate/python
 export PATH=/home/dan/annotate/bin:$PATH
 export SB_MODELS=/home/dan/annotate/models
 
-SALDO_MODEL=$SB_MODELS/saldo_small.pickle
+SALDO_MODEL=$SB_MODELS/saldo.pickle
 SALDO_COMPOUND_MODEL=$SB_MODELS/saldo.compound.pickle
 
 MALT_JAR=/home/dan/annotate/bin/maltparser-1.7.1/maltparser-1.7.1.jar
