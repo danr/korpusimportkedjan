@@ -57,7 +57,7 @@ function make_entity_from_pos (p) {
     return {
         type: p,
         labels: [p],
-        bgColor: color_from_chars(p, 0.8, 0.95, 0.8),
+        bgColor: color_from_chars(p, 0.8, 0.95, 0.95),
         borderColor: 'darken'
     }
 };
@@ -66,7 +66,7 @@ function make_relation_from_rel (r) {
     return {
         type: r,
         labels: [r],
-        color: color_from_chars(r, 0.5, 0.6, 0.2),
+        color: "#000000", // color_from_chars(r, 0.5, 0.6, 0.2),
         args: [ { role: "parent", targets: [] },
                 { role: "child", targets: [] }
               ]

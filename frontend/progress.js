@@ -7,6 +7,8 @@ function initialize_progress_bar() {
 
 function clear_progress_bar() {
     $('#progress-div').css("display","none");
+    $('#progress-bar').css("width","0%");
+    $('#progress-text').text("");
 }
 
 function handle_progress(data) {
@@ -30,7 +32,11 @@ function handle_progress(data) {
                 }
             }
             progress = (steps > 0) ? (step / steps * 100) : 100;
-            $('#progress-text').text("Kör kommando " + command + "...");
+            if (command && command != "undefined") {
+                $('#progress-text').text("Kör kommando " + command + "...");
+            } else {
+                $('#progress-text').text("");
+            }
         }
         $('#progress-bar').css("width",progress + '%');
     }
