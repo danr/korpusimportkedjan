@@ -1,12 +1,14 @@
 # -*- mode: python; coding: utf-8 -*-
 
+from threading import Thread
+from wsgiref.util import FileWrapper
+
 import urlparse
 import json
 
 import os
 import sys
 import traceback
-
 
 # Static pipeline settings
 pipeline = dict()
@@ -37,11 +39,10 @@ os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
 # Where the models are hosted. Replaces SB_MODELS environment variable if it does not exist
 os.environ['SB_MODELS'] = os.environ.get('SB_MODELS','/home/dan/annotate/models')
 
-
 import sb.util as util
 
 from make_makefile import makefile
-from pipeline import run_pipeline
+from pipeline import DirectPipeline
 
 class Writer(object):
     def __init__(self, mode='a'):
@@ -80,10 +81,8 @@ def application(environ,start_response):
     if length == 0:
         post = query_dict.get('text', [''])[0]
 
-    fmt = query_dict.get('fmt', ['xml'])[0]
-
-    only_makefile = query_dict.get('only_makefile', [''])[0]
-    only_makefile = only_makefile.lower() == 'true'
+    fmt = query_dict.get('format', ['xml'])[0]
+    fmt = fmt.lower()
 
     incremental = query_dict.get('incremental', [''])[0]
     incremental = incremental.lower() == 'true'
@@ -96,16 +95,22 @@ def application(environ,start_response):
 
     start_response(status, response_headers)
 
-    if only_makefile:
-        return [makefile(settings)]
+    if fmt == "makefile":
+        yield makefile(settings)
     else:
         try:
-            util.log.info("Running pipeline with text: %s (settings: %s fmt: %s, incremental: %s)", post, settings, fmt, incremental)
-            return run_pipeline(pipeline, post, settings, fmt, incremental)
+            p = DirectPipeline(pipeline, post, settings)
+            t = Thread(target=DirectPipeline.run, args=[p, fmt, incremental])
+            t.start()
+            while True:
+                v = p.queue.get()
+                if not v:
+                    break
+                yield v
         except:
             util.log.error('Error in handling code: %s', sys.exc_info()[1])
             traceback.print_exception(*sys.exc_info())
-            return 'Error in pipeline: "%s"\n' % sys.exc_info()[1]
+            yield 'Error in pipeline: "%s"\n' % sys.exc_info()[1]
 
 if __name__ == "__main__":
     from wsgiref.simple_server import make_server

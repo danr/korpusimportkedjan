@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
 defaults = {
     'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
-    'corpus': '',
+    'corpus': 'untitled',
     'extra_tags': [],
     'paragraph_segmenter': 'blanklines',
     'root': {
