@@ -5,8 +5,8 @@
   First argument is the socket file, remaining arguments are as to the python command,
   supporting paths to scripts, and modules with -m. Examples:
 
-      catalaunch catapult.sockfile -m sb.saldo --xml_to_pickle minisaldo.xml
-      catalaunch catapult.sockfile script.py any arguments
+  catalaunch catapult.sockfile -m sb.saldo --xml_to_pickle minisaldo.xml
+  catalaunch catapult.sockfile script.py any arguments
 
   If the catapult is verbose, then the script's stdout and stderr will
   be printed on stdout.
@@ -17,7 +17,7 @@
   command line arguments, separated by spaces. For this reason, spaces in arguments
   are escaped with backslash, so therefore backslashes are escaped by backslashes.
 
- */
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -27,16 +27,16 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#define PWD_LEN 1024
-#define SEND_LEN 8192
-#define RECV_LEN 1024
+#define PWD_LEN 2048
+#define SEND_LEN 4096
+#define RECV_LEN 4096
 
 int main(int argc, char **argv)
 {
     // A script needs to be specified
     if (argc <= 2) {
-      printf("Example usage:\n\n\t%s sockfile -m sb.noop --flags flag\n", argv[0]);
-      return -1;
+        printf("Example usage:\n\n\t%s sockfile -m sb.noop --flags flag\n", argv[0]);
+        return -1;
     }
 
     int s, len;
@@ -71,18 +71,32 @@ int main(int argc, char **argv)
     // Then all args are copied to msg
     // The 0th argument is skipped as it contains the executable name
     int arg;
-    for(arg=2; arg < argc && p < SEND_LEN-1; ++arg) {
+    for (arg=2; arg < argc; ++arg) {
         // add a space between arguments
         msg[p++] = ' ';
         // copy argument #arg
-        for(c=argv[arg]; *c; ++c) {
+        for (c=argv[arg]; *c; ++c) {
             // escape backslash and space
             if (*c == ' ' || *c == '\\')  msg[p++] = '\\';
             msg[p++] = *c;
+
+            // send this part of the message if we're about to exceed
+            // the buffer length
+            if (p >= SEND_LEN-4) {
+				msg[p] = '\0';
+                if (send(s, msg, p, 0) < 0) {
+                    perror("send");
+                    return -1;
+                }
+                p = 0; // reset position to start
+            }
         }
     }
 
-    // Send message
+	msg[p++] = '\\';
+	msg[p+1] = '\0';
+
+    // send remaining part of the message
     if (send(s, msg, p, 0) < 0) {
         perror("send");
         return -1;

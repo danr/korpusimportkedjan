@@ -9,7 +9,7 @@ pre-loaded and shared between processes. See the variable annotators
 in handle and start.
 """
 
-from multiprocessing import Process, Queue, cpu_count
+from multiprocessing import Process, cpu_count
 from decorator import decorator
 
 import os
@@ -19,6 +19,8 @@ import socket
 import sys
 import traceback
 import sb.util as util
+
+RECV_LEN = 4096
 
 """
 Important to preload all modules otherwise processes will need to do
@@ -113,7 +115,15 @@ def handle(client_sock, verbose, annotators):
         return cleanup
 
     # Receive data
-    data = client_sock.recv(8192)
+    data = ""
+    new_data = ""
+    # Message is terminated with a lone \
+    while len(new_data) == 0 or new_data[-1] != '\\':
+        new_data = client_sock.recv(RECV_LEN)
+        data += new_data
+
+    # Drop the terminating \
+    data = data[0:-1]
 
     # Split arguments on spaces, and replace '\ ' to ' ' and \\ to \
     args = [ arg.replace('\\ ',' ').replace('\\\\','\\')
@@ -141,7 +151,7 @@ def handle(client_sock, verbose, annotators):
 
         # Run the command
         try:
-            sys.argv = ['python']
+            sys.argv = ['?']
             sys.argv.extend(args[1:])
             os.chdir(pwd)
             if module_flag:
@@ -149,7 +159,13 @@ def handle(client_sock, verbose, annotators):
                 if annotator:
                     util.run.main(annotator)
                 else:
-                    runpy.run_module(args[0], run_name='__main__')
+                    annotator = annotators.get((args[0], args[1]), None)
+                    if annotator:
+                        sys.argv = ['?']
+                        sys.argv.extend(args[2:])
+                        util.run.main(annotator)
+                    else:
+                        runpy.run_module(args[0], run_name='__main__')
             else:
                 runpy.run_path(args[0], run_name='__main__')
         except (ImportError, IOError):
@@ -225,6 +241,7 @@ def worker(server_socket, verbose, annotators, malt_args=None):
 
 def start(socket_path, processes=1, verbose='false',
           saldo_model=None, compound_model=None,
+          models_1700s=None,
           malt_jar=None, malt_model=None, malt_encoding=util.UTF8):
     """
     Starts a catapult on a socket file, using a number of processes.
@@ -265,10 +282,18 @@ def start(socket_path, processes=1, verbose='false',
     annotators = {}
 
     if saldo_model:
-        annotators['sb.saldo'] = set_last_argument(saldo.SaldoLexicon(saldo_model))(saldo.annotate)
+        annotators['sb.saldo'] = set_last_argument(
+            saldo.SaldoLexicon(saldo_model))(saldo.annotate)
 
     if compound_model:
-        annotators['sb.compound'] = set_last_argument(compound.SaldoLexicon(compound_model))(compound.annotate)
+        annotators['sb.compound'] = set_last_argument(
+            compound.SaldoLexicon(compound_model))(compound.annotate)
+
+    if models_1700s:
+        models = models_1700s.split()
+        lexicons = [saldo.SaldoLexicon(lex) for lex in models]
+        annotators[('sb.fsv','--annotate_fallback')] = set_last_argument(lexicons)(fsv.annotate_fallback)
+        annotators[('sb.fsv','--annotate_full')] = set_last_argument(lexicons)(fsv.annotate_full)
 
     if verbose:
         util.log.info('Loaded annotators: %s', annotators.keys())
