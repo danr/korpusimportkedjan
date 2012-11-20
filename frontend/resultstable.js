@@ -107,9 +107,9 @@ function tabulate_sentence(columns, sent, make_deptrees) {
 function make_table(data, attributes) {
 
     var col = function(s) { return { name: s, id: s }; }
-    var columns = ["msd","lemma","lex","saldo","prefix","suffix","ref"].map(col);
-    columns.push({ name: "huvud", id: "dephead" });
-    columns.push({ name: "relation", id: "deprel" });
+    var columns = ["pos", "msd","lemma","lex","saldo","prefix","suffix","ref", "dephead", "deprel"].map(col);
+//    columns.push({ name: "huvud", id: "dephead" });
+//    columns.push({ name: "relation", id: "deprel" });
 
     var correct = {
         msd : function (s) { return s.split(".").join(". "); },
@@ -120,9 +120,11 @@ function make_table(data, attributes) {
         suffix : split_pipes(lemgram_link)
     };
 
-    // Remove those columns that are not part of the generated attributes
+    // Remove those columns that are not part of the generated attributes,
+	// and remove pos if msd is present
     columns = $.grep(columns, function (col, _ix) {
-        return $.inArray(col.id, attributes) != -1;
+        return $.inArray(col.id, attributes) != -1 &&
+			!(col.id == "pos" && $.inArray("msd", attributes) != -1);
     });
 
     // Always write the word
@@ -135,7 +137,7 @@ function make_table(data, attributes) {
 
     // Only make dependency trees if all three required attributes are present
     var make_deptrees = true;
-    $.each(["ref", "dephead", "deprel"], function (_ix, a) {
+    $.each(["pos", "ref", "dephead", "deprel"], function (_ix, a) {
         make_deptrees = make_deptrees && $.inArray(a, attributes) != -1;
     });
 
