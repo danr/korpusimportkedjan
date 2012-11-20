@@ -74,16 +74,22 @@ class Writer(object):
 
 request=0
 
-def build(post, settings, incremental, fmt, request):
-
-    build = Build(pipeline_settings, post, settings)
-
+def mk_putstr(build_hash, request_number):
     def putstr(msg):
-        print "%s (%d) %s" % (build.build_hash, request, msg)
+        print "%s (%d) %s" % (build_hash, request, msg)
+    return putstr
 
+def build(original_text, settings, incremental, fmt, request_number):
     """
-    Start build or listen to existing build
+    Starts a build for this corpus. If it is already running,
+    joins it. Messages from the build is received on a queue.
     """
+
+    build = Build(pipeline_settings, original_text, settings)
+
+    putstr = mk_putstr(build.build_hash, request_number)
+
+    # Start build or listen to existing build
     if build.build_hash not in builds:
         putstr("Starting a new build")
         builds[build.build_hash] = build
@@ -93,6 +99,14 @@ def build(post, settings, incremental, fmt, request):
     else:
         putstr("Joining existing build")
         build = builds[build.build_hash]
+
+    return join_build(build, incremental, putstr)
+
+def join_build(build, incremental, putstr):
+    """
+    Joins an existing build, and sends increment messages
+    until it is completed, then sends the build's result.
+    """
 
     # Make a new queue which receives messages from the builder process
     queue = Queue()
@@ -157,6 +171,9 @@ def build(post, settings, incremental, fmt, request):
         yield get_result()
 
 def application(environ, start_response):
+    """
+    Parses the data, but most processing is done in the function build
+    """
     global request
     request+=1
 
