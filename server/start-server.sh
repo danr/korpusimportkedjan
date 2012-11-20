@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}/home/dan/annotate/python
-export PATH=/home/dan/annotate/bin:$PATH
+export PYTHONPATH=/home/dan/annotate/python${PYTHONPATH:+:$PYTHONPATH}
+export PATH=/home/dan/annotate/bin:/usr/local/cwb-3.4.5/bin:$PATH
 export SB_MODELS=/home/dan/annotate/models
 
 SALDO_MODEL=$SB_MODELS/saldo.pickle

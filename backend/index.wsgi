@@ -181,7 +181,7 @@ def application(environ, start_response):
 
     post = ""
     try:
-        length= int(environ.get('CONTENT_LENGTH', '0'))
+        length = int(environ.get('CONTENT_LENGTH', '0'))
     except ValueError:
         length = 0
     if length != 0:

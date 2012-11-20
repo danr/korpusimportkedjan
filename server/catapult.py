@@ -151,7 +151,7 @@ def handle(client_sock, verbose, annotators):
 
         # Run the command
         try:
-            sys.argv = ['?']
+            sys.argv = [args[0].split('.')[-1]]
             sys.argv.extend(args[1:])
             os.chdir(pwd)
             if module_flag:

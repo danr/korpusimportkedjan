@@ -43,28 +43,30 @@ def makefile_comment(s):
 
 def make_Makefile(settings):
 
-    # vrts as column-by-column, initially with default settings
-    vrt_cols = [('word','word','-'),
-                ('pos','pos','-'),
-                ('msd','msd','-'),
-                ('baseform','lemma','-'),
-                ('lemgram','lex','-'),
-                ('saldo','saldo','-'),
-                ('prefix','prefix','-'),
-                ('suffix','suffix','-'),
-                ('ref','ref','-'),
-                ('dephead.ref','dephead','-'),
-                ('deprel','deprel','-')]
+    # vrt_columns[_annotations] as column-by-column, initially with default settings
+    columns = [('word','word'),
+               ('pos','pos'),
+               ('msd','msd'),
+               ('baseform','lemma'),
+               ('lemgram','lex'),
+               ('saldo','saldo'),
+               ('prefix','prefix'),
+               ('suffix','suffix'),
+               ('ref','ref'),
+               ('dephead.ref','dephead'),
+               ('deprel','deprel')]
+
+    # vrt_structs[_annotations]
+    structs = []
 
     # Remove positional attributes that should not be generated
-    vrt_cols = filter(lambda u : u[1] in settings['attributes'],vrt_cols)
+    columns = filter(lambda u : u[1] in settings['attributes'],columns)
 
     # The root tag
     text = settings['root']['tag']
 
-    # Initial parents and chains. All tags are assumed to have the root node as parent
+    # Initial parents. All tags are assumed to have the root node as parent
     parents = []
-    chains = []
 
     # xml_elements and xml_annotations as column-by-column
     xml_cols = []
@@ -73,10 +75,7 @@ def make_Makefile(settings):
     custom_rules = []
 
     def add_parent(tag):
-        parents.append("token.{0}|token|{0}".format(tag))
-
-    def add_chain(tag,attr):
-        chains.append("token.{0}.{1}".format(tag,attr))
+        parents.append("token|" + tag)
 
     def mk_xml_attr(tag,attr):
         return tag + ":" + attr
@@ -84,31 +83,34 @@ def make_Makefile(settings):
     def mk_file_attr(tag,attr):
         return tag + "." + attr
 
-    def add_attribute(tag,attr,structural,mk_chain,filename=None):
+    def add_attribute(tag,attr,structural,filename=None):
         filename = filename or tag
         xml_attr = mk_xml_attr(tag,attr)
         file_attr = mk_file_attr(filename,attr)
         struct_attr = mk_xml_attr(filename,attr)
         xml_cols.append((xml_attr,file_attr))
         if structural:
-            vrt_cols.append((file_attr,"-",struct_attr))
+            structs.append((file_attr,struct_attr))
         else:
-            vrt_cols.append((file_attr,struct_attr,"-"))
-        mk_chain and add_chain(filename,attr)
+            columns.append((file_attr,struct_attr))
 
     # Word (token) segmentation
     ws = settings['word_segmenter']
     if isinstance(ws,basestring):
-        """Example: word_segmenter: "punkt_word"""
+        """Example:
+
+            word_segmenter: "punkt_word"
+
+        """
         token = ([("token_chunk","sentence"),
                   ("token_segmenter",ws)] +
                 ([("token_model","$(punkt_model)")] if "punkt" in ws else []))
     else:
         """Example:
 
-        word_segmenter: { tag: "w",
-        attributes: { pos: "msd", "language": null }
-        }
+            word_segmenter: { tag: "w",
+                              attributes: { pos: "msd", "language": null }
+                            }
         """
         token = [makefile_comment("Using tag " + ws['tag'] + " for words")]
         # Adds w -> token in xml
@@ -126,13 +128,13 @@ def make_Makefile(settings):
                                  mk_file_attr('token',replace)))
             else:
                 # Adds w:language -> token.language in xml and
-                #      token.language -> (language, -) in vrt
+                #      token.language -> language in columns
                 xml_cols.append((mk_xml_attr(ws['tag'],attr),
                                  mk_file_attr('token',attr)))
-                vrt_cols.append((mk_file_attr('token',attr),attr,'-'))
+                columns.append((mk_file_attr('token',attr),attr))
 
     # add the obligatory structural attribute sentence.id
-    vrt_cols.append(('sentence.id','-','sentence:id'))
+    structs.append(('sentence.id','sentence:id'))
 
     # Sentence and Paragraph segmentation
     def add_segmenter(setting,name,chunk,model=None):
@@ -147,23 +149,21 @@ def make_Makefile(settings):
         else:
             """Example
 
-            sentence_segmenter: { tag: "s",
-            attributes: ["mood","id"]
-            }
+                sentence_segmenter: { tag: "s",
+                                      attributes: ["mood","id"]
+                                    }
             """
             xml_cols.append((setting['tag'],name))
             add_parent(name)
             for attr in setting['attributes']:
                 add_attribute(setting['tag'],attr,
-                              structural=True,mk_chain=True,
+                              structural=True,
                               filename=name)
             return [makefile_comment("Using tag " + setting['tag'] + " for " + name)]
 
     sentence_chunk = text if settings['paragraph_segmenter'] == "none" else "paragraph"
-    sentence = add_segmenter(settings['sentence_segmenter'],
-                             "sentence",sentence_chunk,"$(punkt_model)")
-    paragraph = add_segmenter(settings['paragraph_segmenter'],
-                              "paragraph",text)
+    sentence = add_segmenter(settings['sentence_segmenter'], "sentence", sentence_chunk, "$(punkt_model)")
+    paragraph = add_segmenter(settings['paragraph_segmenter'], "paragraph", text)
 
     def add_structural_attributes(tag,attributes,add_xml=False):
         if len(attributes) > 0 or add_xml:
@@ -171,7 +171,7 @@ def make_Makefile(settings):
         if len(attributes) > 0:
             add_parent(tag)
             for attr in attributes:
-                add_attribute(tag,attr,structural=True,mk_chain=True)
+                add_attribute(tag,attr,structural=True)
 
     # Extra tags
     for t in settings['extra_tags']:
@@ -180,41 +180,41 @@ def make_Makefile(settings):
     # Add the root tag to xml and its attributes
     add_structural_attributes(text,settings['root']['attributes'],add_xml=True)
 
-    # Add the magic 'n' annotation
-    vrt_cols.append(('n','-','-'))
-
     # Assemble the makefile
-    hdr = [("corpus",settings['corpus']),  # TODO: escaping of non-filename characters!
-           ("original_dir","original"),
-           ("files","$(basename $(notdir $(wildcard $(original_dir)/*.xml)))")]
+    rows = ([("corpus",settings['corpus']),  # TODO: escaping of non-filename characters!
+             ("original_dir","original"),
+             ("files","$(basename $(notdir $(wildcard $(original_dir)/*.xml)))"),
+             "",
+             zip(["vrt_columns_annotations","vrt_columns"], map(list,zip(*columns))),
+             "",
+             zip(["vrt_structs_annotations","vrt_structs"], map(list,zip(*structs))),
+             "",
+             zip(["xml_elements","xml_annotations"], map(list,zip(*xml_cols))),
+             ""] +
 
-    vrt = [zip(["vrt_annotations","vrt_columns","vrt_structs"],
-               map(list,zip(*vrt_cols)))]
+            token + [""] +
+            sentence + [""] +
+            paragraph + [""] +
 
-    xml = [zip(["xml_elements","xml_annotations"],
-               map(list,zip(*xml_cols)))]
-
-    parents_and_chains = [("parents"," ".join(parents)),
-                          ("chains"," ".join(chains))]
-
-    common = ["include ../Makefile.common"]
-
-    rules = ["include ../Makefile.rules"] # is prependend with custom_rules if there are any, see below
+            [("parents"," ".join(parents)),
+             ""
+             "include ../Makefile.common",
+             ""
+             ])
 
     custom_rule_names = map(lambda t:t[0],custom_rules)
     if len(custom_rule_names) > 0:
         for custom in custom_rules:
-            rules = [makefile_comment("Custom rule for " + custom[0] + ":"),custom[1],""] + rules
-        rules = [("custom_rules",' '.join(custom_rule_names))] + [""] + rules
+            rows += [makefile_comment("Custom rule for " + custom[0] + ":"), custom[1], ""]
 
-    # Add a blank row between sections
-    res = []
-    [ res.extend(row + [""])
-      for row in (hdr, vrt, xml, common, token, sentence, paragraph, parents_and_chains, rules) ]
+        rows += [("custom_rules",' '.join(custom_rule_names)), ""]
 
-    return res
+    rows.append("include ../Makefile.rules")
 
-# An example makefile which can be run on linearise_Makefile
+    # Intersperse a blank row
+    return rows
+
+# An example _old style_ makefile which can be run on linearise_Makefile
 example = [
     ("corpus","dannes_superkorpus"),
     ("original_dir","original"),

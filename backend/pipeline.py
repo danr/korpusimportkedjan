@@ -99,7 +99,7 @@ class Build(object):
 
     def increment_msg(self):
         """The current increment message"""
-        return '<increment command="%s">%s</increment>\n' % (self.command, self.step)
+        return '<increment command="%s" step="%s"/>\n' % (self.command, self.step)
 
     def increment_footer(self):
         """The increment footer message"""
@@ -177,7 +177,7 @@ class Build(object):
 
         # Do a dry run to get the number of invocations that will be made
         stdout, _ = make(make_settings + ['--dry-run']).communicate("")
-        self.steps = stdout.count("catalaunch")
+        self.steps = stdout.count(self.pipeline_settings.python_interpreter)
 
         # Start make for real
         self.make_process = make(make_settings)
@@ -191,9 +191,13 @@ class Build(object):
         for line in iter(self.make_process.stdout.readline, ''):
             # print line.rstrip()
             self.make_out += [line]
-            if "catalaunch" in line:
+            if self.pipeline_settings.python_interpreter in line:
                 self.step += 1;
-                self.command = line.split(" ")[3]
+                argstring = line.split(self.pipeline_settings.python_interpreter)[1]
+                arguments = argstring.lstrip().split()
+                print argstring
+                print arguments
+                self.command = " ".join(arguments[1:3]) if "--" in arguments[3] else arguments[1]
                 self.notify_step()
         self.notify_increment_completion()
 
@@ -222,7 +226,7 @@ class Build(object):
         except:
             self.trace = make_trace()
             print self.trace
-            self.stdout = "\n".join(self.make_out)
+            self.stdout = "".join(self.make_out)
             if self.make_process:
                 self.stderr = self.make_process.stderr.read().rstrip()
             self.change_status(Status.Error)

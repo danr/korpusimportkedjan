@@ -16,18 +16,21 @@ function handle_progress(data) {
     if (finished) {
         clear_progress_bar();
     } else {
-        data = data + '</incremental></result>';
+        if (data.indexOf('</incremental>') == -1) {
+            data = data + '</incremental>';
+        }
+        data = data + '</result>';
         var json = $.xml2json(data);
         var progress = 100;
         var command = ""
         var i = json.incremental;
         if (i) {
-            var steps = i.steps;
+            var steps = Number(i.steps) + 1;
             var step = 0;
             if (i.increment) {
                 var ilen = i.increment.length;
                 if (ilen > 0) {
-                    step = ilen;
+                    step = i.increment[ilen-1].step;
                     command = i.increment[ilen-1].command;
                 }
             }
@@ -37,7 +40,10 @@ function handle_progress(data) {
             } else {
                 $('#progress-text').text("");
             }
+            console.log("Progress, step:", step, " steps:", steps, " progress:", progress, " command:", command)
+            $('#progress-bar').css("width",progress + '%');
+        } else {
+            console.log("Progress: no incremental tag in ", data);
         }
-        $('#progress-bar').css("width",progress + '%');
     }
 }
