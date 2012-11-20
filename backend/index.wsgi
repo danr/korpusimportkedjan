@@ -5,30 +5,34 @@ from threading import Thread
 from wsgiref.util import FileWrapper
 from Queue import Queue
 
-
 import urlparse
 import json
 
 import os
 import sys
 
-# Static pipeline settings
-pipeline = dict()
+class PipelineSettings(object):
+    """Static pipeline settings"""
 
-# Where the pipeline is hosted
-pipeline['dir'] = '/dev/shm/pipeline/'
+    # Where the pipeline is hosted
+    directory = '/dev/shm/pipeline/'
 
-# Socket file
-pipeline['sockfile'] = os.path.join(pipeline['dir'], 'pipeline.sock')
+    # Socket file
+    socket_file = os.path.join(directory, 'pipeline.sock')
 
-# The catalaunch binary
-catalaunch = os.path.join(pipeline['dir'],'catalaunch')
+    # The catalaunch binary
+    catalaunch_binary = os.path.join(directory, 'catalaunch')
 
-# The "python" interpreter, replaced with catalaunch
-pipeline['python'] = "%s %s" % (catalaunch, pipeline['sockfile'])
+    # The "python" interpreter, replaced with catalaunch
+    python_interpreter = catalaunch_binary + " " + socket_file
 
-# The number of processes
-pipeline['processes'] = 2
+    # The number of processes (sent as a -j flag to make)
+    processes = 2
+
+    # Log file
+    log_file = os.path.join(directory, 'log')
+
+pipeline_settings = PipelineSettings()
 
 # Append path to annotate and backend
 paths = ['/home/dan/annotate/python','/export/htdocs/dan/backend']
@@ -56,7 +60,7 @@ from pipeline import Build, Status, Message, finished, make_trace
 
 class Writer(object):
     def __init__(self, mode='a'):
-        self.log = open(os.path.join(pipeline['dir'], 'log'), mode)
+        self.log = open(pipeline_settings.log_file, mode)
 
     def write(self, msg):
         self.log.write(msg)
@@ -68,59 +72,66 @@ class Writer(object):
     def close(self):
         self.log.close()
 
-def within_result_tag(s):
-    return '<result>\n' + s + '</result>\n'
-
 request=0
 
-def build(pipeline, post, settings, incremental, fmt, request):
+def build(post, settings, incremental, fmt, request):
 
-    b = Build(pipeline, post, settings)
+    build = Build(pipeline_settings, post, settings)
 
     def putstr(msg):
-        print "%s (%d) %s" % (b.build_hash, request, msg)
+        print "%s (%d) %s" % (build.build_hash, request, msg)
 
     """
     Start build or listen to existing build
     """
-    if b.build_hash not in builds:
+    if build.build_hash not in builds:
         putstr("Starting a new build")
-        builds[b.build_hash] = b
-        b.make_files()
-        t = Thread(target=Build.run, args=[b, fmt])
+        builds[build.build_hash] = build
+        build.make_files()
+        t = Thread(target=Build.run, args=[build, fmt])
         t.start()
     else:
         putstr("Joining existing build")
-        b = builds[b.build_hash]
+        build = builds[build.build_hash]
 
     # Make a new queue which receives messages from the builder process
-    q = Queue()
-    b.queues.append(q)
+    queue = Queue()
+    build.queues.append(queue)
+
+    def get_result():
+        assert(finished(build.status))
+        if incremental:
+            return build.result() + '</result>\n'
+        else:
+            return '<result>\n' + build.result() + '</result>\n'
+
 
     # Result already exists
-    if finished(b.status):
+    if finished(build.status):
         putstr("Result already exists")
-        if incremental:
-            yield b.result()
-            yield '</result>\n'
-        else:
-            yield within_result_tag(b.result())
+        yield get_result()
 
     # Listen for completion
     else:
         increment_header_sent = False
 
-        if incremental and b.status == Status.Running:
+        if incremental and build.status == Status.Running:
             putstr("Already running, sending increment header and message")
             increment_header_sent = True
-            yield b.increment_header()
-            yield b.increment_msg()
+            yield build.increment_header()
+            yield build.increment_msg()
 
         while True:
-            msg_type, msg = q.get()
-            putstr("Message %s: %s" % (msg_type, str(msg).rstrip()))
-            if msg_type == Message.StatusChange and finished(msg):
-                break
+            msg_type, msg = queue.get()
+            putstr("Message %s: %s" % (Message.lookup[msg_type],
+                                       Status.lookup[msg]
+                                       if msg_type == Message.StatusChange
+                                       else str(msg).rstrip()))
+            # Has status changed to finished?
+            if msg_type == Message.StatusChange:
+                if finished(msg):
+                    break
+            # Increment message
             elif incremental:
                 # Header has not been sent yet
                 if not increment_header_sent:
@@ -129,28 +140,21 @@ def build(pipeline, post, settings, incremental, fmt, request):
                         yield msg
                     elif msg_type == Message.Increment:
                         increment_header_sent = True
-                        yield b.increment_header()
+                        yield build.increment_header()
                         yield msg
                     elif msg_type == Message.IncrementFooter:
                         # Don't send footer if header has not been sent
                         pass
-                    else:
-                        # Impossible
-                        assert false
                 # Header has been sent
                 else:
-                    # Don't resend header (how did this happen?!)
+                    # Don't resend header (this case should be impossible)
                     if msg == Message.IncrementHeader:
                         pass
                     else:
                         yield msg
 
         putstr("Getting result...")
-        if incremental:
-            yield b.result()
-            yield "</result>\n"
-        else:
-            yield within_result_tag(b.result())
+        yield get_result()
 
 def application(environ, start_response):
     global request
@@ -193,7 +197,7 @@ def application(environ, start_response):
             yield "<result>\n"
 
         try:
-            for k in build(pipeline, post, settings, incremental, fmt, int(request)):
+            for k in build(post, settings, incremental, fmt, int(request)):
                 yield k
 
         except:
