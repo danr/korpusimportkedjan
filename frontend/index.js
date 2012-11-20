@@ -13,17 +13,17 @@ function main() {
 
     init_brat();
 
-	/*
-    head.ready(function () {
-        draw_brat_tree(
-            [s("En"				, "DT", 1, 2, "DT"),
-             s("exempeltext"	, "NN", 2, 3, "SS"),
-             s("kommer"			, "VB", 3, null, "ROOT"),
-             s("lastad"			, "PC", 4, 3, "SP"),
-             s("."				, "MAD", 5, 3, "IP"),
-            ], 'example_tree');
-    });
-	*/
+    /*
+      head.ready(function () {
+      draw_brat_tree(
+      [s("En"               , "DT", 1, 2, "DT"),
+      s("exempeltext"   , "NN", 2, 3, "SS"),
+      s("kommer"            , "VB", 3, null, "ROOT"),
+      s("lastad"            , "PC", 4, 3, "SP"),
+      s("."             , "MAD", 5, 3, "IP"),
+      ], 'example_tree');
+      });
+    */
 
     // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});
@@ -55,10 +55,19 @@ function main() {
 
     // Show query button
     $('#show_query').click(function () {
-        submit(xml_editor,true);
+        submit(xml_editor, "makefile");
         return false;
     });
 
     // Submit
-    $('#text_submit').click(function () { return submit(xml_editor); });
+    $('#btn_submit').click(function () {
+		submit(xml_editor, "xml");
+        return false;
+    });
+
+    // Install
+    $('#btn_install').click(function () {
+        submit(xml_editor, "cwb");
+        return false;
+    });
 }

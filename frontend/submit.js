@@ -15,19 +15,18 @@ function show_errors(data) {
     });
 }
 
-function submit(xml_editor,only_makefile) {
+function submit(xml_editor,format) {
 
     var settings = mkJsonSetting();
 
-    var incremental = !only_makefile;
+    var incremental = format != "makefile";
 
     var text = xml_editor.getValue();
 
-    var req_url = "http://demo.spraakdata.gu.se/dan/backend/"
+    var req_url = "http://localhost:8051"
         + "?settings=" + JSON.stringify(settings)
         + "&incremental=" + (incremental ? "true" : "false")
-        + "&fmt=xml"
-        + "&only_makefile=" + (only_makefile ? "true" : "false");
+        + "&format=" + format
 
     if (incremental) {
         initialize_progress_bar();
@@ -35,18 +34,25 @@ function submit(xml_editor,only_makefile) {
 
     $.ajax({
         url: req_url,
-        dataType: only_makefile ? "text" : "xml",
+        dataType: (format == "makefile") ? "text" : "xml",
         timeout: 300000,
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
             clear_progress_bar();
-            if (only_makefile) {
+			/*
+            xml_data = (new XMLSerializer()).serializeToString(data);
+			console.log(xml_data);
+			*/
+            if (format == "makefile") {
                 $('#query')
                     .append($('<div class="alert"/>')
                             .append(dismiss_button(),
                                     $('<pre class="original-pre">').text(data)));
-            } else {
+            } else if (format == "cwb") {
+				$('#result').empty().append(
+					$('<a href="http://localhost/app"/>').text("Visa korpusen i Korp"));
+			} else {
                 show_errors(data);
                 make_table(data, settings.attributes);
             }

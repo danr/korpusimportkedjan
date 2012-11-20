@@ -83,7 +83,7 @@ function mkJsonSetting() {
 		active_attributes.concat($(this).val());
 	});
     return {
-        corpus: "",
+        corpus: "untitled",
         word_segmenter: segmenterSetting('word'),
         sentence_segmenter: segmenterSetting('sentence'),
         paragraph_segmenter: segmenterSetting('paragraph'),
