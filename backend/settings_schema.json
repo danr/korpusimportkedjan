@@ -1,0 +1,92 @@
+{
+
+    "struct_tag": {
+        "name": "Structural attribute tag",
+        "description": "A tag for a structral attribute",
+        "type": "object",
+        "properties": {
+            "tag": {
+                "description": "The tag name",
+                "type": "string"
+            },
+            "attributes": {
+                "description": "The structural attributes in this tag",
+                "type": "array",
+                "default": [],
+                "items": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+
+    "title": "Corpus pipeline makefile settings",
+    "description": "Settings that generate the Makefile for the corpus pipeline.",
+
+    "type":"object",
+
+    "default": {},
+
+    "properties": {
+        "corpus": {
+            "title": "Corpus name",
+            "description": "The name of the corpus",
+            "default": "untitled",
+            "type": "string"
+        },
+
+        "word_segmenter": {
+            "title": "Word segmenter",
+            "description": "Word segmenter to use, or a tag supplied with attributes TODO: Update this entry",
+            "default": "punkt_word",
+            "type": ["string", "object"]
+        },
+
+        "sentence_segmenter": {
+            "title": "Sentence segmenter",
+            "description": "Sentence segmenter to use, or a tag supplied with optional sentence attributes",
+            "default": "punkt_sentence",
+            "type": ["string", {"$ref": "#/struct_tag"}]
+        },
+
+        "paragraph_segmenter": {
+            "title": "Paragraph segmenter",
+            "description": "Paragraph segmenter to use, or a tag supplied with optional structural attributes",
+            "default": "blanklines",
+            "type": ["string", {"$ref": "#/struct_tag"}]
+        },
+
+        "root": {
+            "title": "Root tag",
+            "description": "The name of the root tag, with optional structural attributes",
+            "default": {
+                "tag": "text",
+                "attributes": []
+            },
+            "$ref": "#/struct_tag"
+        },
+
+        "extra_tags": {
+            "title": "Extra structural attributes",
+            "descripiton": "Array of additional structural attributes",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$ref": "#/struct_tag"
+            }
+        },
+
+        "attributes": {
+            "tag": "Positional attribute generation",
+            "description": "An array of positional attributes to generate. Attributes already present in words must not appear here again. The value 'word' should be included.",
+            "type": "array",
+            "default": ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"],
+            "items": {
+                "description": "A positional attribute to generate.",
+                "type": "string",
+                "enum": ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"]
+            }
+        }
+    }
+
+}

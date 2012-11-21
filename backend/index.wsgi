@@ -11,6 +11,16 @@ import json
 import os
 import sys
 
+from jsonschema import Draft3Validator
+from schema_utils import make_default_populator
+
+with open("settings_schema.json","r") as f:
+    schema_str = f.read()
+
+settings_schema = json.loads(schema_str)
+settings_validator = Draft3Validator(settings_schema)
+settings_populate_defaults = make_default_populator(settings_schema)
+
 class PipelineSettings(object):
     """Static pipeline settings"""
 
@@ -196,34 +206,44 @@ def application(environ, start_response):
     incremental = query_dict.get('incremental', [''])[0]
     incremental = incremental.lower() == 'true'
 
-    settings = json.loads(query_dict.get('settings',['{}'])[0])
+    try:
+        settings = json.loads(query_dict.get('settings',['{}'])[0])
+        settings = settings_populate_defaults(settings)
+        settings_validator.validate(settings)
+    except:
+        status = '400 Bad Request'
+        response_headers = [('Content-Type', 'text/plain'),
+                            ('Access-Control-Allow-Origin', '*')]
 
-    status = '200 OK'
-    response_headers = [('Content-Type', 'text/plain'),
-                        ('Access-Control-Allow-Origin', '*')]
-
-    start_response(status, response_headers)
-
-    # command = query_dict.get('command', [''])[0]
-
-    if fmt == "makefile":
-        yield makefile(settings)
+        start_response(status, response_headers)
+        yield '<result><trace>' + escape(make_trace()) + '</trace>\n</result>\n'
     else:
-        if incremental:
-            print "Sending result start"
-            yield "<result>\n"
+        status = '200 OK'
+        response_headers = [('Content-Type', 'text/plain'),
+                            ('Access-Control-Allow-Origin', '*')]
 
-        try:
-            for k in build(post, settings, incremental, fmt, int(request)):
-                yield k
+        start_response(status, response_headers)
 
-        except:
-            trace = make_trace()
-            print trace
-            if not incremental:
-                yield '<result>'
-            yield '<trace>' + escape(trace) + '</trace>\n'
-            yield '</result>\n'
+        # command = query_dict.get('command', [''])[0]
+
+        if fmt == "makefile":
+            yield makefile(settings)
+        else:
+            if incremental:
+                print "Sending result start"
+                yield "<result>\n"
+
+            try:
+                for k in build(post, settings, incremental, fmt, int(request)):
+                    yield k
+
+            except:
+                trace = make_trace()
+                print trace
+                if not incremental:
+                    yield '<result>'
+                yield '<trace>' + escape(trace) + '</trace>\n'
+                yield '</result>\n'
 
 
 if __name__ == "__main__":

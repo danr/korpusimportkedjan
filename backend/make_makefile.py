@@ -1,11 +1,6 @@
 
 import re
 import json
-import pprint
-
-import sb.util
-
-pp = pprint.PrettyPrinter()
 
 def is_str_str_tuple(t):
     """Is this object is a tuple of two strings?"""
@@ -214,7 +209,71 @@ def make_Makefile(settings):
     # Intersperse a blank row
     return rows
 
-# An example _old style_ makefile which can be run on linearise_Makefile
+def makefile(d):
+    """
+    Makes a makefile from a dictionary of settings, which should be
+    validated against the schema in settings_schema.json.
+    """
+
+    import pprint
+    pp = pprint.PrettyPrinter()
+
+    settings_str = re.sub(r"u'",r"'", # remove ugly u in u'strings'
+                          makefile_comment(pp.pformat(d)))
+    return str(linearise_Makefile([settings_str,""] + make_Makefile(d)))
+
+if __name__ == '__main__':
+
+    import sb.util
+
+    def jsjson_to_json(s):
+        """
+        JavaScript JSON to JSON (as strings)
+        """
+        def stringifyKeys(s):
+            return re.sub(r'(\w+):',r'"\1":',s)
+
+        return '\n'.join(filter(lambda l : "//" not in l,
+                                map(stringifyKeys,s.split('\n'))))
+
+    def json_to_Makefile(filename):
+        """
+        Makes a makefile from a javascript json description in filename
+        """
+        with open(filename,"r") as f:
+            initial_json = f.read()
+
+        settings = json.loads(jsjson_to_json(initial_json))
+
+        sb.util.log.info("Writing Makefile...")
+        with open("Makefile","w") as f:
+            f.write(makefile(settings))
+        sb.util.log.info("... done!")
+
+    sb.util.run.main(json_to_Makefile)
+
+# Example settings for make_Makefile
+settings = {'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
+            'corpus': 'corpus title',
+            'dateformat': '%d%h%ms',
+            'datefrom': 'chapter.date',
+            'dateregex': None,
+            'datesplitter': None,
+            'dateto': 'chapter.date',
+            'extra_tags': [{'attributes': ['name'], 'tag': 'chapter'},
+                           {'attributes': ['name'], 'tag': 'section'}],
+            'paragraph_segmenter': 'blanklines',
+            'random': 'sentence',
+            'root': {'attributes': ['title', 'author'], 'tag': 'text'},
+            'sentence_segmenter': {'attributes': ['mood', 'id'], 'tag': 's'},
+            'word_segmenter': {'attributes': {'egennamn': None, 'pos': 'msd'},
+                               'tag': 'w'},
+            'xml_skip': [{'attributes': [], 'tag': 'some_tag'},
+                         {'attributes': ['content'], 'tag': 'footnote'}]}
+
+"""
+An example _old style_ makefile which can be run on linearise_Makefile
+"""
 example = [
     ("corpus","dannes_superkorpus"),
     ("original_dir","original"),
@@ -251,74 +310,3 @@ example = [
     "",
     "include ../Makefile.rules",
     ]
-
-def merge_defaults(settings):
-    """Populates a settings dictionary with default settings for missing fields"""
-    s = settings.copy()
-    for k in defaults:
-        s[k] = s.get(k,defaults[k])
-    return s
-
-def makefile(d):
-    settings_str = re.sub(r"u'",r"'", # remove ugly u in u'strings'
-                          makefile_comment(pp.pformat(d)))
-    return str(linearise_Makefile([settings_str,""] + make_Makefile(merge_defaults(d))))
-
-def makefile_from_json_string(s):
-    return makefile(json.loads(s))
-
-def jsjson_to_json(s):
-    """JavaScript JSON to JSON (as strings)"""
-    def stringifyKeys(s):
-        return re.sub(r'(\w+):',r'"\1":',s)
-
-    return '\n'.join(filter(lambda l : "//" not in l,
-                            map(stringifyKeys,s.split('\n'))))
-
-def json_to_Makefile(filename):
-    """Makes a makefile from a javascript json description in filename"""
-    with open(filename,"r") as f:
-        initial_json = f.read()
-
-    settings = json.loads(jsjson_to_json(initial_json))
-
-    sb.util.log.info("Writing Makefile...")
-    with open("Makefile","w") as f:
-        f.write(makefile(settings))
-    sb.util.log.info("... done!")
-
-if __name__ == '__main__':
-    sb.util.run.main(json_to_Makefile)
-
-
-defaults = {
-    'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
-    'corpus': 'untitled',
-    'extra_tags': [],
-    'paragraph_segmenter': 'blanklines',
-    'root': {
-        'tag': 'text',
-        'attributes': []
-        },
-    'sentence_segmenter': 'punkt_sentence',
-    'word_segmenter': 'punkt_word'
-    }
-
-# Example settings for make_Makefile
-settings = {'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
-            'corpus': 'corpus title',
-            'dateformat': '%d%h%ms',
-            'datefrom': 'chapter.date',
-            'dateregex': None,
-            'datesplitter': None,
-            'dateto': 'chapter.date',
-            'extra_tags': [{'attributes': ['name'], 'tag': 'chapter'},
-                           {'attributes': ['name'], 'tag': 'section'}],
-            'paragraph_segmenter': 'blanklines',
-            'random': 'sentence',
-            'root': {'attributes': ['title', 'author'], 'tag': 'text'},
-            'sentence_segmenter': {'attributes': ['mood', 'id'], 'tag': 's'},
-            'word_segmenter': {'attributes': {'egennamn': None, 'pos': 'msd'},
-                               'tag': 'w'},
-            'xml_skip': [{'attributes': [], 'tag': 'some_tag'},
-                         {'attributes': ['content'], 'tag': 'footnote'}]}
