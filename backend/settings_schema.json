@@ -117,7 +117,9 @@
                 "tag": "text",
                 "attributes": []
             },
-            "$ref": "#/struct_tag"
+			"type": [
+				{"$ref": "#/struct_tag"}
+			]
         },
 
         "extra_tags": {

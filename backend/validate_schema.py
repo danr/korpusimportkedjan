@@ -5,7 +5,7 @@ and tries in on the example dannes_superkorpus.json.
 A successful run should is a silent run.
 """
 
-from jsonschema import Draft3Validator, ErrorTree
+from schema_utils import DefaultValidator
 import json
 
 """
@@ -16,7 +16,7 @@ with open("settings_schema.json","r") as f:
 
 schema = json.loads(schema_str)
 
-validator = Draft3Validator(schema)
+validator = DefaultValidator(schema)
 
 """
 Testing the schema against an instance
@@ -31,8 +31,5 @@ validator.validate(instance)
 """
 Test using the default populator
 """
-from schema_utils import make_default_populator
 
-populate_defaults = make_default_populator(schema)
-
-validator.validate(populate_defaults({}))
+validator.validate({})

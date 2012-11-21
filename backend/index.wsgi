@@ -11,15 +11,13 @@ import json
 import os
 import sys
 
-from jsonschema import Draft3Validator
-from schema_utils import make_default_populator
+from schema_utils import DefaultValidator
 
 with open("settings_schema.json","r") as f:
     schema_str = f.read()
 
 settings_schema = json.loads(schema_str)
-settings_validator = Draft3Validator(settings_schema)
-settings_populate_defaults = make_default_populator(settings_schema)
+settings_validator = DefaultValidator(settings_schema)
 
 class PipelineSettings(object):
     """Static pipeline settings"""
@@ -212,8 +210,6 @@ def application(environ, start_response):
         settings = json.loads(query_dict.get('settings',['{}'])[0])
     except:
         error = escape(make_trace())
-
-    settings = settings_populate_defaults(settings)
 
     for e in sorted(settings_validator.iter_errors(settings)):
         if error is None:
