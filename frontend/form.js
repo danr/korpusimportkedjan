@@ -120,7 +120,11 @@ function mkPosOption(id) {
 
 // Makes the input field, and close and add button, possibly with initial text
 function mkAttribute(id, positional, initial_ix, initial_val) {
-    var initial_text = positional ? initial_ix : initial_val;
+	if (positional) {
+		var initial_text = initial_val.key; // positional ? initial_ix : initial_val;
+	} else {
+		var initial_text = initial_val;
+	}
     var input = $('<input type="text"/>')
         .addClass(id + "-attribute")
         .attr('value',initial_text || "");
@@ -139,7 +143,7 @@ function mkAttribute(id, positional, initial_ix, initial_val) {
         var options = mkPosOption(id);
         var sel = options.find('input:hidden');
         sel.change(updateGenerateBoxes);
-        sel.val(initial_val ? initial_val : "custom").change();
+        sel.val(initial_val.attribute).change();
         div.append(options);
     }
     return div.append(close_button,mkNewButton(id, positional));

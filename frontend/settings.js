@@ -48,17 +48,18 @@ function activeTab(str) {
 }
 
 function tagSetting(str) {
-    var attributes = null;
+    var attributes = [];
     $('.' + str + '-attribute').map(function (idx) {
         var positional = $(this).siblings().find('input[type=hidden]');
         if (positional.length == 1) {
-            attributes = attributes || {};
-            var p = positional.val();
-            attributes[$(this).val()] = p == "custom" ? null : p;
+            var element = {
+                "key": $(this).val(),
+                "attribute": positional.val()
+            };
         } else {
-            attributes = attributes || [];
-            attributes[idx] = $(this).val();
+            var element = $(this).val();
         }
+        attributes.push(element);
     });
     return {
         tag: $('#' + str + '_tag').val(),
@@ -80,8 +81,8 @@ function segmenterSetting(str) {
 function mkJsonSetting() {
     var active_attributes = $('#generate').find('.active').map(function () { return $(this).text(); }).get();
     $('.word-attribute').siblings().find('input:hidden').map(function () {
-		active_attributes.concat($(this).val());
-	});
+        active_attributes.concat($(this).val());
+    });
     return {
         corpus: "untitled",
         word_segmenter: segmenterSetting('word'),

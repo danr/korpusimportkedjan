@@ -110,23 +110,23 @@ def make_Makefile(settings):
         token = [makefile_comment("Using tag " + ws['tag'] + " for words")]
         # Adds w -> token in xml
         xml_cols.append((ws['tag'],"token"))
-        for attr in ws['attributes']:
-            replace = ws['attributes'][attr]
-            if replace:
+        for e in ws['attributes']:
+            key = e['key']
+            if e['attribute'] != "custom":
                 # Adds w:pos -> msd in xml
-                if attr == "dephead":
+                if e['attribute'] == "dephead":
                     custom_rules += [("token.dephead",
 """%.token.dephead: %.children.sentence.token %.token.ref %.token.{0}.ref
 	python $(root)dephead.py --out $@ --sentence $(1) --ref $(2) --dephead_ref $(3)""".format(replace))]
                     replace += ".ref"
-                xml_cols.append((mk_xml_attr(ws['tag'],attr),
-                                 mk_file_attr('token',replace)))
+                xml_cols.append((mk_xml_attr(ws['tag'],key),
+                                 mk_file_attr('token',e['attribute'])))
             else:
                 # Adds w:language -> token.language in xml and
                 #      token.language -> language in columns
-                xml_cols.append((mk_xml_attr(ws['tag'],attr),
-                                 mk_file_attr('token',attr)))
-                columns.append((mk_file_attr('token',attr),attr))
+                xml_cols.append((mk_xml_attr(ws['tag'],key),
+                                 mk_file_attr('token',key)))
+                columns.append((mk_file_attr('token',key),key))
 
     # add the obligatory structural attribute sentence.id
     structs.append(('sentence.id','sentence:id'))

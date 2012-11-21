@@ -37,11 +37,11 @@ var examples =
         { corpus: "Talbanken",
 		  word_segmenter:
 		  { tag: "w",
-			attributes: {
-				ref: "ref",
-				deprel: "deprel",
-				dephead: "dephead"
-			}
+			attributes: [
+				{ key: "ref", attribute: "ref" },
+				{ key: "deprel", attribute: "deprel" },
+				{ key: "dephead", attribute: "dephead" }
+			]
 		  },
 		  sentence_segmenter: "blanklines",
 		  paragraph_segmenter: "none",
@@ -56,7 +56,9 @@ var examples =
         { corpus: "Läsbart",
 		  word_segmenter:
 		  { tag: "w",
-			attributes: { pos: "msd" }
+			attributes: [
+				{ key: "pos", attribute: "msd" }
+			]
 		  },
 		  sentence_segmenter: "punkt_sentence",
 		  paragraph_segmenter: "none",

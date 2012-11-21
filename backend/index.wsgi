@@ -206,17 +206,29 @@ def application(environ, start_response):
     incremental = query_dict.get('incremental', [''])[0]
     incremental = incremental.lower() == 'true'
 
+    error = None
+
     try:
         settings = json.loads(query_dict.get('settings',['{}'])[0])
-        settings = settings_populate_defaults(settings)
-        settings_validator.validate(settings)
     except:
+        error = escape(make_trace())
+
+    settings = settings_populate_defaults(settings)
+
+    for e in sorted(settings_validator.iter_errors(settings)):
+        if error is None:
+            error = ""
+        print e
+        error += str(e) + "\n"
+
+    if error is not None:
+        print error
         status = '400 Bad Request'
         response_headers = [('Content-Type', 'text/plain'),
                             ('Access-Control-Allow-Origin', '*')]
 
         start_response(status, response_headers)
-        yield '<result><trace>' + escape(make_trace()) + '</trace>\n</result>\n'
+        yield '<result><error>' + error + '</error>\n</result>\n'
     else:
         status = '200 OK'
         response_headers = [('Content-Type', 'text/plain'),
