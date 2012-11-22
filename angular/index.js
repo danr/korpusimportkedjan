@@ -3,20 +3,6 @@
 
   window.FormCtrl = function($scope) {
     $scope.schema = {
-      object: {
-        title: "Object",
-        type: "object",
-        properties: {
-          happy: {
-            title: "Happy",
-            type: "bool"
-          },
-          name: {
-            title: "Name",
-            type: "string"
-          }
-        }
-      },
       objlist: {
         title: "Object List",
         type: "array",
@@ -38,10 +24,51 @@
             }
           }
         }
+      },
+      pets: {
+        title: "Pets",
+        type: "array",
+        items: {
+          title: "Pet",
+          "default": "",
+          type: "string"
+        }
+      },
+      segmenter: {
+        title: "Segmenter",
+        type: "string",
+        "enum": ["punkt", "whitespace", "none"]
+      },
+      generate: {
+        title: "Generate",
+        type: "array",
+        "default": [],
+        items: {
+          title: "Annotation",
+          type: "string",
+          "default": "word",
+          "enum": ["word", "msd", "pos"]
+        }
+      }
+    };
+    $scope.change_enumarray = function(array, id, value) {
+      var v;
+      console.log(array, id, value);
+      if (value && -1 === array.indexOf(id)) {
+        array.push(id);
+      }
+      if (!value) {
+        v = array.indexOf(id);
+        if (v !== -1) {
+          return array.splice(v, 1);
+        }
       }
     };
     $scope.clone = function(obj) {
       return JSON.parse(JSON.stringify(obj));
+    };
+    $scope.enumarray = function(desc) {
+      return (desc.type === "array" && desc.items.type === "string" && (desc.items["enum"] != null)).toString();
     };
     $scope.values = {
       objlist: [],

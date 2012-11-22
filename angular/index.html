@@ -10,11 +10,11 @@
     <script type="text/ng-template" id="form_item">
       <div>
         {{desc.title}}
-		<!--
-<pre>values[prop]: {{values[prop]}}
-prop: {{prop}}
-desc: {{desc}}</pre>
--->
+        <!--
+            <pre>values[prop]: {{values[prop]}}
+              prop: {{prop}}
+              desc: {{desc}}</pre>
+            -->
         <div ng-switch on="desc.type">
 
           <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
@@ -28,28 +28,45 @@ desc: {{desc}}</pre>
             <input ng-show="!desc.enum" ng-model="values[prop]">
           </div>
 
-		  <div ng-switch-when="object">
-			<ul ng-repeat="values in [values[prop]]">
-			  <li ng-repeat="(prop, desc) in desc.properties" ng-include="'form_item'"></li>
-			</ul>
-		  </div>
+          <div ng-switch-when="object">
+            <ul ng-repeat="values in [values[prop]]">
+              <li ng-repeat="(prop, desc) in desc.properties" ng-include="'form_item'"></li>
+            </ul>
+          </div>
 
           <div ng-switch-when="array">
-            <ul>
-			  <!--
-				  desc must be replaced with the description of elements,
-				  values with the array,
-				  prop with the index in the array
-			   -->
-              <button ng-click="values[prop].unshift(clone(desc.items.default))">ny</button>
-              <span ng-repeat="desc in [desc.items]">
-                <span ng-repeat="values in [values[prop]]">
-                  <li ng-repeat="elt in values">
-                    <div ng-repeat="prop in [$index]" ng-include="'form_item'"></div>
-                  </li>
-                </span>
-              </span>
-            </ul>
+            <div ng-switch on="enumarray(desc)">
+              <div ng-switch-when="true">
+				<!--
+					an array of enums
+				-->
+				<span ng-repeat="e in desc.items.enum">
+				  <input type="checkbox" ng-model="values['_' + prop + '_' + e]"
+						 ng-change="change_enumarray(values[prop],e,values['_' + prop + '_' + e])">
+				  <!--
+				  <input type="checkbox" ng-model="values[prop]" value="{{e}}">
+				  -->
+				  <label>{{e}}</label>
+				</span>
+              </div>
+              <div ng-switch-default>
+                <ul>
+                  <!--
+                      desc must be replaced with the description of elements,
+                      values with the array,
+                      prop with the index in the array
+                    -->
+                  <button ng-click="values[prop].unshift(clone(desc.items.default))">ny</button>
+                  <span ng-repeat="desc in [desc.items]">
+                    <span ng-repeat="values in [values[prop]]">
+                      <li ng-repeat="elt in values">
+                        <div ng-repeat="prop in [$index]" ng-include="'form_item'"></div>
+                      </li>
+                    </span>
+                  </span>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <!-- assume union type -->
