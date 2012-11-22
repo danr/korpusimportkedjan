@@ -4,16 +4,17 @@
     <script type="text/javascript" src="lib/underscore.js"></script>
     <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="scope.js"></script>
   </head>
   <body>
     <!-- takes prop, desc -->
     <script type="text/ng-template" id="form_item">
       <div>
         {{desc.title}}
-<pre>values[prop]: {{values[prop] | json}}
+		<!--
+<pre>values[prop]: {{values[prop]}}
 prop: {{prop}}
-desc: {{desc | json}}</pre>
+desc: {{desc}}</pre>
+-->
         <div ng-switch on="desc.type">
 
           <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
@@ -27,6 +28,12 @@ desc: {{desc | json}}</pre>
             <input ng-show="!desc.enum" ng-model="values[prop]">
           </div>
 
+		  <div ng-switch-when="object">
+			<ul ng-repeat="values in [values[prop]]">
+			  <li ng-repeat="(prop, desc) in desc.properties" ng-include="'form_item'"></li>
+			</ul>
+		  </div>
+
           <div ng-switch-when="array">
             <ul>
 			  <!--
@@ -38,7 +45,6 @@ desc: {{desc | json}}</pre>
               <span ng-repeat="desc in [desc.items]">
                 <span ng-repeat="values in [values[prop]]">
                   <li ng-repeat="elt in values">
-					{{elt}}
                     <div ng-repeat="prop in [$index]" ng-include="'form_item'"></div>
                   </li>
                 </span>
