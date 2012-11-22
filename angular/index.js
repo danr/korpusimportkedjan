@@ -3,6 +3,10 @@
 
   window.FormCtrl = function($scope) {
     $scope.schema = {
+      happy: {
+        title: "Happy",
+        type: "bool"
+      },
       name: {
         title: "Name",
         type: "string"
@@ -24,27 +28,19 @@
           }
         }
       },
-      i: {
-        title: "one",
-        type: "array",
-        "default": {
-          ii: []
-        },
-        items: {
-          ii: {
-            title: "two",
-            type: "array",
-            "default": {
-              iii: []
-            },
-            items: {
-              iii: {
-                title: "three",
-                type: "string"
-              }
-            }
+      union: {
+        title: "Segmenter",
+        type: [
+          {
+            title: "Punkt",
+            "default": true,
+            type: "bool"
+          }, {
+            title: "Tag",
+            "default": "w",
+            type: "string"
           }
-        }
+        ]
       }
     };
     $scope.clone = function(obj) {
@@ -60,7 +56,10 @@
           pet: 'bjarne'
         }
       ],
-      i: []
+      happy: true,
+      i: [],
+      union: "w",
+      _union: $scope.schema.union.type[0]
     };
   };
 

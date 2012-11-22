@@ -1,5 +1,8 @@
 window.FormCtrl = ($scope) ->
     $scope.schema =
+        happy:
+            title: "Happy"
+            type: "bool"
         name:
             title: "Name"
             type: "string"
@@ -15,21 +18,18 @@ window.FormCtrl = ($scope) ->
                 pet:
                     title: "Pet"
                     type: "string"
-        i:
-            title: "one"
-            type: "array"
-            default:
-                ii: []
-            items:
-                ii:
-                    title: "two"
-                    type: "array"
-                    default:
-                        iii: []
-                    items:
-                        iii:
-                            title: "three"
-                            type: "string"
+        union:
+            title: "Segmenter"
+            type:
+                [
+                    title: "Punkt"
+                    default: true
+                    type: "bool"
+                ,
+                    title: "Tag"
+                    default: "w"
+                    type: "string"
+                ]
 
     $scope.clone = (obj) ->
         JSON.parse(JSON.stringify(obj))
@@ -38,7 +38,11 @@ window.FormCtrl = ($scope) ->
         name: 'dan'
         street: 'tunnbindaregatan'
         pets: [{ pet: 'bosse' }, { pet: 'bjarne' }]
+        happy: true
         i: []
+        union: "w"
+        _union: $scope.schema.union.type[0]
+
 
     return
 
