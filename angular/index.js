@@ -11,28 +11,30 @@
         title: "Name",
         type: "string"
       },
-      street: {
-        title: "Street",
-        type: "string"
-      },
       pets: {
         title: "Pets",
         type: "array",
-        "default": {
-          pet: ""
-        },
         items: {
-          pet: {
-            title: "Pet",
-            type: "string"
-          }
+          title: "Pet",
+          "default": "",
+          type: "string"
         }
       },
       segmenter: {
         title: "Segmenter",
         type: "string",
-        "default": "punkt",
         "enum": ["punkt", "whitespace", "none"]
+      },
+      generate: {
+        title: "Generate",
+        type: "array",
+        "default": [],
+        items: {
+          title: "Annotation",
+          type: "string",
+          "default": "word",
+          "enum": ["word", "msd", "pos"]
+        }
       },
       union: {
         title: "Union",
@@ -45,6 +47,15 @@
             title: "Tag",
             "default": "w",
             type: "string"
+          }, {
+            title: "Nest",
+            "default": [],
+            type: "array",
+            items: {
+              title: "Inhabitant",
+              type: "string",
+              "default": ""
+            }
           }
         ]
       }
@@ -55,20 +66,16 @@
     $scope.values = {
       name: 'dan',
       street: 'tunnbindaregatan',
-      pets: [
-        {
-          pet: 'bosse'
-        }, {
-          pet: 'bjarne'
-        }
-      ],
+      pets: ['bosse', 'bjarne'],
       happy: true,
       i: [],
+      segmenter: "punkt",
+      generate: [],
       union: "w",
       _union: $scope.schema.union.type[0]
     };
   };
 
-  angular.module('formModule', []);
+  window.app = angular.module('formModule', []);
 
 }).call(this);

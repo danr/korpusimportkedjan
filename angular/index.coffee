@@ -6,33 +6,27 @@ window.FormCtrl = ($scope) ->
         name:
             title: "Name"
             type: "string"
-        street:
-            title: "Street"
-            type: "string"
         pets:
             title: "Pets"
             type: "array"
-            default:
-                pet: ""
             items:
-                pet:
-                    title: "Pet"
-                    type: "string"
+                title: "Pet"
+                default: ""
+                type: "string"
         segmenter:
             title: "Segmenter"
             type: "string"
-            default: "punkt"
             enum: ["punkt", "whitespace", "none"]
-#        generate:
-#            title: "Segmenter"
-#            type: "array"
-#            default: []
-#            items:
-#                annotation:
-#                    title: "Annotation"
-#                    type: "string"
-#                    default: "word"
-#                    enum: ["word", "msd", "pos"]
+
+        generate:
+            title: "Generate"
+            type: "array"
+            default: []
+            items:
+                title: "Annotation"
+                type: "string"
+                default: "word"
+                enum: ["word", "msd", "pos"]
         union:
             title: "Union"
             type:
@@ -44,6 +38,14 @@ window.FormCtrl = ($scope) ->
                     title: "Tag"
                     default: "w"
                     type: "string"
+                ,
+                    title: "Nest"
+                    default: []
+                    type: "array"
+                    items:
+                        title: "Inhabitant"
+                        type: "string"
+                        default: ""
                 ]
 
     $scope.clone = (obj) ->
@@ -52,13 +54,15 @@ window.FormCtrl = ($scope) ->
     $scope.values =
         name: 'dan'
         street: 'tunnbindaregatan'
-        pets: [{ pet: 'bosse' }, { pet: 'bjarne' }]
+        pets: ['bosse','bjarne']
         happy: true
         i: []
+        segmenter: "punkt"
+        generate: []
         union: "w"
         _union: $scope.schema.union.type[0]
 
 
     return
 
-angular.module('formModule', [])
+window.app = angular.module('formModule', [])

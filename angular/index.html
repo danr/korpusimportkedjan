@@ -4,12 +4,16 @@
     <script type="text/javascript" src="lib/underscore.js"></script>
     <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="scope.js"></script>
   </head>
   <body>
     <!-- takes prop, desc -->
     <script type="text/ng-template" id="form_item">
       <div>
         {{desc.title}}
+<pre>values[prop]: {{values[prop] | json}}
+prop: {{prop}}
+desc: {{desc | json}}</pre>
         <div ng-switch on="desc.type">
 
           <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
@@ -18,18 +22,28 @@
             <!-- not an enum -->
             <span ng-repeat="e in desc.enum">
               <input type="radio" ng-model="values[prop]" value="{{e}}">
-			  <label>{{e}}</label>
+              <label>{{e}}</label>
             </span>
-            <input ng-show="!desc.enum" "string" ng-model="values[prop]">
+            <input ng-show="!desc.enum" ng-model="values[prop]">
           </div>
 
           <div ng-switch-when="array">
-            An array! {{prop}} {{values[prop]}}
-            <ul ng-repeat="values in values[prop]">
-              {{values}}
-              <li ng-repeat="(prop,desc) in desc.items" ng-include="'form_item'"></li>
+            <ul>
+			  <!--
+				  desc must be replaced with the description of elements,
+				  values with the array,
+				  prop with the index in the array
+			   -->
+              <button ng-click="values[prop].unshift(clone(desc.items.default))">ny</button>
+              <span ng-repeat="desc in [desc.items]">
+                <span ng-repeat="values in [values[prop]]">
+                  <li ng-repeat="elt in values">
+					{{elt}}
+                    <div ng-repeat="prop in [$index]" ng-include="'form_item'"></div>
+                  </li>
+                </span>
+              </span>
             </ul>
-            <button ng-click="values[prop].push(clone(desc.default))">ny</button>
           </div>
 
           <!-- assume union type -->
@@ -38,6 +52,7 @@
                     ng-options="t.title for t in desc.type"
                     ng-change="values[prop] = clone(values['_' + prop]['default'])">
             </select>
+            <pre>values['_' + prop]: {{values['_' + prop]}}</pre>
             <div ng-repeat="desc in [values['_' + prop]]" ng-include="'form_item'">
             </div>
           </div>
@@ -47,7 +62,7 @@
     </script>
 
     <div ng-controller="FormCtrl">
-      {{values}}
+      <pre>values: {{values | json}}</pre>
       <form>
         <ul>
           <li ng-repeat="(prop,desc) in schema" ng-include="'form_item'"></li>
