@@ -1,31 +1,45 @@
-window.Ctrl3 = ($scope) ->
-    $scope.title = 'le nu binxo'
-    $scope.text = 'ma tavla fi ma'
+window.FormCtrl = ($scope) ->
+    $scope.schema =
+        name:
+            title: "Name"
+            type: "string"
+        street:
+            title: "Street"
+            type: "string"
+        pets:
+            title: "Pets"
+            type: "array"
+            default:
+                pet: ""
+            items:
+                pet:
+                    title: "Pet"
+                    type: "string"
+        i:
+            title: "one"
+            type: "array"
+            default:
+                ii: []
+            items:
+                ii:
+                    title: "two"
+                    type: "array"
+                    default:
+                        iii: []
+                    items:
+                        iii:
+                            title: "three"
+                            type: "string"
 
-angular.module('zippyModule', [])
-    .directive 'zippy', ->
-        restrict: 'C'
-        replace: true
-        transclude: true
-        scrope:
-            title: '@zippyTitle'
-        template: '''
-            <div>
-                <div class="title">{{title}}</div>
-                <div class="body" ng-transclude>
-                    Title: <input ng-model="title"><br>
-                    Text: <textarea ng-model="text"></textarea>
-                    <hr>
-                    {{text}}
-                </div>
-            </div>'''
-        link: (scope, element, attrs) ->
-            title = angular.element element.children()[0]
-            opened = true
-            toggle = ->
-                opened = !opened
-                element.removeClass if opened then 'closed' else 'opened'
-                element.addClass if !opened then 'closed' else 'opened'
-                return
-            title.bind 'click', toggle
-            toggle()
+    $scope.clone = (obj) ->
+        JSON.parse(JSON.stringify(obj))
+
+    $scope.values =
+        name: 'dan'
+        street: 'tunnbindaregatan'
+        pets: [{ pet: 'bosse' }, { pet: 'bjarne' }]
+        i: []
+
+    return
+
+angular.module('formModule', [])

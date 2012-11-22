@@ -1,14 +1,36 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<html ng-app="zippyModule">
+<html ng-app="formModule">
   <head>
-    <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="lib/underscore.js"></script>
+    <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="index.js"></script>
-    <link rel="stylesheet" href="zippy.css" />
   </head>
   <body>
-    <div ng-controller="Ctrl3">
-      <div class="zippy" zippy-title="Details: {{title}}..."></div>
+    <!-- takes prop, desc -->
+    <script type="text/ng-template" id="form_item">
+      <div>
+        {{desc.title}}
+        <div ng-switch on="desc.type">
+          <input ng-switch-when="string" ng-model="values[prop]">
+          <div ng-switch-when="array">
+            An array! {{prop}} {{values[prop]}}
+            <ul ng-repeat="values in values[prop]">
+			  {{values}}
+              <li ng-repeat="(prop,desc) in desc.items" ng-include="'form_item'"></li>
+            </ul>
+			<button ng-click="values[prop].push(clone(desc.default))">ny</button>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <div ng-controller="FormCtrl">
+	  {{values}}
+      <form>
+        <ul>
+          <li ng-repeat="(prop,desc) in schema" ng-include="'form_item'"></li>
+        </ul>
+	  </form>
     </div>
   </body>
 </html>
