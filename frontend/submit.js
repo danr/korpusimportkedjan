@@ -29,7 +29,7 @@ function submit(xml_editor,format) {
         + "&format=" + format
 
     if (incremental) {
-        initialize_progress_bar();
+        progress.initialize();
     }
 
     $.ajax({
@@ -39,7 +39,7 @@ function submit(xml_editor,format) {
         type: "POST",
         data: text,
         success: function(data, textStatus, xhr) {
-            clear_progress_bar();
+            progress.clear();
 			/*
             xml_data = (new XMLSerializer()).serializeToString(data);
 			console.log(xml_data);
@@ -59,7 +59,7 @@ function submit(xml_editor,format) {
         },
         progress: function(data, e) {
             if (incremental) {
-                handle_progress(e.target.response);
+                progress.handle(e.target.response);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
