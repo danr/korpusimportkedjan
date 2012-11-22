@@ -18,8 +18,23 @@ window.FormCtrl = ($scope) ->
                 pet:
                     title: "Pet"
                     type: "string"
-        union:
+        segmenter:
             title: "Segmenter"
+            type: "string"
+            default: "punkt"
+            enum: ["punkt", "whitespace", "none"]
+#        generate:
+#            title: "Segmenter"
+#            type: "array"
+#            default: []
+#            items:
+#                annotation:
+#                    title: "Annotation"
+#                    type: "string"
+#                    default: "word"
+#                    enum: ["word", "msd", "pos"]
+        union:
+            title: "Union"
             type:
                 [
                     title: "Punkt"

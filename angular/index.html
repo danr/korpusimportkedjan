@@ -12,40 +12,47 @@
         {{desc.title}}
         <div ng-switch on="desc.type">
 
-		  <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
+          <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
 
-          <input ng-switch-when="string" ng-model="values[prop]">
+          <div ng-switch-when="string">
+            <!-- not an enum -->
+            <span ng-repeat="e in desc.enum">
+              <input type="radio" ng-model="values[prop]" value="{{e}}">
+			  <label>{{e}}</label>
+            </span>
+            <input ng-show="!desc.enum" "string" ng-model="values[prop]">
+          </div>
 
           <div ng-switch-when="array">
             An array! {{prop}} {{values[prop]}}
             <ul ng-repeat="values in values[prop]">
-			  {{values}}
+              {{values}}
               <li ng-repeat="(prop,desc) in desc.items" ng-include="'form_item'"></li>
             </ul>
-			<button ng-click="values[prop].push(clone(desc.default))">ny</button>
+            <button ng-click="values[prop].push(clone(desc.default))">ny</button>
           </div>
 
-		  <!-- assume union type -->
-		  <div ng-switch-default>
-			<select ng-model="values['_' + prop]"
-					ng-options="t.title for t in desc.type"
-					ng-change="values[prop] = clone(values['_' + prop]['default'])">
-			</select>
-			<div ng-repeat="desc in [values['_' + prop]]" ng-include="'form_item'">
-			</div>
-		  </div>
+          <!-- assume union type -->
+          <div ng-switch-default>
+            <select ng-model="values['_' + prop]"
+                    ng-options="t.title for t in desc.type"
+                    ng-change="values[prop] = clone(values['_' + prop]['default'])">
+            </select>
+            <div ng-repeat="desc in [values['_' + prop]]" ng-include="'form_item'">
+            </div>
+          </div>
 
         </div>
       </div>
     </script>
 
     <div ng-controller="FormCtrl">
-	  {{values}}
+      {{values}}
       <form>
         <ul>
           <li ng-repeat="(prop,desc) in schema" ng-include="'form_item'"></li>
         </ul>
-	  </form>
+      </form>
     </div>
   </body>
 </html>

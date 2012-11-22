@@ -28,8 +28,14 @@
           }
         }
       },
-      union: {
+      segmenter: {
         title: "Segmenter",
+        type: "string",
+        "default": "punkt",
+        "enum": ["punkt", "whitespace", "none"]
+      },
+      union: {
+        title: "Union",
         type: [
           {
             title: "Punkt",
