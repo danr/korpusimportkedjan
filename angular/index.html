@@ -4,17 +4,16 @@
     <script type="text/javascript" src="lib/underscore.js"></script>
     <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="scopes.js"></script>
   </head>
   <body>
     <!-- takes prop, desc -->
     <script type="text/ng-template" id="form_item">
       <div>
         {{desc.title}}
-        <!--
-            <pre>values[prop]: {{values[prop]}}
-              prop: {{prop}}
-              desc: {{desc}}</pre>
-            -->
+        <pre>values[prop]: {{values[prop]}}</pre>
+        <pre>prop: {{prop}}</pre>
+        <pre>desc: {{desc | json}}</pre>
         <div ng-switch on="desc.type">
 
           <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
@@ -37,17 +36,17 @@
           <div ng-switch-when="array">
             <div ng-switch on="enumarray(desc)">
               <div ng-switch-when="true">
-				<!--
-					an array of enums
-				-->
-				<span ng-repeat="e in desc.items.enum">
-				  <input type="checkbox" ng-model="values['_' + prop + '_' + e]"
-						 ng-change="change_enumarray(values[prop],e,values['_' + prop + '_' + e])">
-				  <!--
-				  <input type="checkbox" ng-model="values[prop]" value="{{e}}">
-				  -->
-				  <label>{{e}}</label>
-				</span>
+                <!--
+                    an array of enums
+                  -->
+                <span ng-repeat="e in desc.items.enum">
+                  <input type="checkbox" ng-model="values['_' + prop + '_' + e]"
+                         ng-change="change_enumarray(values[prop],e,values['_' + prop + '_' + e])">
+                  <!--
+                      <input type="checkbox" ng-model="values[prop]" value="{{e}}">
+                      -->
+                  <label>{{e}}</label>
+                </span>
               </div>
               <div ng-switch-default>
                 <ul>
@@ -56,14 +55,22 @@
                       values with the array,
                       prop with the index in the array
                     -->
-                  <button ng-click="values[prop].unshift(clone(desc.items.default))">ny</button>
-                  <span ng-repeat="desc in [desc.items]">
-                    <span ng-repeat="values in [values[prop]]">
-                      <li ng-repeat="elt in values">
-                        <div ng-repeat="prop in [$index]" ng-include="'form_item'"></div>
-                      </li>
+                  <li ng-repeat="_element in values[prop]">
+                    before sub scope
+                    <pre>desc: {{ desc | json }}</pre>
+                    <pre>prop: {{ prop | json }}</pre>
+                    <pre>values: {{ values | json }}</pre>
+                    <pre>index: {{ $index }}</pre>
+                    <span sub-scope desc="desc.items" values="values[prop]" prop="$index">
+                      after sub scope
+                      <pre>desc: {{ desc | json }}</pre>
+                      <pre>prop: {{ prop | json }}</pre>
+                      <pre>values: {{ values | json }}</pre>
+                      <pre>index: {{ $index }}</pre>
+                      <div ng-include="'form_item'"></div>
                     </span>
-                  </span>
+                  </li>
+                  <button ng-click="values[prop].push(clone(desc.items.default))">ny</button>
                 </ul>
               </div>
             </div>
@@ -86,6 +93,7 @@
 
     <div ng-controller="FormCtrl">
       <pre>values: {{values | json}}</pre>
+      <pre>schema: {{schema | json}}</pre>
       <form>
         <ul>
           <li ng-repeat="(prop,desc) in schema" ng-include="'form_item'"></li>

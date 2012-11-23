@@ -10,22 +10,22 @@ window.FormCtrl = ($scope) ->
 #                name:
 #                    title: "Name"
 #                    type: "string"
-        objlist:
-            title: "Object List"
-            type: "array"
-            items:
-                title: "List Object"
-                type: "object"
-                default:
-                    happy: true
-                    name: ""
-                properties:
-                    happy:
-                        title: "Happy"
-                        type: "bool"
-                    name:
-                        title: "Name"
-                        type: "string"
+#        objlist:
+#            title: "Object List"
+#            type: "array"
+#            items:
+#                title: "List Object"
+#                type: "object"
+#                default:
+#                    happy: true
+#                    name: ""
+#                properties:
+#                    happy:
+#                        title: "Happy"
+#                        type: "bool"
+#                    name:
+#                        title: "Name"
+#                        type: "string"
 #        happy:
 #            title: "Happy"
 #            type: "bool"
@@ -39,20 +39,20 @@ window.FormCtrl = ($scope) ->
                 title: "Pet"
                 default: ""
                 type: "string"
-        segmenter:
-            title: "Segmenter"
-            type: "string"
-            enum: ["punkt", "whitespace", "none"]
-
-        generate:
-            title: "Generate"
-            type: "array"
-            default: []
-            items:
-                title: "Annotation"
-                type: "string"
-                default: "word"
-                enum: ["word", "msd", "pos"]
+#        segmenter:
+#            title: "Segmenter"
+#            type: "string"
+#            enum: ["punkt", "whitespace", "none"]
+#
+#        generate:
+#            title: "Generate"
+#            type: "array"
+#            default: []
+#            items:
+#                title: "Annotation"
+#                type: "string"
+#                default: "word"
+#                enum: ["word", "msd", "pos"]
 #        union:
 #            title: "Union"
 #            type:
@@ -90,18 +90,18 @@ window.FormCtrl = ($scope) ->
         (desc.type == "array" and desc.items.type == "string" and desc.items.enum?).toString()
 
     $scope.values =
-        objlist: []
-        object:
-            name: 'johan'
-            happy: true
-        name: 'dan'
-        street: 'tunnbindaregatan'
-        pets: ['bosse','bjarne']
-        happy: true
-        i: []
-        segmenter: "punkt"
-        generate: []
-        union: "w"
+        pets: ['bosse']
+#        objlist: []
+#        object:
+#            name: 'johan'
+#            happy: true
+#        name: 'dan'
+#        street: 'tunnbindaregatan'
+#        happy: true
+#        i: []
+#        segmenter: "punkt"
+#        generate: []
+#        union: "w"
 #        _union: $scope.schema.union.type[0]
 
 

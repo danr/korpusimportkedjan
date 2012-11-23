@@ -3,28 +3,6 @@
 
   window.FormCtrl = function($scope) {
     $scope.schema = {
-      objlist: {
-        title: "Object List",
-        type: "array",
-        items: {
-          title: "List Object",
-          type: "object",
-          "default": {
-            happy: true,
-            name: ""
-          },
-          properties: {
-            happy: {
-              title: "Happy",
-              type: "bool"
-            },
-            name: {
-              title: "Name",
-              type: "string"
-            }
-          }
-        }
-      },
       pets: {
         title: "Pets",
         type: "array",
@@ -32,22 +10,6 @@
           title: "Pet",
           "default": "",
           type: "string"
-        }
-      },
-      segmenter: {
-        title: "Segmenter",
-        type: "string",
-        "enum": ["punkt", "whitespace", "none"]
-      },
-      generate: {
-        title: "Generate",
-        type: "array",
-        "default": [],
-        items: {
-          title: "Annotation",
-          type: "string",
-          "default": "word",
-          "enum": ["word", "msd", "pos"]
         }
       }
     };
@@ -71,19 +33,7 @@
       return (desc.type === "array" && desc.items.type === "string" && (desc.items["enum"] != null)).toString();
     };
     $scope.values = {
-      objlist: [],
-      object: {
-        name: 'johan',
-        happy: true
-      },
-      name: 'dan',
-      street: 'tunnbindaregatan',
-      pets: ['bosse', 'bjarne'],
-      happy: true,
-      i: [],
-      segmenter: "punkt",
-      generate: [],
-      union: "w"
+      pets: ['bosse']
     };
   };
 
