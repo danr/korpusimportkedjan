@@ -4,101 +4,59 @@
     <script type="text/javascript" src="lib/underscore.js"></script>
     <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="scopes.js"></script>
+    <!--
+        <script type="text/javascript" src="scopes.js"></script>
+        -->
   </head>
   <body>
-    <!-- takes prop, desc -->
+    <div ng-controller="MainCtrl">
+      <form>
+        <div ng-include="'form_item'"></div>
+      </form>
+    </div>
+
+    <!-- takes value, schema -->
     <script type="text/ng-template" id="form_item">
       <div>
-        {{desc.title}}
-        <pre>values[prop]: {{values[prop]}}</pre>
-        <pre>prop: {{prop}}</pre>
-        <pre>desc: {{desc | json}}</pre>
-        <div ng-switch on="desc.type">
+        {{schema.title}}
+        <pre>schema = {{schema | json}}</pre>
+        <pre>value = {{value | json}}</pre>
 
-          <input ng-switch-when="bool" ng-model="values[prop]" type="checkbox">
+        <div ng-show="schema.type == 'string'">
+          <input ng-model="value"> (outside switch)
+        </div>
+
+        <ng-switch on="schema.type">
+          <input ng-switch-when="bool" ng-model="value" type="checkbox">
 
           <div ng-switch-when="string">
             <!-- not an enum -->
-            <span ng-repeat="e in desc.enum">
-              <input type="radio" ng-model="values[prop]" value="{{e}}">
+            <span ng-repeat="e in schema.enum">
+              <input type="radio" ng-model="value" value="{{e}}">
               <label>{{e}}</label>
             </span>
-            <input ng-show="!desc.enum" ng-model="values[prop]">
+            <input ng-model="value">
           </div>
 
           <div ng-switch-when="object">
-            <ul ng-repeat="values in [values[prop]]">
-              <li ng-repeat="(prop, desc) in desc.properties" ng-include="'form_item'"></li>
+            <ul>
+              <li ng-repeat="(key, value) in value">
+                <div ng-repeat="schema in [schema.properties[key]]" ng-include="'form_item'"></div>
+              <li>
             </ul>
           </div>
 
           <div ng-switch-when="array">
-            <div ng-switch on="enumarray(desc)">
-              <div ng-switch-when="true">
-                <!--
-                    an array of enums
-                  -->
-                <span ng-repeat="e in desc.items.enum">
-                  <input type="checkbox" ng-model="values['_' + prop + '_' + e]"
-                         ng-change="change_enumarray(values[prop],e,values['_' + prop + '_' + e])">
-                  <!--
-                      <input type="checkbox" ng-model="values[prop]" value="{{e}}">
-                      -->
-                  <label>{{e}}</label>
-                </span>
-              </div>
-              <div ng-switch-default>
-                <ul>
-                  <!--
-                      desc must be replaced with the description of elements,
-                      values with the array,
-                      prop with the index in the array
-                    -->
-                  <li ng-repeat="_element in values[prop]">
-                    before sub scope
-                    <pre>desc: {{ desc | json }}</pre>
-                    <pre>prop: {{ prop | json }}</pre>
-                    <pre>values: {{ values | json }}</pre>
-                    <pre>index: {{ $index }}</pre>
-                    <span sub-scope desc="desc.items" values="values[prop]" prop="$index">
-                      after sub scope
-                      <pre>desc: {{ desc | json }}</pre>
-                      <pre>prop: {{ prop | json }}</pre>
-                      <pre>values: {{ values | json }}</pre>
-                      <pre>index: {{ $index }}</pre>
-                      <div ng-include="'form_item'"></div>
-                    </span>
-                  </li>
-                  <button ng-click="values[prop].push(clone(desc.items.default))">ny</button>
-                </ul>
-              </div>
-            </div>
+            <ul>
+              <li ng-repeat="value in value">
+                <div ng-repeat="schema in [schema.items]" ng-include="'form_item'"></div>
+              </li>
+              <button ng-click="value.push(clone(schema.items.default))">ny</button>
+            </ul>
           </div>
-
-          <!-- assume union type -->
-          <div ng-switch-default>
-            <select ng-model="values['_' + prop]"
-                    ng-options="t.title for t in desc.type"
-                    ng-change="values[prop] = clone(values['_' + prop]['default'])">
-            </select>
-            <pre>values['_' + prop]: {{values['_' + prop]}}</pre>
-            <div ng-repeat="desc in [values['_' + prop]]" ng-include="'form_item'">
-            </div>
-          </div>
-
-        </div>
+        </ng-switch>
       </div>
     </script>
 
-    <div ng-controller="FormCtrl">
-      <pre>values: {{values | json}}</pre>
-      <pre>schema: {{schema | json}}</pre>
-      <form>
-        <ul>
-          <li ng-repeat="(prop,desc) in schema" ng-include="'form_item'"></li>
-        </ul>
-      </form>
-    </div>
   </body>
 </html>

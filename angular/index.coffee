@@ -1,5 +1,60 @@
-window.FormCtrl = ($scope) ->
+window.app = angular.module('formModule', [])
+
+window.MainCtrl = ($scope) ->
     $scope.schema =
+        title: "Schema"
+        type: "object"
+        properties:
+            name:
+                title: "Name"
+                type: "string"
+            pets:
+                title: "Pets"
+                type: "array"
+                items:
+                    title: "Name"
+                    default: ""
+                    type: "string"
+            object:
+                title: "Checkbox object"
+                type: "object"
+                properties:
+                    one:
+                        title: "One"
+                        type: "bool"
+                    two:
+                        title: "Two"
+                        type: "bool"
+
+    $scope.value =
+        name: "Dan"
+        pets: []
+        object:
+            one: true
+            two: false
+
+    $scope.clone = (obj) ->
+        console.log obj
+        JSON.parse JSON.stringify obj
+
+    return
+
+
+#    $scope.change_enumarray = (array, id, value) ->
+#        console.log array, id, value
+#        if value and -1 == array.indexOf id
+#            array.push id
+#        if !value
+#            v = array.indexOf id
+#            if (v != -1)
+#                array.splice v, 1
+#
+#    $scope.enumarray = (desc) ->
+#        (desc.type == "array" and desc.items.type == "string" and desc.items.enum?).toString()
+
+
+# old schema
+
 #        object:
 #            title: "Object"
 #            type: "object"
@@ -32,13 +87,13 @@ window.FormCtrl = ($scope) ->
 #        name:
 #            title: "Name"
 #            type: "string"
-        pets:
-            title: "Pets"
-            type: "array"
-            items:
-                title: "Pet"
-                default: ""
-                type: "string"
+#        pets:
+#            title: "Pets"
+#            type: "array"
+#            items:
+#                title: "Pet"
+#                default: ""
+#                type: "string"
 #        segmenter:
 #            title: "Segmenter"
 #            type: "string"
@@ -74,23 +129,8 @@ window.FormCtrl = ($scope) ->
 #                        default: ""
 #                ]
 
-    $scope.change_enumarray = (array, id, value) ->
-        console.log array, id, value
-        if value and -1 == array.indexOf id
-            array.push(id)
-        if !value
-            v = array.indexOf id
-            if (v != -1)
-                array.splice(v,1)
+# old values
 
-    $scope.clone = (obj) ->
-        JSON.parse(JSON.stringify(obj))
-
-    $scope.enumarray = (desc) ->
-        (desc.type == "array" and desc.items.type == "string" and desc.items.enum?).toString()
-
-    $scope.values =
-        pets: ['bosse']
 #        objlist: []
 #        object:
 #            name: 'johan'
@@ -103,8 +143,3 @@ window.FormCtrl = ($scope) ->
 #        generate: []
 #        union: "w"
 #        _union: $scope.schema.union.type[0]
-
-
-    return
-
-window.app = angular.module('formModule', [])
