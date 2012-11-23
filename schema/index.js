@@ -3,45 +3,166 @@
   var generate, generate_item, schema, test, value;
 
   $(window.document).ready(function() {
-    return $("#form").html(generate(schema, "value"));
+    var form_dom, form_get, form_load, _ref;
+    _ref = generate(schema, "value"), form_dom = _ref[0], form_load = _ref[1], form_get = _ref[2];
+    $("#form").empty().append(form_dom);
+    console.log(value);
+    form_load(value);
+    return $('#get').click(function() {
+      var v;
+      v = form_get();
+      console.log(v);
+      console.log(JSON.stringify(v));
+      return $('#result').text(JSON.stringify(v));
+    });
   });
 
   generate = function(schema, path) {
-    var dom, dom_key, key, new_button;
-    console.log(schema, path);
+    var dom, dom_key, get, get_key, getters, items_div, items_get, key, new_button, set, set_key, setters, _ref;
     switch (schema.type) {
       case "string":
-        return $("<span>" + schema.title + ": <input id=\"" + path + "\"></span>");
+        return [
+          dom = $("<span class=\"string\">" + schema.title + ": <input id=\"" + path + "\"></span>"), function(v) {
+            console.log("Setting ", v, " to input elements under ", dom);
+            return $(dom).find(":input").val(v);
+          }, function() {
+            console.log("Retreiving value from input elements under ", dom);
+            return $(dom).find(":input").val();
+          }
+        ];
       case "bool":
-        return $("<span><input id=\"" + path + "\" type=\"checkbox\"> " + schema.title + "</span>");
+        return [
+          dom = $("<span class=\"bool\"><input id=\"" + path + "\" type=\"checkbox\"> " + schema.title + "</span>"), function(v) {
+            console.log("Setting ", v, " to checkbox elements under ", dom);
+            return $(dom).find(":checkbox").attr('checked', v);
+          }, function() {
+            console.log("Retreiving value from checkbox elements under ", dom);
+            return $(dom).find(":checkbox").attr('checked');
+          }
+        ];
       case "object":
-        dom = $("<div><strong>" + schema.title + "</strong></div>");
+        dom = $("<div class=\"object\"><strong>" + schema.title + "</strong></div>");
+        setters = [];
+        getters = [];
         for (key in schema.properties) {
-          dom_key = generate(schema.properties[key], "" + path + "_" + key);
+          _ref = generate(schema.properties[key], "" + path + "_" + key), dom_key = _ref[0], set_key = _ref[1], get_key = _ref[2];
           dom.append($("<div>").append(dom_key));
+          setters.push([key, set_key]);
+          getters.push([key, get_key]);
         }
-        return dom;
+        set = function(x) {
+          var _i, _len, _ref1;
+          console.log("Setting object ", x, " to ", dom);
+          for (_i = 0, _len = setters.length; _i < _len; _i++) {
+            _ref1 = setters[_i], key = _ref1[0], set_key = _ref1[1];
+            console.log("Setting ", key, " with value ", x[key], " of object ", x, " pertaining to ", dom);
+            set_key(x[key]);
+          }
+        };
+        get = function() {
+          var obj, _i, _len, _ref1;
+          console.log("Getting object from items ", dom);
+          obj = {};
+          for (_i = 0, _len = getters.length; _i < _len; _i++) {
+            _ref1 = getters[_i], key = _ref1[0], get_key = _ref1[1];
+            obj[key] = get_key();
+          }
+          return obj;
+        };
+        return [dom, set, get];
       case "array":
-        dom = $("<div><strong>" + schema.title + "</strong></div>");
+        dom = $("<div class=\"array\"><strong>" + schema.title + "</strong></div>");
+        items_div = $("<div class=\"items\">");
+        items_get = [];
         new_button = $("<button>mk</button>").click(function() {
-          dom.append(generate_item(schema.items, path));
+          var item_div, item_get, _item_load, _ref1;
+          _ref1 = generate_item(schema.items, path), item_div = _ref1[0], _item_load = _ref1[1], item_get = _ref1[2];
+          items_div.append(item_div);
+          items_get.push(item_get);
           return false;
         });
-        return dom.append(new_button);
+        return [
+          dom.append(new_button, items_div), function(vs) {
+            var item_dom, item_get, item_set, v, _i, _len, _ref1, _results;
+            console.log("Setting array", vs, " to items div ", items_div);
+            items_div.empty();
+            _results = [];
+            for (_i = 0, _len = vs.length; _i < _len; _i++) {
+              v = vs[_i];
+              _ref1 = generate_item(schema.items, path), item_dom = _ref1[0], item_set = _ref1[1], item_get = _ref1[2];
+              items_div.append(item_dom);
+              items_get.push(item_get);
+              _results.push(item_set(v));
+            }
+            return _results;
+          }, function() {
+            var item_get, _i, _len, _results;
+            console.log("Getting array from items ", items_div);
+            _results = [];
+            for (_i = 0, _len = items_get.length; _i < _len; _i++) {
+              item_get = items_get[_i];
+              _results.push(item_get());
+            }
+            return _results;
+          }
+        ];
     }
   };
 
   generate_item = function(schema, path) {
-    var item_div, rm_button;
-    item_div = $("<div>");
+    var item_div, item_dom, item_get, item_load, rm_button, _ref;
+    item_div = $("<div class=\"item\">");
     rm_button = $("<button>rm</button>").click(function() {
       item_div.remove();
       return false;
     });
-    return item_div.append(generate(schema, "" + path + "_element"), rm_button);
+    _ref = generate(schema, "" + path + "_element"), item_dom = _ref[0], item_load = _ref[1], item_get = _ref[2];
+    return [item_div.append(item_dom, rm_button), item_load, item_get];
   };
 
-  test = "array";
+  test = "complex";
+
+  if (test === "complex") {
+    schema = {
+      title: "Complex Schema",
+      type: "object",
+      properties: {
+        extra: {
+          title: "Extra Tags",
+          type: "array",
+          items: {
+            title: "Extra Tag",
+            type: "object",
+            properties: {
+              tag: {
+                title: "Tag Name",
+                type: "string"
+              },
+              attrs: {
+                title: "Attributes",
+                type: "array",
+                items: {
+                  title: "Attribute",
+                  type: "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+    value = {
+      extra: [
+        {
+          tag: "chapter",
+          attrs: ["title", "author"]
+        }, {
+          tag: "header",
+          attrs: ["date", "journal"]
+        }
+      ]
+    };
+  }
 
   if (test === "object") {
     schema = {
@@ -59,10 +180,8 @@
       }
     };
     value = {
-      ref: {
-        name: "Test name",
-        happy: true
-      }
+      name: "Test name",
+      happy: true
     };
   }
 
@@ -76,9 +195,7 @@
         "default": "default string value"
       }
     };
-    value = {
-      ref: ["first string", "second string"]
-    };
+    value = ["first string", "second string"];
   }
 
   if (test === "string") {
@@ -86,9 +203,7 @@
       title: "A string",
       type: "string"
     };
-    value = {
-      ref: "a string value"
-    };
+    value = "a string value";
   }
 
   if (test === "bool") {
@@ -96,6 +211,7 @@
       title: "A checkbox",
       type: "bool"
     };
+    value = true;
   }
 
 }).call(this);
