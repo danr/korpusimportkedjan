@@ -1,9 +1,21 @@
 $(window.document).ready () ->
-    [form_dom, form_load, form_get] = generate schema, "value"
+
+    for key of examples
+        do (key) ->
+            example_button = $("""<button>#{key}</button>""").click () ->
+                console.log "Loading example ", key, " with value ", examples[key]
+                load_example examples[key]
+                false
+            $("#examples").append example_button
+
+    load_example examples.complex
+
+load_example = (example) ->
+    console.log example
+    [form_dom, form_load, form_get] = generate example.schema, "value"
     $("#form").empty().append form_dom
-    console.log value
-    form_load value
-    $('#get').click () ->
+    form_load example.value
+    $('#get').unbind('click').click () ->
         v = form_get()
         console.log v
         console.log JSON.stringify v
@@ -28,7 +40,7 @@ generate = (schema, path) ->
                 $(dom).find(":checkbox").attr 'checked', v
               () ->
                 console.log "Retreiving value from checkbox elements under ", dom
-                $(dom).find(":checkbox").attr 'checked'
+                'checked' == $(dom).find(":checkbox").attr 'checked'
             ]
         when "object"
             dom = $ """<div class="object"><strong>#{schema.title}</strong></div>"""
@@ -87,80 +99,79 @@ generate_item = (schema, path) ->
       item_get
     ]
 
-test = "complex"
-
-if test == "complex"
-    schema =
-        title: "Complex Schema"
-        type: "object"
-        properties:
-            extra:
-                title: "Extra Tags"
-                type: "array"
-                items:
-                    title: "Extra Tag"
-                    type: "object"
-                    properties:
-                        tag:
-                            title: "Tag Name"
-                            type: "string"
-                        attrs:
-                            title: "Attributes"
-                            type: "array"
-                            items:
-                                title: "Attribute"
+examples =
+    complex:
+        schema:
+            title: "Complex Schema"
+            type: "object"
+            properties:
+                extra:
+                    title: "Extra Tags"
+                    type: "array"
+                    items:
+                        title: "Extra Tag"
+                        type: "object"
+                        properties:
+                            tag:
+                                title: "Tag Name"
                                 type: "string"
+                            attrs:
+                                title: "Attributes"
+                                type: "array"
+                                items:
+                                    title: "Attribute"
+                                    type: "string"
 
-    value =
-        extra:
-            [
-                tag: "chapter"
-                attrs: ["title", "author"]
-            ,
-                tag: "header"
-                attrs: ["date", "journal"]
+        value:
+            extra:
+                [
+                    tag: "chapter"
+                    attrs: ["title", "author"]
+                ,
+                    tag: "header"
+                    attrs: ["date", "journal"]
+                ]
+
+    object:
+        schema:
+            title: "Two objects"
+            type: "object"
+            properties:
+                name:
+                    title: "Name"
+                    type: "string"
+                happy:
+                    title: "Happy"
+                    type: "bool"
+
+        value:
+            name: "Test name"
+            happy: true
+
+    array:
+        schema:
+            title: "An array of strings"
+            type: "array"
+            items:
+                title: "A string in the array"
+                type: "string"
+                default: "default string value"
+
+        value:
+            [ "first string"
+              "second string"
             ]
 
-if test == "object"
-    schema =
-        title: "Two objects"
-        type: "object"
-        properties:
-            name:
-                title: "Name"
-                type: "string"
-            happy:
-                title: "Happy"
-                type: "bool"
-
-    value =
-        name: "Test name"
-        happy: true
-
-if test == "array"
-    schema =
-        title: "An array of strings"
-        type: "array"
-        items:
-            title: "A string in the array"
+    string:
+        schema:
+            title: "A string"
             type: "string"
-            default: "default string value"
 
-    value =
-        [ "first string"
-          "second string"
-        ]
+        value: "a string value"
 
-if test == "string"
-    schema =
-        title: "A string"
-        type: "string"
+    bool:
+        schema:
+            title: "A checkbox"
+            type: "bool"
 
-    value = "a string value"
-
-if test == "bool"
-    schema =
-        title: "A checkbox"
-        type: "bool"
-
-    value = true
+        value: true
