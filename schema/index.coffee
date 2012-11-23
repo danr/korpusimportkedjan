@@ -24,80 +24,98 @@ load_example = (example) ->
 generate = (schema, path) ->
     # console.log schema, path
     return switch schema.type
+
         when "string"
             [ dom = $ """<span class="string">#{schema.title}: <input id="#{path}"></span>"""
               (v) ->
                 console.log "Setting ", v, " to input elements under ", dom
                 $(dom).find(":input").val v
+                return
               () ->
                 console.log "Retreiving value from input elements under ", dom
                 $(dom).find(":input").val()
             ]
+
         when "bool"
             [ dom = $ """<span class="bool"><input id="#{path}" type="checkbox"> #{schema.title}</span>"""
               (v) ->
                 console.log "Setting ", v, " to checkbox elements under ", dom
                 $(dom).find(":checkbox").attr 'checked', v
+                return
               () ->
                 console.log "Retreiving value from checkbox elements under ", dom
                 'checked' == $(dom).find(":checkbox").attr 'checked'
             ]
+
         when "object"
             dom = $ """<div class="object"><strong>#{schema.title}</strong></div>"""
             setters = []
             getters = []
+
             for key of schema.properties
                 [ dom_key, set_key, get_key ] = generate schema.properties[key], "#{path}_#{key}"
                 dom.append $("<div>").append(dom_key)
                 setters.push [ key, set_key ]
                 getters.push [ key, get_key ]
+
             set = (x) ->
                 console.log "Setting object ", x, " to ", dom
                 for [ key, set_key ] in setters
                     console.log "Setting ", key, " with value ", x[key], " of object ", x, " pertaining to ", dom
                     set_key x[key]
                 return
+
             get = () ->
                 console.log "Getting object from items " , dom
                 obj = {}
                 obj[key] = get_key() for [ key, get_key ] in getters
                 obj
+
             [ dom, set, get ]
+
         when "array"
             dom = $ """<div class="array"><strong>#{schema.title}</strong></div>"""
 
             items_div = $ """<div class="items">"""
             items_get = []
 
-            new_button = $("""<button>mk</button>""").click () ->
-                [ item_div, _item_load , item_get ] = generate_item schema.items, path
+            generate_item = () ->
+                item_div = $("""<div class="item">""")
+
+                [ item_dom, item_set, item_get ] = generate schema.items, "#{path}_element"
+
+                get_indirect =
+                    ref: item_get
+
+                rm_button = $("""<button>rm</button>""").click () ->
+                    item_div.remove(); false
+                    get_indirect.ref = null
+                    return
+
+                item_div.append item_dom, rm_button
+
                 items_div.append item_div
-                items_get.push item_get
+                items_get.push get_indirect
+                return item_set
+
+            new_button = $("""<button>mk</button>""").click () ->
+                generate_item()
                 false
 
-            [ dom.append new_button, items_div
-              (vs) ->
+            dom.append new_button, items_div
+
+            set = (vs) ->
                 console.log "Setting array", vs, " to items div ", items_div
                 items_div.empty()
-                for v in vs
-                    [ item_dom, item_set, item_get ] = generate_item schema.items, path
-                    items_div.append item_dom
-                    items_get.push item_get
-                    item_set(v)
-              () ->
-                console.log "Getting array from items " , items_div
-                (item_get() for item_get in items_get)
-            ]
+                generate_item()(v) for v in vs
+                return
 
-generate_item = (schema, path) ->
-    item_div = $("""<div class="item">""")
-    rm_button = $("""<button>rm</button>""").click () ->
-        item_div.remove(); false
-    [ item_dom, item_load, item_get ] = generate schema, "#{path}_element"
-    [ item_div.append item_dom, rm_button
-      item_load
-      item_get
-    ]
+            get = () ->
+                console.log "Getting array from items " , items_div
+                (item_get.ref() for item_get in items_get when item_get.ref isnt null)
+
+            [ dom, set, get ]
+
 
 examples =
     complex:
