@@ -35,7 +35,7 @@
   };
 
   generate = function(schema, path) {
-    var dom, dom_key, generate_item, get, get_key, getters, items_div, items_get, key, new_button, set, set_key, setters, _ref;
+    var dom, generate_item, get, items_div, items_get, key, new_button, object_dom, objects, set, _, _i, _len, _ref;
     switch (schema.type) {
       case "string":
         return [
@@ -59,29 +59,33 @@
         ];
       case "object":
         dom = $("<div class=\"object\"><strong>" + schema.title + "</strong></div>");
-        setters = [];
-        getters = [];
-        for (key in schema.properties) {
-          _ref = generate(schema.properties[key], "" + path + "_" + key), dom_key = _ref[0], set_key = _ref[1], get_key = _ref[2];
-          dom.append($("<div>").append(dom_key));
-          setters.push([key, set_key]);
-          getters.push([key, get_key]);
+        objects = (function() {
+          var _results;
+          _results = [];
+          for (key in schema.properties) {
+            _results.push([].concat([key], generate(schema.properties[key], "" + path + "_" + key)));
+          }
+          return _results;
+        })();
+        for (_i = 0, _len = objects.length; _i < _len; _i++) {
+          _ref = objects[_i], _ = _ref[0], object_dom = _ref[1], _ = _ref[2], _ = _ref[3];
+          dom.append($("<div>").append(object_dom));
         }
-        set = function(x) {
-          var _i, _len, _ref1;
-          console.log("Setting object ", x, " to ", dom);
-          for (_i = 0, _len = setters.length; _i < _len; _i++) {
-            _ref1 = setters[_i], key = _ref1[0], set_key = _ref1[1];
-            console.log("Setting ", key, " with value ", x[key], " of object ", x, " pertaining to ", dom);
-            set_key(x[key]);
+        set = function(obj) {
+          var object_set, _j, _len1, _ref1;
+          console.log("Setting object ", obj, " to ", dom);
+          for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
+            _ref1 = objects[_j], key = _ref1[0], _ = _ref1[1], object_set = _ref1[2], _ = _ref1[3];
+            console.log("Setting ", key, " with value ", obj[key], " of object ", obj, " pertaining to ", dom);
+            object_set(obj[key]);
           }
         };
         get = function() {
-          var obj, _i, _len, _ref1;
+          var get_key, obj, _j, _len1, _ref1;
           console.log("Getting object from items ", dom);
           obj = {};
-          for (_i = 0, _len = getters.length; _i < _len; _i++) {
-            _ref1 = getters[_i], key = _ref1[0], get_key = _ref1[1];
+          for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
+            _ref1 = objects[_j], key = _ref1[0], _ = _ref1[1], _ = _ref1[2], get_key = _ref1[3];
             obj[key] = get_key();
           }
           return obj;
@@ -114,20 +118,20 @@
         });
         dom.append(new_button, items_div);
         set = function(vs) {
-          var v, _i, _len;
+          var v, _j, _len1;
           console.log("Setting array", vs, " to items div ", items_div);
           items_div.empty();
-          for (_i = 0, _len = vs.length; _i < _len; _i++) {
-            v = vs[_i];
+          for (_j = 0, _len1 = vs.length; _j < _len1; _j++) {
+            v = vs[_j];
             generate_item()(v);
           }
         };
         get = function() {
-          var item_get, _i, _len, _results;
+          var item_get, _j, _len1, _results;
           console.log("Getting array from items ", items_div);
           _results = [];
-          for (_i = 0, _len = items_get.length; _i < _len; _i++) {
-            item_get = items_get[_i];
+          for (_j = 0, _len1 = items_get.length; _j < _len1; _j++) {
+            item_get = items_get[_j];
             if (item_get.ref !== null) {
               _results.push(item_get.ref());
             }

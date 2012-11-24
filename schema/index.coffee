@@ -49,26 +49,25 @@ generate = (schema, path) ->
 
         when "object"
             dom = $ """<div class="object"><strong>#{schema.title}</strong></div>"""
-            setters = []
-            getters = []
+            objects = for key of schema.properties
+                [].concat [key], generate schema.properties[key], "#{path}_#{key}"
 
-            for key of schema.properties
-                [ dom_key, set_key, get_key ] = generate schema.properties[key], "#{path}_#{key}"
-                dom.append $("<div>").append(dom_key)
-                setters.push [ key, set_key ]
-                getters.push [ key, get_key ]
+            for [ _, object_dom, _, _ ] in objects
+                dom.append $("<div>").append(object_dom)
+                           # ^ why this extra div?
 
-            set = (x) ->
-                console.log "Setting object ", x, " to ", dom
-                for [ key, set_key ] in setters
-                    console.log "Setting ", key, " with value ", x[key], " of object ", x, " pertaining to ", dom
-                    set_key x[key]
+            set = (obj) ->
+                console.log "Setting object ", obj, " to ", dom
+                for [ key, _ , object_set, _ ] in objects
+                    console.log "Setting ", key, " with value ", obj[key],
+                        " of object ", obj, " pertaining to ", dom
+                    object_set obj[key]
                 return
 
             get = () ->
                 console.log "Getting object from items " , dom
                 obj = {}
-                obj[key] = get_key() for [ key, get_key ] in getters
+                obj[key] = get_key() for [ key, _, _, get_key ] in objects
                 obj
 
             [ dom, set, get ]

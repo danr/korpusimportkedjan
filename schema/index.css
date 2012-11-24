@@ -1,0 +1,29 @@
+.string {
+	border: 1px magenta solid;
+	margin: 6px;
+}
+
+.bool {
+	border: 1px black solid;
+	margin: 6px;
+}
+
+.object {
+	border: 1px red solid;
+	margin: 6px;
+}
+
+.array {
+	border: 1px blue solid;
+	margin: 6px;
+}
+
+.items {
+	border: 1px purple solid;
+	margin: 6px;
+}
+
+.item {
+	border: 1px brown solid;
+	margin: 6px;
+}
