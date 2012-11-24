@@ -69,7 +69,7 @@
         })();
         for (_i = 0, _len = objects.length; _i < _len; _i++) {
           _ref = objects[_i], _ = _ref[0], object_dom = _ref[1], _ = _ref[2], _ = _ref[3];
-          dom.append($("<div>").append(object_dom));
+          dom.append(object_dom);
         }
         set = function(obj) {
           var object_set, _j, _len1, _ref1;
@@ -96,20 +96,20 @@
         items_div = $("<div class=\"items\">");
         items_get = [];
         generate_item = function() {
-          var get_indirect, item_div, item_dom, item_get, item_set, rm_button, _ref1;
+          var item_div, item_dom, item_get, item_get_indirect, item_set, rm_button, _ref1;
           item_div = $("<div class=\"item\">");
           _ref1 = generate(schema.items, "" + path + "_element"), item_dom = _ref1[0], item_set = _ref1[1], item_get = _ref1[2];
-          get_indirect = {
+          item_get_indirect = {
             ref: item_get
           };
           rm_button = $("<button>rm</button>").click(function() {
             item_div.remove();
-            false;
-            get_indirect.ref = null;
+            item_get_indirect.ref = null;
+            return false;
           });
           item_div.append(item_dom, rm_button);
           items_div.append(item_div);
-          items_get.push(get_indirect);
+          items_get.push(item_get_indirect);
           return item_set;
         };
         new_button = $("<button>mk</button>").click(function() {
@@ -127,13 +127,13 @@
           }
         };
         get = function() {
-          var item_get, _j, _len1, _results;
+          var item_get_indirect, _j, _len1, _results;
           console.log("Getting array from items ", items_div);
           _results = [];
           for (_j = 0, _len1 = items_get.length; _j < _len1; _j++) {
-            item_get = items_get[_j];
-            if (item_get.ref !== null) {
-              _results.push(item_get.ref());
+            item_get_indirect = items_get[_j];
+            if (item_get_indirect.ref !== null) {
+              _results.push(item_get_indirect.ref());
             }
           }
           return _results;

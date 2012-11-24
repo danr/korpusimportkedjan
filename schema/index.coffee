@@ -22,7 +22,6 @@ load_example = (example) ->
         $('#result').text JSON.stringify v
 
 generate = (schema, path) ->
-    # console.log schema, path
     return switch schema.type
 
         when "string"
@@ -53,8 +52,7 @@ generate = (schema, path) ->
                 [].concat [key], generate schema.properties[key], "#{path}_#{key}"
 
             for [ _, object_dom, _, _ ] in objects
-                dom.append $("<div>").append(object_dom)
-                           # ^ why this extra div?
+                dom.append object_dom
 
             set = (obj) ->
                 console.log "Setting object ", obj, " to ", dom
@@ -83,18 +81,17 @@ generate = (schema, path) ->
 
                 [ item_dom, item_set, item_get ] = generate schema.items, "#{path}_element"
 
-                get_indirect =
-                    ref: item_get
+                item_get_indirect = ref: item_get
 
                 rm_button = $("""<button>rm</button>""").click () ->
-                    item_div.remove(); false
-                    get_indirect.ref = null
-                    return
+                    item_div.remove()
+                    item_get_indirect.ref = null
+                    false
 
                 item_div.append item_dom, rm_button
 
                 items_div.append item_div
-                items_get.push get_indirect
+                items_get.push item_get_indirect
                 return item_set
 
             new_button = $("""<button>mk</button>""").click () ->
@@ -111,7 +108,8 @@ generate = (schema, path) ->
 
             get = () ->
                 console.log "Getting array from items " , items_div
-                (item_get.ref() for item_get in items_get when item_get.ref isnt null)
+                for item_get_indirect in items_get when item_get_indirect.ref isnt null
+                    item_get_indirect.ref()
 
             [ dom, set, get ]
 
