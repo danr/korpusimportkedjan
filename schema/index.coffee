@@ -102,7 +102,7 @@ generate = (schema, path) ->
         set = (vs) ->
             console.log "Setting array", vs, " to items div ", items_div
             items_div.empty()
-            generate_item()(v) for v in vs
+            generate_item() v for v in vs
             return
 
         get = () ->
