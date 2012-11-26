@@ -16,7 +16,7 @@
     for (key in examples) {
       _fn(key);
     }
-    return load_example(examples.complex);
+    return load_example(examples.union);
   });
 
   load_example = function(example) {
@@ -35,114 +35,163 @@
   };
 
   generate = function(schema, path) {
-    var dom, generate_item, get, items_div, items_get, key, new_button, object_dom, objects, set, _, _i, _len, _ref;
-    switch (schema.type) {
-      case "string":
-        return [
-          dom = $("<span class=\"string\">" + schema.title + ": <input id=\"" + path + "\"></span>"), function(v) {
-            console.log("Setting ", v, " to input elements under ", dom);
-            $(dom).find(":input").val(v);
-          }, function() {
-            console.log("Retreiving value from input elements under ", dom);
-            return $(dom).find(":input").val();
-          }
-        ];
-      case "bool":
-        return [
-          dom = $("<span class=\"bool\"><input id=\"" + path + "\" type=\"checkbox\"> " + schema.title + "</span>"), function(v) {
-            console.log("Setting ", v, " to checkbox elements under ", dom);
-            $(dom).find(":checkbox").attr('checked', v);
-          }, function() {
-            console.log("Retreiving value from checkbox elements under ", dom);
-            return 'checked' === $(dom).find(":checkbox").attr('checked');
-          }
-        ];
-      case "object":
-        dom = $("<div class=\"object\"><strong>" + schema.title + "</strong></div>");
-        objects = (function() {
-          var _results;
-          _results = [];
-          for (key in schema.properties) {
-            _results.push([].concat([key], generate(schema.properties[key], "" + path + "_" + key)));
-          }
-          return _results;
-        })();
-        for (_i = 0, _len = objects.length; _i < _len; _i++) {
-          _ref = objects[_i], _ = _ref[0], object_dom = _ref[1], _ = _ref[2], _ = _ref[3];
-          dom.append(object_dom);
+    var display, dom, generate_item, get, i, items_div, items_get, key, new_button, object_dom, object_get, object_set, objects, options, select, set, subschema, _, _i, _j, _len, _len1, _ref, _ref1;
+    if (schema.type === "string") {
+      return [
+        dom = $("<span class=\"string\">" + schema.title + ": <input id=\"" + path + "\"></span>"), function(v) {
+          console.log("Setting ", v, " to input elements under ", dom);
+          $(dom).find(":input").val(v);
+        }, function() {
+          console.log("Retreiving value from input elements under ", dom);
+          return $(dom).find(":input").val();
         }
-        set = function(obj) {
-          var object_set, _j, _len1, _ref1;
-          console.log("Setting object ", obj, " to ", dom);
-          for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
-            _ref1 = objects[_j], key = _ref1[0], _ = _ref1[1], object_set = _ref1[2], _ = _ref1[3];
-            console.log("Setting ", key, " with value ", obj[key], " of object ", obj, " pertaining to ", dom);
-            object_set(obj[key]);
-          }
+      ];
+    } else if (schema.type === "bool") {
+      return [
+        dom = $("<span class=\"bool\"><input id=\"" + path + "\" type=\"checkbox\"> " + schema.title + "</span>"), function(v) {
+          console.log("Setting ", v, " to checkbox elements under ", dom);
+          $(dom).find(":checkbox").attr('checked', v);
+        }, function() {
+          console.log("Retreiving value from checkbox elements under ", dom);
+          return 'checked' === $(dom).find(":checkbox").attr('checked');
+        }
+      ];
+    } else if (schema.type === "object") {
+      dom = $("<div class=\"object\"><strong>" + schema.title + "</strong></div>");
+      objects = (function() {
+        var _results;
+        _results = [];
+        for (key in schema.properties) {
+          _results.push([].concat([key], generate(schema.properties[key], "" + path + "_" + key)));
+        }
+        return _results;
+      })();
+      for (_i = 0, _len = objects.length; _i < _len; _i++) {
+        _ref = objects[_i], _ = _ref[0], object_dom = _ref[1], _ = _ref[2], _ = _ref[3];
+        dom.append(object_dom);
+      }
+      set = function(obj) {
+        var object_set, _j, _len1, _ref1;
+        console.log("Setting object ", obj, " to ", dom);
+        for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
+          _ref1 = objects[_j], key = _ref1[0], _ = _ref1[1], object_set = _ref1[2], _ = _ref1[3];
+          console.log("Setting ", key, " with value ", obj[key], " of object ", obj, " pertaining to ", dom);
+          object_set(obj[key]);
+        }
+      };
+      get = function() {
+        var get_key, obj, _j, _len1, _ref1;
+        console.log("Getting object from items ", dom);
+        obj = {};
+        for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
+          _ref1 = objects[_j], key = _ref1[0], _ = _ref1[1], _ = _ref1[2], get_key = _ref1[3];
+          obj[key] = get_key();
+        }
+        return obj;
+      };
+      return [dom, set, get];
+    } else if (schema.type === "array") {
+      dom = $("<div class=\"array\"><strong>" + schema.title + "</strong></div>");
+      items_div = $("<div class=\"items\">");
+      items_get = [];
+      generate_item = function() {
+        var item_div, item_dom, item_get, item_get_indirect, item_set, rm_button, _ref1;
+        item_div = $("<div class=\"item\">");
+        _ref1 = generate(schema.items, "" + path + "_element"), item_dom = _ref1[0], item_set = _ref1[1], item_get = _ref1[2];
+        item_get_indirect = {
+          ref: item_get
         };
-        get = function() {
-          var get_key, obj, _j, _len1, _ref1;
-          console.log("Getting object from items ", dom);
-          obj = {};
-          for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
-            _ref1 = objects[_j], key = _ref1[0], _ = _ref1[1], _ = _ref1[2], get_key = _ref1[3];
-            obj[key] = get_key();
-          }
-          return obj;
-        };
-        return [dom, set, get];
-      case "array":
-        dom = $("<div class=\"array\"><strong>" + schema.title + "</strong></div>");
-        items_div = $("<div class=\"items\">");
-        items_get = [];
-        generate_item = function() {
-          var item_div, item_dom, item_get, item_get_indirect, item_set, rm_button, _ref1;
-          item_div = $("<div class=\"item\">");
-          _ref1 = generate(schema.items, "" + path + "_element"), item_dom = _ref1[0], item_set = _ref1[1], item_get = _ref1[2];
-          item_get_indirect = {
-            ref: item_get
-          };
-          rm_button = $("<button>rm</button>").click(function() {
-            item_div.remove();
-            item_get_indirect.ref = null;
-            return false;
-          });
-          item_div.append(item_dom, rm_button);
-          items_div.append(item_div);
-          items_get.push(item_get_indirect);
-          return item_set;
-        };
-        new_button = $("<button>mk</button>").click(function() {
-          generate_item();
+        rm_button = $("<button>rm</button>").click(function() {
+          item_div.remove();
+          item_get_indirect.ref = null;
           return false;
         });
-        dom.append(new_button, items_div);
-        set = function(vs) {
-          var v, _j, _len1;
-          console.log("Setting array", vs, " to items div ", items_div);
-          items_div.empty();
-          for (_j = 0, _len1 = vs.length; _j < _len1; _j++) {
-            v = vs[_j];
-            generate_item()(v);
+        item_div.append(item_dom, rm_button);
+        items_div.append(item_div);
+        items_get.push(item_get_indirect);
+        return item_set;
+      };
+      new_button = $("<button>mk</button>").click(function() {
+        generate_item();
+        return false;
+      });
+      dom.append(new_button, items_div);
+      set = function(vs) {
+        var v, _j, _len1;
+        console.log("Setting array", vs, " to items div ", items_div);
+        items_div.empty();
+        for (_j = 0, _len1 = vs.length; _j < _len1; _j++) {
+          v = vs[_j];
+          generate_item()(v);
+        }
+      };
+      get = function() {
+        var item_get_indirect, _j, _len1, _results;
+        console.log("Getting array from items ", items_div);
+        _results = [];
+        for (_j = 0, _len1 = items_get.length; _j < _len1; _j++) {
+          item_get_indirect = items_get[_j];
+          if (item_get_indirect.ref !== null) {
+            _results.push(item_get_indirect.ref());
           }
-        };
-        get = function() {
-          var item_get_indirect, _j, _len1, _results;
-          console.log("Getting array from items ", items_div);
-          _results = [];
-          for (_j = 0, _len1 = items_get.length; _j < _len1; _j++) {
-            item_get_indirect = items_get[_j];
-            if (item_get_indirect.ref !== null) {
-              _results.push(item_get_indirect.ref());
-            }
-          }
-          return _results;
-        };
-        return [dom, set, get];
+        }
+        return _results;
+      };
+      return [dom, set, get];
+    } else if ($.isArray(schema.type)) {
+      dom = $("<div class=\"union\"><strong>" + schema.title + "</strong></div>");
+      select = $("<select>");
+      options = (function() {
+        var _j, _len1, _ref1, _ref2, _results;
+        _ref1 = schema.type;
+        _results = [];
+        for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+          subschema = _ref1[i];
+          select.append($("<option id=\"" + i + "\">" + subschema.title + "</option>"));
+          _ref2 = generate(subschema, "" + path + "_" + i), object_dom = _ref2[0], object_set = _ref2[1], object_get = _ref2[2];
+          display = i === 0 ? "block" : "none";
+          _results.push(dom.append($("<div class=\"option\" id=\"" + i + "_div\" style=\"display: none;\">").append(object_dom)));
+        }
+        return _results;
+      })();
+      select.change(function() {
+        var selected;
+        dom.children(".option").css("display", "none");
+        selected = $(this).children(":selected").attr("id");
+        console.log("Selected:", selected);
+        return dom.children("#" + selected + "_div").css("display", "block");
+      });
+      for (i = _j = 0, _len1 = options.length; _j < _len1; i = ++_j) {
+        _ref1 = options[i], object_dom = _ref1[0], _ = _ref1[1], _ = _ref1[2];
+        dom.append($("<div class=\"option\" id=\"" + i + "_div\" style=\"display: none;\">").append(object_dom));
+      }
+      dom.prepend(select);
+      return [
+        dom, function(x) {
+          return x;
+        }, function() {}
+      ];
+    } else {
+      throw new Error("The type of " + (JSON.stringify(schema)) + " is not supported!");
     }
   };
 
   examples = {
+    union: {
+      schema: {
+        title: "Union type",
+        type: [
+          {
+            title: "Checkbox",
+            type: "bool"
+          }, {
+            title: "String",
+            type: "string"
+          }
+        ]
+      },
+      value: "hello"
+    },
     complex: {
       schema: {
         title: "Complex Schema",
