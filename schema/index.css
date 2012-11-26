@@ -1,34 +1,48 @@
 .string {
 	border: 1px magenta solid;
-	margin: 6px;
+	padding: 6px;
 }
 
 .bool {
 	border: 1px black solid;
-	margin: 6px;
+	padding: 6px;
 }
 
 .object {
 	border: 1px red solid;
-	margin: 6px;
+	padding: 6px;
 }
 
 .array {
 	border: 1px blue solid;
-	margin: 6px;
+	padding: 6px;
 }
 
 .items {
 	border: 1px purple solid;
-	margin: 6px;
+	padding: 6px;
 }
 
 .item {
 	border: 1px brown solid;
-	margin: 6px;
+	padding: 6px;
+}
+
+.inner {
+	border: 1px pink solid;
+	padding: 6px
+}
+
+.union {
+	border: 1px tan solid;
+	padding: 6px
 }
 
 .option {
 	border: 1px orange solid;
-	margin: 6px
+	padding: 6px
+}
+
+.title {
+	font-weight: bold
 }
