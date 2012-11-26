@@ -17,9 +17,11 @@ $(window.document).ready () ->
         success: (data, textStatus, xhr) ->
             schema = schema_utils.follow_references data
             console.log schema
-            add_example_button 'taxi',
+            example =
                 schema: schema
                 value: schema_utils.get_default schema
+            add_example_button 'annoteringslabbet', example
+            load_example example
         error: (info...) ->
             console.log info
 
@@ -27,8 +29,13 @@ $(window.document).ready () ->
 
     load_example examples.array
 
+logger = (f) -> (args...) ->
+    res = f(args...)
+    console.log "args: " + (JSON.stringify arg for arg in args) + " = ", res
+    res
+
 load_example = (example) ->
-    form = generate example.schema, "value"
+    form = generate example.schema, "path"
     $("#form").empty().append form.dom
     form.set example.value
     $('#get').unbind('click').click () ->
@@ -37,15 +44,35 @@ load_example = (example) ->
         console.log JSON.stringify v
         $('#result').text JSON.stringify v
 
+simplify_type = (schema) ->
+    if schema.type == "array" and schema.items.type == "string" and schema.items.enum?
+        enum: schema.items.enum
+        multi: true
+        desc: "multi-enum"
+    else if schema.type == "string" and schema.enum?
+        if schema.enum.length == 1
+            only: schema.enum[0]
+            desc: "only"
+        else
+            enum: schema.enum
+            multi: false
+            desc: "single-enum"
+    else
+        schema.type
+
 generate = (schema, path) -> do ->
+
+    schema.type = simplify_type schema
 
     decorator = (make) ->
         obj = make()
         inner_dom = obj.dom
-        type = if _.isArray schema.type then "union" else schema.type
-        obj.dom = $ """<div class="#{type}"/>"""
+        type = schema.type.desc or if _.isArray schema.type then "union" else schema.type
+        obj.dom = $ """<div class="#{type} nest" id="#{path}"/>"""
         if schema.title?
             obj.dom.append $ """<div class="title">#{schema.title}</div>"""
+        else
+            console.log "no title:", schema
         if schema.description?
             obj.dom.append $ """<div class="description">#{schema.description}</div>"""
         obj.dom.append inner_dom
@@ -53,18 +80,41 @@ generate = (schema, path) -> do ->
 
     decorator ->
 
-        if schema.type == "string"
-            dom: dom = $ """<input id="#{path}">"""
+        if schema.type.only?
+            dom: []
+            set: (v) -> return
+            get: () -> schema.only
+
+        else if schema.type.enum?
+            toggle = if schema.type.multi then "buttons-checkbox" else "buttons-radio"
+            dom = $ """<div class="btn-group" data-toggle="#{toggle}"/>"""
+            for v in schema.type.enum
+                dom.append $ """<button type="button" class="btn" id="#{v}">#{v}</button>"""
+            dom: dom
+            set: (vs) ->
+                if schema.type.multi
+                    dom.children("button").removeClass("active")
+                    dom.find("##{v}").addClass "active" for v in vs
+                else
+                    dom.children("button").removeClass("active").filter("##{vs}").addClass "active"
+            get: () ->
+                if schema.type.multi
+                    $(c).attr "id" for c in dom.children ".active"
+                else
+                    dom.children(".active").attr("id")
+
+        else if schema.type == "string"
+            dom: dom = $ """<input type="text">"""
             set: (v) -> dom.val v; return
             get: () -> dom.val()
 
         else if schema.type == "bool"
-            dom: dom = $ """<input id="#{path}" type="checkbox">"""
+            dom: dom = $ """<input type="checkbox">"""
             set: (v) -> dom.attr 'checked', v; return
             get: () -> 'checked' == dom.attr 'checked'
 
         else if schema.type == "object"
-            dom = $ """<div class="object">"""
+            dom = $ """<div class="inner object-inner">"""
             objects = for key of schema.properties
                 _.extend {key: key}, generate schema.properties[key], "#{path}_#{key}"
 
@@ -75,7 +125,7 @@ generate = (schema, path) -> do ->
             get: () -> _.object ([object.key, object.get()] for object in objects)
 
         else if schema.type == "array"
-            dom = $ """<div class="inner">"""
+            dom = $ """<div class="inner array-inner">"""
 
             items_div = $ """<div class="items">"""
             items = []
@@ -84,7 +134,7 @@ generate = (schema, path) -> do ->
                 item = generate schema.items, "#{path}_item"
                 item_div = $ """<div class="item">"""
 
-                rm_button = $("""<button>rm</button>""").click () ->
+                rm_button = $("""<button class="btn btn-danger item-btn"><i class="icon-minus-sign">""").click () ->
                     item_div.remove()
                     items = _.without(items, item)
                     false
@@ -92,7 +142,7 @@ generate = (schema, path) -> do ->
                 items_div.append item_div.append item.dom, rm_button
                 return item
 
-            new_button = $("""<button>mk</button>""").click () ->
+            new_button = $("""<button class="btn btn-success item-btn"><i class="icon-plus-sign">""").click () ->
                 items.push generate_item()
                 false
 
@@ -106,13 +156,22 @@ generate = (schema, path) -> do ->
                 return
             get: () -> item.get() for item in items
 
-        else if $.isArray schema.type
-            dom = $ """<div class="inner">"""
+        else if (_.isArray schema.type) and schema.type.length == 1
+            res = generate schema.type[0], "#{path}_single"
+            res.dom.addClass "single"
+            res
+
+        else if _.isArray schema.type
+            dom = $ """<div class="inner union-inner">"""
+            select_parent = $ """<div class="select-parent">"""
             select_dom = $ """<select>"""
 
             options = for subschema, i in schema.type
                 select_dom.append $ """<option value="#{i}">#{subschema.title}</option>"""
-                generate subschema, "#{path}_#{i}"
+                option = generate subschema, "#{path}_#{i}"
+                if subschema.default?
+                    option.set subschema.default
+                option
 
             for option, i in options
                 option_div = $ """<div class="option" id="#{i}"/>"""
@@ -123,16 +182,20 @@ generate = (schema, path) -> do ->
                 selected = null
                 set : (s) ->
                     selected = s if s?
-                    dom.children(".option").css "display","none"
-                    dom.children(".option##{selected}").css "display", "block"
+                    dom.children(".option").hide()
+                    dom.children(".option##{selected}").show()
+                    # select_parent.find("input:hidden").val selected
                     select_dom.val(selected)
                 get: () -> selected
 
             with_selected.set(0)
 
+            select_parent.append select_dom
             select_dom.change -> with_selected.set select_dom.val()
+            # select_dom.buttonSelect(false)
+            # select_parent.find("input:hidden").change -> console.log $(@); with_selected.set $(@).val()
 
-            dom: dom.prepend select_dom
+            dom: dom.prepend select_parent
             set: (x) ->
                 # Picks the first option with correct type
                 for subschema, i in schema.type when type_match x, subschema
@@ -144,10 +207,6 @@ generate = (schema, path) -> do ->
         else
             throw new Error "The type of #{JSON.stringify schema} is not supported!"
 
-logger = (f) -> (args...) ->
-    res = f(args...)
-    console.log "args: " + (JSON.stringify arg for arg in args) + " = ", res
-    res
 
 # True if first argument is of the type described by the second argument. Used to set union types
 type_match = do ->
@@ -161,6 +220,8 @@ type_match = do ->
             all value, (v) -> type_match v, schema.items
         else if _.isArray(schema.type)
             any schema.type, (s) -> type_match value, s
+        else if schema.enum?
+            _.contains schema.enum, value
         else
             schema.type == "string" and _.isString(value) or
             schema.type == "bool" and _.isBoolean(value)
