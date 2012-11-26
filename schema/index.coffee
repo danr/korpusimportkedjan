@@ -1,3 +1,4 @@
+
 $(window.document).ready () ->
 
     for key of examples
@@ -12,11 +13,11 @@ $(window.document).ready () ->
 
 load_example = (example) ->
     console.log example
-    [form_dom, form_load, form_get] = generate example.schema, "value"
-    $("#form").empty().append form_dom
-    form_load example.value
+    form = generate example.schema, "value"
+    $("#form").empty().append form.dom
+    form.set example.value
     $('#get').unbind('click').click () ->
-        v = form_get()
+        v = form.get()
         console.log v
         console.log JSON.stringify v
         $('#result').text JSON.stringify v
@@ -24,121 +25,106 @@ load_example = (example) ->
 generate = (schema, path) ->
 
     if schema.type == "string"
-        [ dom = $ """<span class="string">#{schema.title}: <input id="#{path}"></span>"""
-          (v) ->
-            console.log "Setting ", v, " to input elements under ", dom
-            $(dom).find(":input").val v
-            return
-          () ->
-            console.log "Retreiving value from input elements under ", dom
-            $(dom).find(":input").val()
-        ]
+        dom: dom = $ """<span class="string">#{schema.title}: <input id="#{path}"></span>"""
+        set: (v) -> $(dom).find(":input").val v; return
+        get: () -> $(dom).find(":input").val()
 
     else if schema.type == "bool"
-        [ dom = $ """<span class="bool"><input id="#{path}" type="checkbox"> #{schema.title}</span>"""
-          (v) ->
-            console.log "Setting ", v, " to checkbox elements under ", dom
-            $(dom).find(":checkbox").attr 'checked', v
-            return
-          () ->
-            console.log "Retreiving value from checkbox elements under ", dom
-            'checked' == $(dom).find(":checkbox").attr 'checked'
-        ]
+        dom: dom = $ """<span class="bool"><input id="#{path}" type="checkbox"> #{schema.title}</span>"""
+        set: (v) -> $(dom).find(":checkbox").attr 'checked', v; return
+        get: () -> 'checked' == $(dom).find(":checkbox").attr 'checked'
 
     else if schema.type == "object"
         dom = $ """<div class="object"><strong>#{schema.title}</strong></div>"""
         objects = for key of schema.properties
-            [].concat [key], generate schema.properties[key], "#{path}_#{key}"
+            _.extend {key: key}, generate schema.properties[key], "#{path}_#{key}"
 
-        for [ _, object_dom, _, _ ] in objects
-            dom.append object_dom
+        dom.append object.dom for object in objects
 
-        set = (obj) ->
-            console.log "Setting object ", obj, " to ", dom
-            for [ key, _ , object_set, _ ] in objects
-                console.log "Setting ", key, " with value ", obj[key],
-                    " of object ", obj, " pertaining to ", dom
-                object_set obj[key]
-            return
-
-        get = () ->
-            console.log "Getting object from items " , dom
-            obj = {}
-            obj[key] = get_key() for [ key, _, _, get_key ] in objects
-            obj
-
-        [ dom, set, get ]
+        dom: dom
+        set: (obj) -> object.set obj[object.key] for object in objects; return
+        get: () -> _.object ([object.key, object.get()] for object in objects)
 
     else if schema.type == "array"
         dom = $ """<div class="array"><strong>#{schema.title}</strong></div>"""
 
         items_div = $ """<div class="items">"""
-        items_get = []
+        items = []
 
         generate_item = () ->
-            item_div = $("""<div class="item">""")
-
-            [ item_dom, item_set, item_get ] = generate schema.items, "#{path}_element"
-
-            item_get_indirect = ref: item_get
+            item = generate schema.items, "#{path}_item"
+            item_div = $ """<div class="item">"""
 
             rm_button = $("""<button>rm</button>""").click () ->
                 item_div.remove()
-                item_get_indirect.ref = null
+                items = _.without(items, item)
                 false
 
-            item_div.append item_dom, rm_button
-
-            items_div.append item_div
-            items_get.push item_get_indirect
-            return item_set
+            items_div.append item_div.append item.dom, rm_button
+            return item
 
         new_button = $("""<button>mk</button>""").click () ->
-            generate_item()
+            items.push generate_item()
             false
 
-        dom.append new_button, items_div
-
-        set = (vs) ->
-            console.log "Setting array", vs, " to items div ", items_div
+        dom: dom.append new_button, items_div
+        set: (vs) ->
             items_div.empty()
-            generate_item() v for v in vs
+            items = for v in vs
+                item = generate_item()
+                item.set v
+                item
             return
-
-        get = () ->
-            console.log "Getting array from items " , items_div
-            for item_get_indirect in items_get when item_get_indirect.ref isnt null
-                item_get_indirect.ref()
-
-        [ dom, set, get ]
+        get: () -> item.get() for item in items
 
     else if $.isArray schema.type
-        dom = $ """<div class="union"><strong>#{schema.title}</strong></div>"""
-        select = $ """<select>"""
+        dom = $ """<div class="union">"""
+        select_dom = $ """<select>"""
 
         options = for subschema, i in schema.type
-            select.append $ """<option id="#{i}">#{subschema.title}</option>"""
-            [ object_dom, object_set, object_get ] = generate subschema, "#{path}_#{i}"
-            display = if i == 0 then "block" else "none"
-            dom.append $("""<div class="option" id="#{i}_div" style="display: none;">""").append object_dom
+            select_dom.append $ """<option value="#{i}">#{subschema.title}</option>"""
+            generate subschema, "#{path}_#{i}"
 
-        select.change () ->
-            dom.children(".option").css "display","none"
-            selected = $(@).children(":selected").attr "id"
-            console.log "Selected:", selected
-            dom.children("##{selected}_div").css "display", "block"
+        for option, i in options
+            option_div = $ """<div class="option" id="#{i}"/>"""
+            dom.append option_div.append option.dom
 
-        for [ object_dom, _, _ ], i in options
-            dom.append $("""<div class="option" id="#{i}_div" style="display: none;">""").append object_dom
+        # The selected item index is stored in the closed variable selected
+        with_selected = do ->
+            selected = null
+            set : (s) ->
+                selected = s if s?
+                dom.children(".option").css "display","none"
+                dom.children(".option##{selected}").css "display", "block"
+                select_dom.val(selected)
+            get: () -> selected
 
-        dom.prepend select
+        with_selected.set(0)
 
-        [ dom
-          (x) -> x
-          () -> return
-        ]
+        select_dom.change -> set_selected select_dom.val()
+
+        dom: dom.prepend $("""<strong>#{schema.title}</strong>"""), select_dom
+        set: (x) ->
+            # Picks the first option with correct type
+            for subschema, i in schema.type when type_match x, subschema
+                options[i].set(x)
+                with_selected.set(i)
+                break
+            return
+        get: () -> options[with_selected.get()].get()
     else
         throw new Error "The type of #{JSON.stringify(schema)} is not supported!"
+
+# True if first argument is of the type described by the second argument. Used to set union types
+type_match = do ->
+    [all, any, map] = [_.all, _.any, _.map]
+    (value, schema) ->
+        any [ schema.type == "string" and _.isString(value)
+              schema.type == "bool" and _.isBoolean(value)
+              schema.type == "object" and _.isObject(value) and
+                all map schema.properties, (key, subschema) -> type_match value.key, subschema
+              _.isArray(schema.type) and any schema.type, (s) -> type_match value, s
+            ]
 
 examples =
     union:
