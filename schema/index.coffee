@@ -1,12 +1,30 @@
 
+add_example_button = (key, example) ->
+    example_button = $("""<button>#{key}</button>""").click () ->
+        load_example example
+        false
+    $("#examples").append example_button
+
 $(window.document).ready () ->
 
+    $.ajax
+        url: "http://localhost:8051"
+        data:
+            format: "schema"
+        dataType: "json"
+        timeout: 300000
+        type: "GET"
+        success: (data, textStatus, xhr) ->
+            schema = schema_utils.follow_references data
+            console.log schema
+            add_example_button 'taxi',
+                schema: schema
+                value: schema_utils.get_default schema
+        error: (info...) ->
+            console.log info
+
     for key of examples
-        do (key) ->
-            example_button = $("""<button>#{key}</button>""").click () ->
-                load_example examples[key]
-                false
-            $("#examples").append example_button
+        do (key) -> add_example_button key, examples[key]
 
     load_example examples.array
 
