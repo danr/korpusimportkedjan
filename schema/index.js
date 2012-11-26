@@ -353,7 +353,7 @@
             _results = [];
             for (_k = 0, _len2 = options.length; _k < _len2; _k++) {
               option = options[_k];
-              _results.push(option.dom);
+              _results.push(option.dom.addClass("union-child"));
             }
             return _results;
           })();

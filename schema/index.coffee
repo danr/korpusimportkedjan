@@ -198,7 +198,7 @@ generate = (schema, path) -> do ->
             # select_dom.buttonSelect(false)
             # select_parent.find("input:hidden").change -> console.log $(@); with_selected.set $(@).val()
 
-            doms = (option.dom for option in options)
+            doms = (option.dom.addClass "union-child" for option in options)
             doms.unshift select_dom
 
             dom: doms

@@ -46,40 +46,61 @@ body {
 
 */
 
-.union-inner, .object-inner .object-inner {
-	margin-top: 10px;
+/* Grey separator between entries */
+#path > .nest  {
+	padding-bottom: 5px;
+	border-bottom: 1px #ccc solid;
+}
+
+/* Hanging indent */
+#path > .nest > .nest, #path > .nest > select {
 	margin-left: 30px;
+	padding-bottom: 0px;
 }
 
-.nest .title {
-	display: block;
-	font-size: 1.1em;
-	font-weight: bold
-}
-
-.bool .title {
-	display: inline;
-	font-size: 1em;
-	font-weight: normal;
-}
-
-.string .title {
-	display: inline;
-	font-size: 1em;
-	font-weight: normal;
-}
-
-.bool .title:after {
-	content: ": ";
+.dropdown-enum-nest > select {
+	margin-left: 0px;
 }
 
 /*
+.nest .nest .nest {
+	border-bottom: none;
+}
 
-   Don't display titles for union types
+/* But not in nested items */
+.items .item .nest {
+	margin-left: 0px;
+	border-bottom: 1px #ccc solid;
+	padding-bottom: 3px;
+}
 
+.nest .nest .nest .nest {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
 */
-.union-title {
+
+/* Don't show topmost title */
+.nest .title {
 	display: none;
+}
+
+.nest .nest .title {
+    margin-top: 5px;
+	display: block;
+	font-size: 1.1em;
+	font-weight: bold;
+}
+
+.nest .nest .nest .title {
+    margin-top: 0px;
+}
+
+.nest .nest .string .title {
+	display: inline;
+	font-size: 1em;
+	font-weight: normal;
 }
 
 /* titles */
@@ -98,35 +119,31 @@ body {
 
 /*
 
+   Don't display titles for union types
+
+*/
+
+.union-child > .title {
+	display: none ! important;
+}
+
+/*
+
    Strings and booleans (the latter unused)
 
 */
 
+.nest .string-title {
+	display: inline;
+}
 
-.string {
+.nest .nest .string {
 	display: inline;
 	vertical-align: top;
 }
 
 .bool {
 	display: inline;
-}
-
-/*
-
-   Grey separator between entries
-
-*/
-
-.nest .nest {
-	padding-bottom: 10px;
-	border-bottom: 1px #ccc solid;
-}
-
-.nest .nest .nest {
-	border: none;
-	margin: 0;
-	padding: 0;
 }
 
 /*
@@ -155,14 +172,10 @@ body {
 }
 
 #path_extra_tags .item .item{
+	display: block;
 	border: none;
 	padding: 0;
 	margin: 0;
-}
-
-#path_extra_tags .item .item {
-	display: block;
-	padding: none;
 }
 
 /*
@@ -214,6 +227,7 @@ body {
 #path_word_segmenter_1_attributes_item_attribute .title {
 	display: none;
 }
+
 
 /*
 
