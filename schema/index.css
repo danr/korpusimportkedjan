@@ -1,6 +1,32 @@
+/*
+
+   Make input boxes a little larger
+
+*/
+input[type=text] {
+    height: 2em;
+}
+
+/*
+
+   Style buttons
+
+*/
+.item-btn {
+    margin-left: 4px;
+	margin-top: 2px;
+    padding: 0.45em 0.5em 0.2em 0.5em;
+}
+
 body {
 	padding:  10px
 }
+
+/*
+
+   Hide descriptins, except in onlys (string of enum of only one value)
+
+*/
 
 .description {
 	display: none;
@@ -13,6 +39,12 @@ body {
 .only .title {
 	display: inline;
 }
+
+/*
+
+    Main flow
+
+*/
 
 .union-inner, .object-inner .object-inner {
 	margin-top: 10px;
@@ -41,6 +73,17 @@ body {
 	content: ": ";
 }
 
+/*
+
+   Don't display titles for union types
+
+*/
+.union-title {
+	display: none;
+}
+
+/* titles */
+
 .string .title:after {
 	content: ": ";
 }
@@ -53,6 +96,13 @@ body {
 	content: ": ";
 }
 
+/*
+
+   Strings and booleans (the latter unused)
+
+*/
+
+
 .string {
 	display: inline;
 	vertical-align: top;
@@ -62,13 +112,15 @@ body {
 	display: inline;
 }
 
+/*
+
+   Grey separator between entries
+
+*/
+
 .nest .nest {
-	padding-bottom: 5px;
+	padding-bottom: 10px;
 	border-bottom: 1px #ccc solid;
-	/*
-	margin: 5px;
-	padding: 5px;
-	*/
 }
 
 .nest .nest .nest {
@@ -77,10 +129,22 @@ body {
 	padding: 0;
 }
 
+/*
+
+   Border around array objects
+
+*/
+
 .array .object {
 	border: 1px #ccc solid;
 	padding: 6px;
 }
+
+/*
+
+   Extra tags
+
+*/
 
 #path_extra_tags .item {
 	border: 1px #ccc solid;
@@ -92,12 +156,20 @@ body {
 
 #path_extra_tags .item .item{
 	border: none;
+	padding: 0;
+	margin: 0;
 }
 
 #path_extra_tags .item .item {
 	display: block;
 	padding: none;
 }
+
+/*
+
+   Singles (buggy union types of only one element)
+
+*/
 
 .single .title {
 	display: none;
@@ -107,16 +179,52 @@ body {
 	display: block;
 }
 
-.single .nest .string .title {
+.single .nest .string-title {
 	display: inline;
 }
 
-input[type=text] {
-    height: 2em;
+/*
+
+   Word segmentation positional attributes
+
+*/
+
+#path_word_segmenter_1_attributes_item {
+	display: inline;
 }
 
-.item-btn {
-    margin-left: 4px;
-	margin-top: 2px;
-    padding: 0.45em 0.5em 0.2em 0.5em;
+#path_word_segmenter_1_attributes_item .inner {
+	display: inline;
+}
+
+#path_word_segmenter_1_attributes_item .title {
+	display: inline;
+	font-weight: normal;
+	font-size: 1em;
+}
+
+#path_word_segmenter_1_attributes_item .title:after {
+	content: ": ";
+}
+
+#path_word_segmenter_1_attributes_item_key .title {
+	display: none;
+}
+
+#path_word_segmenter_1_attributes_item_attribute .title {
+	display: none;
+}
+
+/*
+
+   Dropdowns (not used)
+
+*/
+
+.dropdown-enum .title {
+	display: inline;
+}
+
+.dropdown-enum {
+	display: inline;
 }

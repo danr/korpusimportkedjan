@@ -94,7 +94,7 @@
         return {
           "enum": schema["enum"],
           multi: false,
-          desc: "single-enum"
+          desc: schema.style_enum === "dropdown" ? "dropdown-enum" : "single-enum"
         };
       }
     } else {
@@ -107,24 +107,27 @@
       var decorator;
       schema.type = simplify_type(schema);
       decorator = function(make) {
-        var inner_dom, obj, type;
+        var dom, inner_dom, obj, type, _i, _len;
         obj = make();
         inner_dom = obj.dom;
         type = schema.type.desc || (_.isArray(schema.type) ? "union" : schema.type);
         obj.dom = $("<div class=\"" + type + " nest\" id=\"" + path + "\"/>");
         if (schema.title != null) {
-          obj.dom.append($("<div class=\"title\">" + schema.title + "</div>"));
+          obj.dom.append($("<div class=\"title " + type + "-title\">" + schema.title + "</div>"));
         } else {
           console.log("no title:", schema);
         }
         if (schema.description != null) {
           obj.dom.append($("<div class=\"description\">" + schema.description + "</div>"));
         }
-        obj.dom.append(inner_dom);
+        for (_i = 0, _len = inner_dom.length; _i < _len; _i++) {
+          dom = inner_dom[_i];
+          obj.dom.append(dom);
+        }
         return obj;
       };
       return decorator(function() {
-        var dom, generate_item, i, items, items_div, key, new_button, object, objects, option, option_div, options, res, select_dom, select_parent, subschema, toggle, v, with_selected, _i, _j, _k, _len, _len1, _len2, _ref;
+        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, res, select_dom, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1;
         if (schema.type.only != null) {
           return {
             dom: [],
@@ -134,44 +137,62 @@
             }
           };
         } else if (schema.type["enum"] != null) {
-          toggle = schema.type.multi ? "buttons-checkbox" : "buttons-radio";
-          dom = $("<div class=\"btn-group\" data-toggle=\"" + toggle + "\"/>");
-          _ref = schema.type["enum"];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            v = _ref[_i];
-            dom.append($("<button type=\"button\" class=\"btn\" id=\"" + v + "\">" + v + "</button>"));
-          }
-          return {
-            dom: dom,
-            set: function(vs) {
-              var _j, _len1, _results;
-              if (schema.type.multi) {
-                dom.children("button").removeClass("active");
-                _results = [];
-                for (_j = 0, _len1 = vs.length; _j < _len1; _j++) {
-                  v = vs[_j];
-                  _results.push(dom.find("#" + v).addClass("active"));
-                }
-                return _results;
-              } else {
-                return dom.children("button").removeClass("active").filter("#" + vs).addClass("active");
-              }
-            },
-            get: function() {
-              var c, _j, _len1, _ref1, _results;
-              if (schema.type.multi) {
-                _ref1 = dom.children(".active");
-                _results = [];
-                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-                  c = _ref1[_j];
-                  _results.push($(c).attr("id"));
-                }
-                return _results;
-              } else {
-                return dom.children(".active").attr("id");
-              }
+          if (schema.style_enum === "dropdown" && !schema.type.multi) {
+            dom = $("<select>");
+            _ref = schema.type["enum"];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              v = _ref[_i];
+              dom.append($("<option value=\"" + v + "\">" + v + "</option>"));
             }
-          };
+            return {
+              dom: dom,
+              set: function(s) {
+                return dom.val(s);
+              },
+              get: function() {
+                return dom.val();
+              }
+            };
+          } else {
+            toggle = schema.type.multi ? "buttons-checkbox" : "buttons-radio";
+            dom = $("<div class=\"btn-group\" data-toggle=\"" + toggle + "\"/>");
+            _ref1 = schema.type["enum"];
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              v = _ref1[_j];
+              dom.append($("<button type=\"button\" class=\"btn\" id=\"" + v + "\">" + v + "</button>"));
+            }
+            return {
+              dom: dom,
+              set: function(vs) {
+                var _k, _len2, _results;
+                if (schema.type.multi) {
+                  dom.children("button").removeClass("active");
+                  _results = [];
+                  for (_k = 0, _len2 = vs.length; _k < _len2; _k++) {
+                    v = vs[_k];
+                    _results.push(dom.find("#" + v).addClass("active"));
+                  }
+                  return _results;
+                } else {
+                  return dom.children("button").removeClass("active").filter("#" + vs).addClass("active");
+                }
+              },
+              get: function() {
+                var c, _k, _len2, _ref2, _results;
+                if (schema.type.multi) {
+                  _ref2 = dom.children(".active");
+                  _results = [];
+                  for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+                    c = _ref2[_k];
+                    _results.push($(c).attr("id"));
+                  }
+                  return _results;
+                } else {
+                  return dom.children(".active").attr("id");
+                }
+              }
+            };
+          }
         } else if (schema.type === "string") {
           return {
             dom: dom = $("<input type=\"text\">"),
@@ -193,7 +214,6 @@
             }
           };
         } else if (schema.type === "object") {
-          dom = $("<div class=\"inner object-inner\">");
           objects = (function() {
             var _results;
             _results = [];
@@ -204,12 +224,16 @@
             }
             return _results;
           })();
-          for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
-            object = objects[_j];
-            dom.append(object.dom);
-          }
           return {
-            dom: dom,
+            dom: (function() {
+              var _k, _len2, _results;
+              _results = [];
+              for (_k = 0, _len2 = objects.length; _k < _len2; _k++) {
+                object = objects[_k];
+                _results.push(object.dom);
+              }
+              return _results;
+            })(),
             set: function(obj) {
               var _k, _len2;
               for (_k = 0, _len2 = objects.length; _k < _len2; _k++) {
@@ -230,7 +254,6 @@
             }
           };
         } else if (schema.type === "array") {
-          dom = $("<div class=\"inner array-inner\">");
           items_div = $("<div class=\"items\">");
           items = [];
           generate_item = function() {
@@ -250,7 +273,7 @@
             return false;
           });
           return {
-            dom: dom.append(new_button, items_div),
+            dom: [new_button, items_div],
             set: function(vs) {
               var item;
               items_div.empty();
@@ -281,15 +304,13 @@
           res.dom.addClass("single");
           return res;
         } else if (_.isArray(schema.type)) {
-          dom = $("<div class=\"inner union-inner\">");
-          select_parent = $("<div class=\"select-parent\">");
           select_dom = $("<select>");
           options = (function() {
-            var _k, _len2, _ref1, _results;
-            _ref1 = schema.type;
+            var _k, _len2, _ref2, _results;
+            _ref2 = schema.type;
             _results = [];
-            for (i = _k = 0, _len2 = _ref1.length; _k < _len2; i = ++_k) {
-              subschema = _ref1[i];
+            for (i = _k = 0, _len2 = _ref2.length; _k < _len2; i = ++_k) {
+              subschema = _ref2[i];
               select_dom.append($("<option value=\"" + i + "\">" + subschema.title + "</option>"));
               option = generate(subschema, "" + path + "_" + i);
               if (subschema["default"] != null) {
@@ -299,21 +320,23 @@
             }
             return _results;
           })();
-          for (i = _k = 0, _len2 = options.length; _k < _len2; i = ++_k) {
-            option = options[i];
-            option_div = $("<div class=\"option\" id=\"" + i + "\"/>");
-            dom.append(option_div.append(option.dom));
-          }
           with_selected = (function() {
             var selected;
             selected = null;
             return {
               set: function(s) {
+                var _k, _len2;
                 if (s != null) {
                   selected = s;
                 }
-                dom.children(".option").hide();
-                dom.children(".option#" + selected).show();
+                for (i = _k = 0, _len2 = options.length; _k < _len2; i = ++_k) {
+                  option = options[i];
+                  if (i === Number(selected)) {
+                    option.dom.show();
+                  } else {
+                    option.dom.hide();
+                  }
+                }
                 return select_dom.val(selected);
               },
               get: function() {
@@ -322,17 +345,26 @@
             };
           })();
           with_selected.set(0);
-          select_parent.append(select_dom);
           select_dom.change(function() {
             return with_selected.set(select_dom.val());
           });
+          doms = (function() {
+            var _k, _len2, _results;
+            _results = [];
+            for (_k = 0, _len2 = options.length; _k < _len2; _k++) {
+              option = options[_k];
+              _results.push(option.dom);
+            }
+            return _results;
+          })();
+          doms.unshift(select_dom);
           return {
-            dom: dom.prepend(select_parent),
+            dom: doms,
             set: function(x) {
-              var _l, _len3, _ref1;
-              _ref1 = schema.type;
-              for (i = _l = 0, _len3 = _ref1.length; _l < _len3; i = ++_l) {
-                subschema = _ref1[i];
+              var _k, _len2, _ref2;
+              _ref2 = schema.type;
+              for (i = _k = 0, _len2 = _ref2.length; _k < _len2; i = ++_k) {
+                subschema = _ref2[i];
                 if (!(type_match(x, subschema))) {
                   continue;
                 }

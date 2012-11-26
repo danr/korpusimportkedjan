@@ -56,7 +56,7 @@ simplify_type = (schema) ->
         else
             enum: schema.enum
             multi: false
-            desc: "single-enum"
+            desc: if schema.style_enum == "dropdown" then "dropdown-enum" else "single-enum"
     else
         schema.type
 
@@ -70,12 +70,12 @@ generate = (schema, path) -> do ->
         type = schema.type.desc or if _.isArray schema.type then "union" else schema.type
         obj.dom = $ """<div class="#{type} nest" id="#{path}"/>"""
         if schema.title?
-            obj.dom.append $ """<div class="title">#{schema.title}</div>"""
+            obj.dom.append $ """<div class="title #{type}-title">#{schema.title}</div>"""
         else
             console.log "no title:", schema
         if schema.description?
             obj.dom.append $ """<div class="description">#{schema.description}</div>"""
-        obj.dom.append inner_dom
+        obj.dom.append dom for dom in inner_dom
         obj
 
     decorator ->
@@ -86,22 +86,32 @@ generate = (schema, path) -> do ->
             get: () -> schema.only
 
         else if schema.type.enum?
-            toggle = if schema.type.multi then "buttons-checkbox" else "buttons-radio"
-            dom = $ """<div class="btn-group" data-toggle="#{toggle}"/>"""
-            for v in schema.type.enum
-                dom.append $ """<button type="button" class="btn" id="#{v}">#{v}</button>"""
-            dom: dom
-            set: (vs) ->
-                if schema.type.multi
-                    dom.children("button").removeClass("active")
-                    dom.find("##{v}").addClass "active" for v in vs
-                else
-                    dom.children("button").removeClass("active").filter("##{vs}").addClass "active"
-            get: () ->
-                if schema.type.multi
-                    $(c).attr "id" for c in dom.children ".active"
-                else
-                    dom.children(".active").attr("id")
+            if schema.style_enum == "dropdown" and not schema.type.multi
+                dom = $ """<select>"""
+
+                for v in schema.type.enum
+                    dom.append $ """<option value="#{v}">#{v}</option>"""
+
+                dom: dom
+                set : (s) -> dom.val(s)
+                get: () -> dom.val()
+            else
+                toggle = if schema.type.multi then "buttons-checkbox" else "buttons-radio"
+                dom = $ """<div class="btn-group" data-toggle="#{toggle}"/>"""
+                for v in schema.type.enum
+                    dom.append $ """<button type="button" class="btn" id="#{v}">#{v}</button>"""
+                dom: dom
+                set: (vs) ->
+                    if schema.type.multi
+                        dom.children("button").removeClass("active")
+                        dom.find("##{v}").addClass "active" for v in vs
+                    else
+                        dom.children("button").removeClass("active").filter("##{vs}").addClass "active"
+                get: () ->
+                    if schema.type.multi
+                        $(c).attr "id" for c in dom.children ".active"
+                    else
+                        dom.children(".active").attr("id")
 
         else if schema.type == "string"
             dom: dom = $ """<input type="text">"""
@@ -114,19 +124,14 @@ generate = (schema, path) -> do ->
             get: () -> 'checked' == dom.attr 'checked'
 
         else if schema.type == "object"
-            dom = $ """<div class="inner object-inner">"""
             objects = for key of schema.properties
                 _.extend {key: key}, generate schema.properties[key], "#{path}_#{key}"
 
-            dom.append object.dom for object in objects
-
-            dom: dom
+            dom: (object.dom for object in objects)
             set: (obj) -> object.set obj[object.key] for object in objects; return
             get: () -> _.object ([object.key, object.get()] for object in objects)
 
         else if schema.type == "array"
-            dom = $ """<div class="inner array-inner">"""
-
             items_div = $ """<div class="items">"""
             items = []
 
@@ -146,7 +151,7 @@ generate = (schema, path) -> do ->
                 items.push generate_item()
                 false
 
-            dom: dom.append new_button, items_div
+            dom: [new_button, items_div]
             set: (vs) ->
                 items_div.empty()
                 items = for v in vs
@@ -162,8 +167,6 @@ generate = (schema, path) -> do ->
             res
 
         else if _.isArray schema.type
-            dom = $ """<div class="inner union-inner">"""
-            select_parent = $ """<div class="select-parent">"""
             select_dom = $ """<select>"""
 
             options = for subschema, i in schema.type
@@ -173,29 +176,32 @@ generate = (schema, path) -> do ->
                     option.set subschema.default
                 option
 
-            for option, i in options
-                option_div = $ """<div class="option" id="#{i}"/>"""
-                dom.append option_div.append option.dom
-
             # The selected item index is stored in the closed variable selected
             with_selected = do ->
                 selected = null
                 set : (s) ->
                     selected = s if s?
-                    dom.children(".option").hide()
-                    dom.children(".option##{selected}").show()
+                    for option, i in options
+                        if i == Number selected
+                            option.dom.show()
+                        else
+                            option.dom.hide()
                     # select_parent.find("input:hidden").val selected
                     select_dom.val(selected)
                 get: () -> selected
 
             with_selected.set(0)
 
-            select_parent.append select_dom
             select_dom.change -> with_selected.set select_dom.val()
+            # select_parent = $ """<div class="select-parent">"""
+            # select_parent.append select_dom
             # select_dom.buttonSelect(false)
             # select_parent.find("input:hidden").change -> console.log $(@); with_selected.set $(@).val()
 
-            dom: dom.prepend select_parent
+            doms = (option.dom for option in options)
+            doms.unshift select_dom
+
+            dom: doms
             set: (x) ->
                 # Picks the first option with correct type
                 for subschema, i in schema.type when type_match x, subschema
