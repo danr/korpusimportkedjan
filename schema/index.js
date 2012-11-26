@@ -13,7 +13,7 @@
   };
 
   $(window.document).ready(function() {
-    var key, _fn;
+    var key;
     $.ajax({
       url: "http://localhost:8051",
       data: {
@@ -37,11 +37,8 @@
         return console.log(info);
       }
     });
-    _fn = function(key) {
-      return add_example_button(key, examples[key]);
-    };
     for (key in examples) {
-      _fn(key);
+      add_example_button(key, examples[key]);
     }
     return load_example(examples.array);
   });

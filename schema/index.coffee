@@ -23,8 +23,7 @@ $(window.document).ready () ->
         error: (info...) ->
             console.log info
 
-    for key of examples
-        do (key) -> add_example_button key, examples[key]
+    add_example_button key, examples[key] for key of examples
 
     load_example examples.array
 
