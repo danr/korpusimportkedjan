@@ -62,34 +62,43 @@ simplify_type = (schema) ->
 
 generate = (schema, path) -> do ->
 
-    schema.type = simplify_type schema
+    type = simplify_type schema
 
     decorator = (make) ->
         obj = make()
         inner_dom = obj.dom
-        type = schema.type.desc or if _.isArray schema.type then "union" else schema.type
+        type = type.desc or if _.isArray type then "union" else type
         obj.dom = $ """<div class="#{type} nest" id="#{path}"/>"""
+
         if schema.title?
             obj.dom.append $ """<div class="title #{type}-title">#{schema.title}</div>"""
         else
             console.log "no title:", schema
+
+        if (schema.type == "object")
+            if _.all _.map schema.properties, ((subschema) -> subschema.type == "string")
+                obj.dom.addClass "simple-object"
+            else
+                obj.dom.addClass "complex-object"
+
         if schema.description?
             obj.dom.append $ """<div class="description">#{schema.description}</div>"""
+
         obj.dom.append dom for dom in inner_dom
         obj
 
     decorator ->
 
-        if schema.type.only?
+        if type.only?
             dom: []
             set: (v) -> return
-            get: () -> schema.type.only
+            get: () -> type.only
 
-        else if schema.type.enum?
-            if schema.style_enum == "dropdown" and not schema.type.multi
+        else if type.enum?
+            if schema.style_enum == "dropdown" and not type.multi
                 select = $ """<select>"""
 
-                for v in schema.type.enum
+                for v in type.enum
                     select.append $ """<option value="#{v}">#{v}</option>"""
 
                 dom = $ """<div class="select-parent">"""
@@ -100,34 +109,34 @@ generate = (schema, path) -> do ->
                 set : (s) -> dom.find("input:hidden").val(s)
                 get: () -> dom.find("input:hidden").val()
             else
-                toggle = if schema.type.multi then "buttons-checkbox" else "buttons-radio"
+                toggle = if type.multi then "buttons-checkbox" else "buttons-radio"
                 dom = $ """<div class="btn-group" data-toggle="#{toggle}"/>"""
-                for v in schema.type.enum
+                for v in type.enum
                     dom.append $ """<button type="button" class="btn button-enum" id="#{v}">#{v}</button>"""
                 dom: dom
                 set: (vs) ->
-                    if schema.type.multi
+                    if type.multi
                         dom.children("button").removeClass "active"
                         dom.find("##{v}").addClass "active" for v in vs
                     else
                         dom.children("button").removeClass("active").filter("##{vs}").addClass "active"
                 get: () ->
-                    if schema.type.multi
+                    if type.multi
                         $(c).attr "id" for c in dom.children ".active"
                     else
                         dom.children(".active").attr("id")
 
-        else if schema.type == "string"
+        else if type == "string"
             dom: dom = $ """<input type="text">"""
             set: (v) -> dom.val v; return
             get: () -> dom.val()
 
-        else if schema.type == "bool"
+        else if type == "bool"
             dom: dom = $ """<input type="checkbox">"""
             set: (v) -> dom.attr 'checked', v; return
             get: () -> 'checked' == dom.attr 'checked'
 
-        else if schema.type == "object"
+        else if type == "object"
             objects = for key of schema.properties
                 _.extend {key: key}, generate schema.properties[key], "#{path}_#{key}"
 
@@ -135,7 +144,7 @@ generate = (schema, path) -> do ->
             set: (obj) -> object.set obj[object.key] for object in objects; return
             get: () -> _.object ([object.key, object.get()] for object in objects)
 
-        else if schema.type == "array"
+        else if type == "array"
             items_div = $ """<div class="items">"""
             items = []
 
@@ -165,15 +174,15 @@ generate = (schema, path) -> do ->
                 return
             get: () -> item.get() for item in items
 
-        else if (_.isArray schema.type) and schema.type.length == 1
-            res = generate schema.type[0], "#{path}_single"
+        else if (_.isArray type) and type.length == 1
+            res = generate type[0], "#{path}_single"
             res.dom.addClass "single"
             res
 
-        else if _.isArray schema.type
+        else if _.isArray type
             select_dom = $ """<select>"""
 
-            options = for subschema, i in schema.type
+            options = for subschema, i in type
                 select_dom.append $ """<option value="#{i}">#{subschema.title}</option>"""
                 option = generate subschema, "#{path}_#{i}"
                 if subschema.default?
@@ -209,7 +218,7 @@ generate = (schema, path) -> do ->
             dom: doms
             set: (x) ->
                 # Picks the first option with correct type
-                for subschema, i in schema.type when type_match x, subschema
+                for subschema, i in type when type_match x, subschema
                     options[i].set(x)
                     with_selected.set(i)
                     break

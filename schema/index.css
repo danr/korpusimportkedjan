@@ -48,7 +48,7 @@ input[type=text] {
 .union-child > .title {
   display: none !important; }
 
-.item > .object {
+.item > .complex-object {
   border: 1px #cccccc solid;
   padding: 5px; }
 
@@ -66,14 +66,14 @@ input[type=text] {
 .single > .title {
   display: none; }
 
-#path_word_segmenter_1_attributes_item {
+.simple-object {
   display: inline;
   border: 0; }
-  #path_word_segmenter_1_attributes_item .title {
+  .simple-object .title {
     display: inline;
     font-weight: normal;
     font-size: 1em; }
-    #path_word_segmenter_1_attributes_item .title:after {
+    .simple-object .title:after {
       content: ": "; }
-  #path_word_segmenter_1_attributes_item > .nest > .title {
+  .simple-object > .nest > .title {
     display: none; }
