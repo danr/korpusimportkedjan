@@ -12,14 +12,8 @@ input[type=text]
   margin-top: 2px
   padding: 0.45em 0.5em 0.2em 0.5em
 
-// Hide descriptions, except in string of enumerations of only one value (only)
-
-.description
-  display: none
-
-.only .description
-  display: inline
-
+.array > .item-btn
+  margin-bottom: 5px
 
 //
 // Main flow
@@ -31,154 +25,78 @@ input[type=text]
 #path > .nest
   // Grey line between main entries
   padding-bottom: 5px
-  border-bottom: 1px #ccc solid
+  &:not(:last-child)
+    border-bottom: 1px #ccc solid
 
   // Hanging indent
 
-  & > .nest, & > .select-parent
+  & > :not(.title)
     margin-left: 30px
     padding-bottom: 0px
+
+  & > .title
+    font-weight: bold
 
   & > .select-parent
     padding-bottom: 5px
 
-.nest .nest .title
-  margin-top: 5px
-  display: block
+.title
   font-weight: bold
 
-.nest .nest .string .title
+.string
   display: inline
+
+.string-title
   font-weight: normal
+  display: inline
+  &:after
+    content: ": "
 
-// Colon after some titles
-.string .title:after
-  content: ": "
+// Hide descriptions, except in string of enumerations of only one value (only)
 
-.single-enum .title:after
-  content: ": "
+.description
+  display: none
 
-.multi-enum .title:after
-  content: ": "
+.only .description
+  display: inline
 
-// No titles
+// Don't duplicate union children's titles
 .union-child > .title
   display: none !important
 
-// Strings and booleans
-.nest .string-title
-  display: inline
-
-.nest .nest .string
-  display: inline
-  vertical-align: top
-
-.bool
-  display: inline
-
-// Border around array objects
-.array .object
+// Border around array item objects
+.item > .object
   border: 1px #ccc solid
   padding: 5px
 
-// Enumerate buttons
-
-.button-enum:hover
-  color: #000000
-
-.button-enum
-  color: #000000
-
-.button-enum.active:hover
-  background-color: lighten(#337ffa,5%)
-  color: #ffffff
-
-.button-enum.active
-  background-color: #337ffa
-  color: #ffffff
+// Drop downs
+.dropdown-enum
+  display: inline
+  & > .title, & > .select-parent
+    display: inline
+  padding: 6px
 
 // Drop downs
 .dropdown-enum
   display: inline
   .title
     display: inline
-  padding: 6px
-
-.dropdown-toggle, .dropdown-toggle:hover
-  color: #000000
-
-ul.dropdown-menu > li > a
-  color: #000000
-
-// Enumerate buttons
-
-
-.button-enum:hover
-  color: #000000
-
-.button-enum
-  color: #000000
-
-.button-enum.active:hover
-  background-color: lighten(#337ffa,5%)
-  color: #ffffff
-
-.button-enum.active
-  background-color: #337ffa
-  color: #ffffff
-
-//
-// Extra tags
-//
-
-#path_extra_tags
-  .item
-    border: 1px #ccc solid
-    display: inline-block
-    vertical-align: top
-    padding: 3px
-    margin: 3px
-    & .item
-      display: block
-      border: none
-      padding: 0
-      margin: 0
 
 // Singles (buggy union types of only one element)
 
 .single
-  .title
+  & > .title
     display: none
-  .nest .title
-    display: block
-  .single .nest .string-title
-    display: inline
 
 // Word segmentation positional attributes
 #path_word_segmenter_1_attributes_item
   display: inline
   border: 0
-  .inner
-    display: inline
   .title
     display: inline
     font-weight: normal
     font-size: 1em
     &:after
       content: ": "
-  .select-parent
-    display: inline
-
-#path_word_segmenter_1_attributes_item_key
-  .title
+  & > .nest > .title
     display: none
-
-#path_word_segmenter_1_attributes_item_attribute
-  .title
-    display: none
-
-// Drop downs
-.dropdown-enum
-  display: inline
-  .title
-    display: inline

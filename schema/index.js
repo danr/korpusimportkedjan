@@ -133,7 +133,7 @@
             dom: [],
             set: function(v) {},
             get: function() {
-              return schema.only;
+              return schema.type.only;
             }
           };
         } else if (schema.type["enum"] != null) {
@@ -335,7 +335,6 @@
                 if (s != null) {
                   selected = s;
                 }
-                console.log("Selecting", selected);
                 for (i = _k = 0, _len2 = options.length; _k < _len2; i = ++_k) {
                   option = options[i];
                   if (i === Number(selected)) {
@@ -354,7 +353,6 @@
           })();
           with_selected.set(0);
           select_parent.find("input:hidden").change(function() {
-            console.log($(this), $(this).val());
             return with_selected.set($(this).val());
           });
           doms = (function() {

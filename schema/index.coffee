@@ -83,7 +83,7 @@ generate = (schema, path) -> do ->
         if schema.type.only?
             dom: []
             set: (v) -> return
-            get: () -> schema.only
+            get: () -> schema.type.only
 
         else if schema.type.enum?
             if schema.style_enum == "dropdown" and not schema.type.multi
@@ -189,7 +189,6 @@ generate = (schema, path) -> do ->
                 selected = null
                 set : (s) ->
                     selected = s if s?
-                    console.log "Selecting", selected
                     for option, i in options
                         if i == Number selected
                             option.dom.show()
@@ -202,7 +201,6 @@ generate = (schema, path) -> do ->
             with_selected.set(0)
 
             select_parent.find("input:hidden").change ->
-                console.log $(this), $(this).val()
                 with_selected.set $(this).val()
 
             doms = (option.dom.addClass "union-child" for option in options)
