@@ -5,10 +5,13 @@ body
 // Make input boxes a bit taller
 input[type=text]
   height: 2em
+  margin-bottom: 0px
+  .item > .string > &
+    margin-right: 4px
 
 // Style buttons
 .item-btn
-  margin-left: 4px
+  // margin-left: 4px
   margin-top: 2px
   padding: 0.45em 0.5em 0.2em 0.5em
 
@@ -31,8 +34,7 @@ input[type=text]
   // Hanging indent
 
   & > :not(.title)
-    margin-left: 30px
-    padding-bottom: 0px
+    margin-left: 200px
 
   & > .title
     font-weight: bold
@@ -43,10 +45,10 @@ input[type=text]
 .title
   font-weight: bold
 
-.string
+.nest .nest .string
   display: inline
 
-.string-title
+.nest .nest .nest .string-title
   font-weight: normal
   display: inline
   &:after
@@ -63,6 +65,10 @@ input[type=text]
 // Don't duplicate union children's titles
 .union-child > .title
   display: none !important
+
+// Some margin between items
+.item
+  margin: 5px 0px 5px 0px
 
 // Border around array item objects
 .item > .complex-object
@@ -89,7 +95,7 @@ input[type=text]
     display: none
 
 // Word segmentation positional attributes
-.simple-object
+.nest .nest .nest .simple-object
   display: inline
   border: 0
   .title

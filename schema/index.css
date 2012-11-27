@@ -2,10 +2,12 @@ body {
   padding: 10px; }
 
 input[type=text] {
-  height: 2em; }
+  height: 2em;
+  margin-bottom: 0px; }
+  .item > .string > input[type=text] {
+    margin-right: 4px; }
 
 .item-btn {
-  margin-left: 4px;
   margin-top: 2px;
   padding: 0.45em 0.5em 0.2em 0.5em; }
 
@@ -20,8 +22,7 @@ input[type=text] {
   #path > .nest:not(:last-child) {
     border-bottom: 1px #cccccc solid; }
   #path > .nest > :not(.title) {
-    margin-left: 30px;
-    padding-bottom: 0px; }
+    margin-left: 200px; }
   #path > .nest > .title {
     font-weight: bold; }
   #path > .nest > .select-parent {
@@ -30,13 +31,13 @@ input[type=text] {
 .title {
   font-weight: bold; }
 
-.string {
+.nest .nest .string {
   display: inline; }
 
-.string-title {
+.nest .nest .nest .string-title {
   font-weight: normal;
   display: inline; }
-  .string-title:after {
+  .nest .nest .nest .string-title:after {
     content: ": "; }
 
 .description {
@@ -47,6 +48,9 @@ input[type=text] {
 
 .union-child > .title {
   display: none !important; }
+
+.item {
+  margin: 5px 0px 5px 0px; }
 
 .item > .complex-object {
   border: 1px #cccccc solid;
@@ -66,14 +70,14 @@ input[type=text] {
 .single > .title {
   display: none; }
 
-.simple-object {
+.nest .nest .nest .simple-object {
   display: inline;
   border: 0; }
-  .simple-object .title {
+  .nest .nest .nest .simple-object .title {
     display: inline;
     font-weight: normal;
     font-size: 1em; }
-    .simple-object .title:after {
+    .nest .nest .nest .simple-object .title:after {
       content: ": "; }
-  .simple-object > .nest > .title {
+  .nest .nest .nest .simple-object > .nest > .title {
     display: none; }
