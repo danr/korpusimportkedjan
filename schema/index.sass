@@ -1,0 +1,184 @@
+// Body padding
+body
+  padding: 10px
+
+// Make input boxes a bit taller
+input[type=text]
+  height: 2em
+
+// Style buttons
+.item-btn
+  margin-left: 4px
+  margin-top: 2px
+  padding: 0.45em 0.5em 0.2em 0.5em
+
+// Hide descriptions, except in string of enumerations of only one value (only)
+
+.description
+  display: none
+
+.only .description
+  display: inline
+
+
+//
+// Main flow
+//
+
+#path > .title
+  display: none
+
+#path > .nest
+  // Grey line between main entries
+  padding-bottom: 5px
+  border-bottom: 1px #ccc solid
+
+  // Hanging indent
+
+  & > .nest, & > .select-parent
+    margin-left: 30px
+    padding-bottom: 0px
+
+  & > .select-parent
+    padding-bottom: 5px
+
+.nest .nest .title
+  margin-top: 5px
+  display: block
+  font-weight: bold
+
+.nest .nest .string .title
+  display: inline
+  font-weight: normal
+
+// Colon after some titles
+.string .title:after
+  content: ": "
+
+.single-enum .title:after
+  content: ": "
+
+.multi-enum .title:after
+  content: ": "
+
+// No titles
+.union-child > .title
+  display: none !important
+
+// Strings and booleans
+.nest .string-title
+  display: inline
+
+.nest .nest .string
+  display: inline
+  vertical-align: top
+
+.bool
+  display: inline
+
+// Border around array objects
+.array .object
+  border: 1px #ccc solid
+  padding: 5px
+
+// Enumerate buttons
+
+.button-enum:hover
+  color: #000000
+
+.button-enum
+  color: #000000
+
+.button-enum.active:hover
+  background-color: lighten(#337ffa,5%)
+  color: #ffffff
+
+.button-enum.active
+  background-color: #337ffa
+  color: #ffffff
+
+// Drop downs
+.dropdown-enum
+  display: inline
+  .title
+    display: inline
+  padding: 6px
+
+.dropdown-toggle, .dropdown-toggle:hover
+  color: #000000
+
+ul.dropdown-menu > li > a
+  color: #000000
+
+// Enumerate buttons
+
+
+.button-enum:hover
+  color: #000000
+
+.button-enum
+  color: #000000
+
+.button-enum.active:hover
+  background-color: lighten(#337ffa,5%)
+  color: #ffffff
+
+.button-enum.active
+  background-color: #337ffa
+  color: #ffffff
+
+//
+// Extra tags
+//
+
+#path_extra_tags
+  .item
+    border: 1px #ccc solid
+    display: inline-block
+    vertical-align: top
+    padding: 3px
+    margin: 3px
+    & .item
+      display: block
+      border: none
+      padding: 0
+      margin: 0
+
+// Singles (buggy union types of only one element)
+
+.single
+  .title
+    display: none
+  .nest .title
+    display: block
+  .single .nest .string-title
+    display: inline
+
+// Word segmentation positional attributes
+#path_word_segmenter_1_attributes_item
+  display: inline
+  border: 0
+  .inner
+    display: inline
+  .title
+    display: inline
+    font-weight: normal
+    font-size: 1em
+    &:after
+      content: ": "
+  .select-parent
+    display: inline
+
+#path_word_segmenter_1_attributes_item_key
+  .title
+    display: none
+
+#path_word_segmenter_1_attributes_item_attribute
+  .title
+    display: none
+
+// Drop downs
+.dropdown-enum
+  display: inline
+  .title
+    display: inline

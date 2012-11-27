@@ -1,6 +1,6 @@
 
 add_example_button = (key, example) ->
-    example_button = $("""<button>#{key}</button>""").click () ->
+    example_button = $("""<button class="btn btn-info">#{key}</button>""").click () ->
         load_example example
         false
     $("#examples").append example_button
@@ -87,23 +87,27 @@ generate = (schema, path) -> do ->
 
         else if schema.type.enum?
             if schema.style_enum == "dropdown" and not schema.type.multi
-                dom = $ """<select>"""
+                select = $ """<select>"""
 
                 for v in schema.type.enum
-                    dom.append $ """<option value="#{v}">#{v}</option>"""
+                    select.append $ """<option value="#{v}">#{v}</option>"""
+
+                dom = $ """<div class="select-parent">"""
+                dom.append select
+                select.buttonSelect(true)
 
                 dom: dom
-                set : (s) -> dom.val(s)
-                get: () -> dom.val()
+                set : (s) -> dom.find("input:hidden").val(s)
+                get: () -> dom.find("input:hidden").val()
             else
                 toggle = if schema.type.multi then "buttons-checkbox" else "buttons-radio"
                 dom = $ """<div class="btn-group" data-toggle="#{toggle}"/>"""
                 for v in schema.type.enum
-                    dom.append $ """<button type="button" class="btn" id="#{v}">#{v}</button>"""
+                    dom.append $ """<button type="button" class="btn button-enum" id="#{v}">#{v}</button>"""
                 dom: dom
                 set: (vs) ->
                     if schema.type.multi
-                        dom.children("button").removeClass("active")
+                        dom.children("button").removeClass "active"
                         dom.find("##{v}").addClass "active" for v in vs
                     else
                         dom.children("button").removeClass("active").filter("##{vs}").addClass "active"
@@ -176,30 +180,33 @@ generate = (schema, path) -> do ->
                     option.set subschema.default
                 option
 
+            select_parent = $ """<div class="select-parent">"""
+            select_parent.append select_dom
+            select_dom.buttonSelect(false)
+
             # The selected item index is stored in the closed variable selected
             with_selected = do ->
                 selected = null
                 set : (s) ->
                     selected = s if s?
+                    console.log "Selecting", selected
                     for option, i in options
                         if i == Number selected
                             option.dom.show()
                         else
                             option.dom.hide()
-                    # select_parent.find("input:hidden").val selected
+                    select_parent.find("input:hidden").val selected
                     select_dom.val(selected)
                 get: () -> selected
 
             with_selected.set(0)
 
-            select_dom.change -> with_selected.set select_dom.val()
-            # select_parent = $ """<div class="select-parent">"""
-            # select_parent.append select_dom
-            # select_dom.buttonSelect(false)
-            # select_parent.find("input:hidden").change -> console.log $(@); with_selected.set $(@).val()
+            select_parent.find("input:hidden").change ->
+                console.log $(this), $(this).val()
+                with_selected.set $(this).val()
 
             doms = (option.dom.addClass "union-child" for option in options)
-            doms.unshift select_dom
+            doms.unshift select_parent
 
             dom: doms
             set: (x) ->

@@ -5,7 +5,7 @@
 
   add_example_button = function(key, example) {
     var example_button;
-    example_button = $("<button>" + key + "</button>").click(function() {
+    example_button = $("<button class=\"btn btn-info\">" + key + "</button>").click(function() {
       load_example(example);
       return false;
     });
@@ -127,7 +127,7 @@
         return obj;
       };
       return decorator(function() {
-        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, res, select_dom, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1;
+        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, res, select, select_dom, select_parent, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1;
         if (schema.type.only != null) {
           return {
             dom: [],
@@ -138,19 +138,22 @@
           };
         } else if (schema.type["enum"] != null) {
           if (schema.style_enum === "dropdown" && !schema.type.multi) {
-            dom = $("<select>");
+            select = $("<select>");
             _ref = schema.type["enum"];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               v = _ref[_i];
-              dom.append($("<option value=\"" + v + "\">" + v + "</option>"));
+              select.append($("<option value=\"" + v + "\">" + v + "</option>"));
             }
+            dom = $("<div class=\"select-parent\">");
+            dom.append(select);
+            select.buttonSelect(true);
             return {
               dom: dom,
               set: function(s) {
-                return dom.val(s);
+                return dom.find("input:hidden").val(s);
               },
               get: function() {
-                return dom.val();
+                return dom.find("input:hidden").val();
               }
             };
           } else {
@@ -159,7 +162,7 @@
             _ref1 = schema.type["enum"];
             for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
               v = _ref1[_j];
-              dom.append($("<button type=\"button\" class=\"btn\" id=\"" + v + "\">" + v + "</button>"));
+              dom.append($("<button type=\"button\" class=\"btn button-enum\" id=\"" + v + "\">" + v + "</button>"));
             }
             return {
               dom: dom,
@@ -320,6 +323,9 @@
             }
             return _results;
           })();
+          select_parent = $("<div class=\"select-parent\">");
+          select_parent.append(select_dom);
+          select_dom.buttonSelect(false);
           with_selected = (function() {
             var selected;
             selected = null;
@@ -329,6 +335,7 @@
                 if (s != null) {
                   selected = s;
                 }
+                console.log("Selecting", selected);
                 for (i = _k = 0, _len2 = options.length; _k < _len2; i = ++_k) {
                   option = options[i];
                   if (i === Number(selected)) {
@@ -337,6 +344,7 @@
                     option.dom.hide();
                   }
                 }
+                select_parent.find("input:hidden").val(selected);
                 return select_dom.val(selected);
               },
               get: function() {
@@ -345,8 +353,9 @@
             };
           })();
           with_selected.set(0);
-          select_dom.change(function() {
-            return with_selected.set(select_dom.val());
+          select_parent.find("input:hidden").change(function() {
+            console.log($(this), $(this).val());
+            return with_selected.set($(this).val());
           });
           doms = (function() {
             var _k, _len2, _results;
@@ -357,7 +366,7 @@
             }
             return _results;
           })();
-          doms.unshift(select_dom);
+          doms.unshift(select_parent);
           return {
             dom: doms,
             set: function(x) {

@@ -1,244 +1,147 @@
-/*
-
-   Make input boxes a little larger
-
-*/
-input[type=text] {
-    height: 2em;
-}
-
-/*
-
-   Style buttons
-
-*/
-.item-btn {
-    margin-left: 4px;
-	margin-top: 2px;
-    padding: 0.45em 0.5em 0.2em 0.5em;
-}
-
 body {
-	padding:  10px
-}
+  padding: 10px; }
 
-/*
+input[type=text] {
+  height: 2em; }
 
-   Hide descriptins, except in onlys (string of enum of only one value)
-
-*/
+.item-btn {
+  margin-left: 4px;
+  margin-top: 2px;
+  padding: 0.45em 0.5em 0.2em 0.5em; }
 
 .description {
-	display: none;
-}
+  display: none; }
 
 .only .description {
-	display: inline;
-}
+  display: inline; }
 
-.only .title {
-	display: inline;
-}
+#path > .title {
+  display: none; }
 
-/*
-
-    Main flow
-
-*/
-
-/* Grey separator between entries */
-#path > .nest  {
-	padding-bottom: 5px;
-	border-bottom: 1px #ccc solid;
-}
-
-/* Hanging indent */
-#path > .nest > .nest, #path > .nest > select {
-	margin-left: 30px;
-	padding-bottom: 0px;
-}
-
-.dropdown-enum-nest > select {
-	margin-left: 0px;
-}
-
-/*
-.nest .nest .nest {
-	border-bottom: none;
-}
-
-/* But not in nested items */
-.items .item .nest {
-	margin-left: 0px;
-	border-bottom: 1px #ccc solid;
-	padding-bottom: 3px;
-}
-
-.nest .nest .nest .nest {
-	border: none;
-	margin: 0;
-	padding: 0;
-}
-*/
-
-/* Don't show topmost title */
-.nest .title {
-	display: none;
-}
+#path > .nest {
+  padding-bottom: 5px;
+  border-bottom: 1px #cccccc solid; }
+  #path > .nest > .nest, #path > .nest > .select-parent {
+    margin-left: 30px;
+    padding-bottom: 0px; }
+  #path > .nest > .select-parent {
+    padding-bottom: 5px; }
 
 .nest .nest .title {
-    margin-top: 5px;
-	display: block;
-	font-size: 1.1em;
-	font-weight: bold;
-}
-
-.nest .nest .nest .title {
-    margin-top: 0px;
-}
+  margin-top: 5px;
+  display: block;
+  font-weight: bold; }
 
 .nest .nest .string .title {
-	display: inline;
-	font-size: 1em;
-	font-weight: normal;
-}
-
-/* titles */
+  display: inline;
+  font-weight: normal; }
 
 .string .title:after {
-	content: ": ";
-}
+  content: ": "; }
 
 .single-enum .title:after {
-	content: ": ";
-}
+  content: ": "; }
 
 .multi-enum .title:after {
-	content: ": ";
-}
-
-/*
-
-   Don't display titles for union types
-
-*/
+  content: ": "; }
 
 .union-child > .title {
-	display: none ! important;
-}
-
-/*
-
-   Strings and booleans (the latter unused)
-
-*/
+  display: none !important; }
 
 .nest .string-title {
-	display: inline;
-}
+  display: inline; }
 
 .nest .nest .string {
-	display: inline;
-	vertical-align: top;
-}
+  display: inline;
+  vertical-align: top; }
 
 .bool {
-	display: inline;
-}
-
-/*
-
-   Border around array objects
-
-*/
+  display: inline; }
 
 .array .object {
-	border: 1px #ccc solid;
-	padding: 6px;
-}
+  border: 1px #cccccc solid;
+  padding: 5px; }
 
-/*
+.button-enum:hover {
+  color: black; }
 
-   Extra tags
+.button-enum {
+  color: black; }
 
-*/
+.button-enum.active:hover {
+  background-color: #4c8ffb;
+  color: white; }
 
-#path_extra_tags .item {
-	border: 1px #ccc solid;
-	display: inline-block;
-	vertical-align: top;
-	padding: 3px;
-	margin: 3px;
-}
-
-#path_extra_tags .item .item{
-	display: block;
-	border: none;
-	padding: 0;
-	margin: 0;
-}
-
-/*
-
-   Singles (buggy union types of only one element)
-
-*/
-
-.single .title {
-	display: none;
-}
-
-.single .nest .title {
-	display: block;
-}
-
-.single .nest .string-title {
-	display: inline;
-}
-
-/*
-
-   Word segmentation positional attributes
-
-*/
-
-#path_word_segmenter_1_attributes_item {
-	display: inline;
-}
-
-#path_word_segmenter_1_attributes_item .inner {
-	display: inline;
-}
-
-#path_word_segmenter_1_attributes_item .title {
-	display: inline;
-	font-weight: normal;
-	font-size: 1em;
-}
-
-#path_word_segmenter_1_attributes_item .title:after {
-	content: ": ";
-}
-
-#path_word_segmenter_1_attributes_item_key .title {
-	display: none;
-}
-
-#path_word_segmenter_1_attributes_item_attribute .title {
-	display: none;
-}
-
-
-/*
-
-   Dropdowns (not used)
-
-*/
-
-.dropdown-enum .title {
-	display: inline;
-}
+.button-enum.active {
+  background-color: #337ffa;
+  color: white; }
 
 .dropdown-enum {
-	display: inline;
-}
+  display: inline;
+  padding: 6px; }
+  .dropdown-enum .title {
+    display: inline; }
+
+.dropdown-toggle, .dropdown-toggle:hover {
+  color: black; }
+
+ul.dropdown-menu > li > a {
+  color: black; }
+
+.button-enum:hover {
+  color: black; }
+
+.button-enum {
+  color: black; }
+
+.button-enum.active:hover {
+  background-color: #4c8ffb;
+  color: white; }
+
+.button-enum.active {
+  background-color: #337ffa;
+  color: white; }
+
+#path_extra_tags .item {
+  border: 1px #cccccc solid;
+  display: inline-block;
+  vertical-align: top;
+  padding: 3px;
+  margin: 3px; }
+  #path_extra_tags .item .item {
+    display: block;
+    border: none;
+    padding: 0;
+    margin: 0; }
+
+.single .title {
+  display: none; }
+.single .nest .title {
+  display: block; }
+.single .single .nest .string-title {
+  display: inline; }
+
+#path_word_segmenter_1_attributes_item {
+  display: inline;
+  border: 0; }
+  #path_word_segmenter_1_attributes_item .inner {
+    display: inline; }
+  #path_word_segmenter_1_attributes_item .title {
+    display: inline;
+    font-weight: normal;
+    font-size: 1em; }
+    #path_word_segmenter_1_attributes_item .title:after {
+      content: ": "; }
+  #path_word_segmenter_1_attributes_item .select-parent {
+    display: inline; }
+
+#path_word_segmenter_1_attributes_item_key .title {
+  display: none; }
+
+#path_word_segmenter_1_attributes_item_attribute .title {
+  display: none; }
+
+.dropdown-enum {
+  display: inline; }
+  .dropdown-enum .title {
+    display: inline; }
