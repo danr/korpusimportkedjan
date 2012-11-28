@@ -123,12 +123,21 @@ body
   /* Items */
   // Some margin between items
   .item
-    margin: 5px 0px 5px 0px
+    margin-top: 5px
+    margin-bottom: 5px
+  .item:last-child
+    margin-bottom: 0px
 
-  // Border around array item objects
+
+  // Border and some extra space around array item objects
   .item > .complex-object
     border: 1px #ccc solid
-    padding: 5px
+    padding: 10px
+    margin-right: 7px
+    &:not(first-child)
+      margin-top: 5px
+    &:not(last-child)
+      margin-bottom: 5px
 
   /* Selects */
   .select-parent

@@ -80,10 +80,18 @@ body {
   #settings .only .description {
     display: inline; }
   #settings .item {
-    margin: 5px 0px 5px 0px; }
+    margin-top: 5px;
+    margin-bottom: 5px; }
+  #settings .item:last-child {
+    margin-bottom: 0px; }
   #settings .item > .complex-object {
     border: 1px #cccccc solid;
-    padding: 5px; }
+    padding: 10px;
+    margin-right: 7px; }
+    #settings .item > .complex-object:not(first-child) {
+      margin-top: 5px; }
+    #settings .item > .complex-object:not(last-child) {
+      margin-bottom: 5px; }
   #settings .select-parent {
     padding-bottom: 5px; }
   #settings .dropdown-enum {
