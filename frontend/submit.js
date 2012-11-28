@@ -63,7 +63,7 @@ function submit(xml_editor,format) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            clear_progress_bar();
+            progress.clear();
             console.log("error", jqXHR, textStatus, errorThrown);
         }
     });

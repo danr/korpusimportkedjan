@@ -11,25 +11,20 @@ function s(str, pos, ref, head, rel) {
 
 function main() {
 
-    init_brat();
+    // Make the form
+    load_form();
 
-    /*
-      head.ready(function () {
-      draw_brat_tree(
-      [s("En"               , "DT", 1, 2, "DT"),
-      s("exempeltext"   , "NN", 2, 3, "SS"),
-      s("kommer"            , "VB", 3, null, "ROOT"),
-      s("lastad"            , "PC", 4, 3, "SP"),
-      s("."             , "MAD", 5, 3, "IP"),
-      ], 'example_tree');
-      });
-    */
+    // Initialize brat
+    init_brat();
 
     // Activate tooltips
     $('.header span').tooltip({placement: "bottom"});
 
-    // Make the form
-    xml_editor = mkForm()
+    // Make the xml editor
+    var xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
+        lineNumbers: true
+    });
+
 
     // Set the initial text
     xml_editor.setValue("En exempeltext kommer lastad. Med vadå?");
