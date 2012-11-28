@@ -1,14 +1,5 @@
 $(document).ready(main);
 
-function s(str, pos, ref, head, rel) {
-    var res = new String(str);
-    res.pos = pos;
-    res.ref = ref;
-    res.dephead = head;
-    res.deprel = rel;
-    return res;
-}
-
 function main() {
 
     // Make the form
@@ -40,7 +31,7 @@ function main() {
         var button_id = "example" + idx;
         $('<button class="btn btn-small btn-info" style="margin:5px"/>')
             .attr("id",button_id)
-            .text(" " + val.corpus)
+            .text(" " + val.title)
             .prepend($('<i class="icon-book"/>'))
             .appendTo('#example_buttons');
         $('#' + button_id).click(function () {

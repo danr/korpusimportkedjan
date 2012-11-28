@@ -106,7 +106,7 @@ generate = (schema, path) -> do ->
                 select.buttonSelect(true)
 
                 dom: dom
-                set : (s) -> dom.find("input:hidden").val(s)
+                set: (s) -> dom.find("input:hidden").val(s).trigger('change')
                 get: () -> dom.find("input:hidden").val()
             else
                 toggle = if type.multi then "buttons-checkbox" else "buttons-radio"
@@ -198,8 +198,12 @@ generate = (schema, path) -> do ->
                             option.dom.show()
                         else
                             option.dom.hide()
-                    select_parent.find("input:hidden").val selected
-                    select_dom.val(selected)
+                    hidden = select_parent.find("input:hidden")
+                    # We cannot unconditionally update the hidden, because
+                    # we are also listening for change events from it
+                    if hidden.val() != selected
+                        hidden.val(selected)
+                        hidden.trigger('change')
                 get: () -> selected
 
             with_selected.set(0)
@@ -213,10 +217,11 @@ generate = (schema, path) -> do ->
             dom: doms
             set: (x) ->
                 # Picks the first option with correct type
-                for subschema, i in type when type_match x, subschema
-                    options[i].set(x)
-                    with_selected.set(i)
-                    break
+                for subschema, i in type
+                    if type_match x, subschema
+                        options[i].set(x)
+                        with_selected.set(i)
+                        break
                 return
             get: () -> options[with_selected.get()].get()
         else

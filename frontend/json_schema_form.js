@@ -144,7 +144,7 @@
             return {
               dom: dom,
               set: function(s) {
-                return dom.find("input:hidden").val(s);
+                return dom.find("input:hidden").val(s).trigger('change');
               },
               get: function() {
                 return dom.find("input:hidden").val();
@@ -320,7 +320,7 @@
             selected = null;
             return {
               set: function(s) {
-                var _k, _len2;
+                var hidden, _k, _len2;
                 if (s != null) {
                   selected = s;
                 }
@@ -332,8 +332,11 @@
                     option.dom.hide();
                   }
                 }
-                select_parent.find("input:hidden").val(selected);
-                return select_dom.val(selected);
+                hidden = select_parent.find("input:hidden");
+                if (hidden.val() !== selected) {
+                  hidden.val(selected);
+                  return hidden.trigger('change');
+                }
               },
               get: function() {
                 return selected;
@@ -360,12 +363,11 @@
               var _k, _len2;
               for (i = _k = 0, _len2 = type.length; _k < _len2; i = ++_k) {
                 subschema = type[i];
-                if (!(type_match(x, subschema))) {
-                  continue;
+                if (type_match(x, subschema)) {
+                  options[i].set(x);
+                  with_selected.set(i);
+                  break;
                 }
-                options[i].set(x);
-                with_selected.set(i);
-                break;
               }
             },
             get: function() {
