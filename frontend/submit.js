@@ -17,7 +17,7 @@ function show_errors(data) {
 
 function submit(xml_editor,format) {
 
-    var settings = mkJsonSetting();
+    var settings = with_form.get();
 
     var incremental = format != "makefile";
 

@@ -35,7 +35,7 @@ function main() {
             .prepend($('<i class="icon-book"/>'))
             .appendTo('#example_buttons');
         $('#' + button_id).click(function () {
-            loadExample(xml_editor, examples[idx]);
+            with_form.set(xml_editor, examples[idx]);
         })
     });
 

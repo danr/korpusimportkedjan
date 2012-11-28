@@ -2,13 +2,13 @@
 (function() {
   var attasidor_xml, drama_xml, lasbart_xml, talbanken_xml;
 
-  attasidor_xml = attasidor_xml || "";
+  attasidor_xml = window.attasidor_xml || "";
 
-  drama_xml = drama_xml || "";
+  drama_xml = window.drama_xml || "";
 
-  lasbart_xml = lasbart_xml || "";
+  lasbart_xml = window.lasbart_xml || "";
 
-  talbanken_xml = talbanken_xml || "";
+  talbanken_xml = window.talbanken_xml || "";
 
   window.all_attributes = ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
 
@@ -71,6 +71,7 @@
       corpus_xml: talbanken_xml
     }, {
       title: "Läsbart",
+      corpus: "lasbart",
       word_segmenter: {
         tag: "w",
         attributes: [
@@ -91,6 +92,7 @@
       corpus_xml: lasbart_xml
     }, {
       title: "Exempelkorpus",
+      corpus: "exempelkorpus",
       word_segmenter: "punkt_word",
       root: {
         tag: "text",

@@ -1,5 +1,6 @@
-window.loadExample = () -> console.log "Error: Form not loaded!"
-window.mkJsonSetting = () -> console.log "Error: Form not loaded!"
+window.with_form =
+    get: () -> console.log "Error: Form not loaded!"
+    set: () -> console.log "Error: Form not loaded!"
 
 set_form = (schema, value) ->
 
@@ -7,11 +8,11 @@ set_form = (schema, value) ->
     $("#form").empty().append form.dom
     form.set value
 
-    window.loadExample = (xml_editor, example) ->
+    window.with_form.set = (xml_editor, example) ->
         xml_editor.setValue example.corpus_xml
         form.set example
 
-    window.mkJsonSetting = form.get
+    window.with_form.get = form.get
 
 window.load_form = () ->
 

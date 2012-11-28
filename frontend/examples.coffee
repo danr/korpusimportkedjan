@@ -1,7 +1,7 @@
-attasidor_xml = attasidor_xml or "";
-drama_xml = drama_xml or "";
-lasbart_xml = lasbart_xml or "";
-talbanken_xml = talbanken_xml or "";
+attasidor_xml = window.attasidor_xml or "";
+drama_xml = window.drama_xml or "";
+lasbart_xml = window.lasbart_xml or "";
+talbanken_xml = window.talbanken_xml or "";
 
 window.all_attributes = ["word", "pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
 
@@ -52,6 +52,7 @@ window.examples =
         corpus_xml: talbanken_xml
     ,
         title: "Läsbart"
+        corpus: "lasbart"
         word_segmenter:
             tag: "w"
             attributes: [
@@ -67,6 +68,7 @@ window.examples =
         corpus_xml: lasbart_xml
     ,
         title: "Exempelkorpus"
+        corpus: "exempelkorpus"
         word_segmenter: "punkt_word"
         root:
             tag: "text"

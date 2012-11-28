@@ -3,12 +3,13 @@
   var set_form,
     __slice = [].slice;
 
-  window.loadExample = function() {
-    return console.log("Error: Form not loaded!");
-  };
-
-  window.mkJsonSetting = function() {
-    return console.log("Error: Form not loaded!");
+  window.with_form = {
+    get: function() {
+      return console.log("Error: Form not loaded!");
+    },
+    set: function() {
+      return console.log("Error: Form not loaded!");
+    }
   };
 
   set_form = function(schema, value) {
@@ -16,11 +17,11 @@
     form = json_schema_form.generate(schema, "settings");
     $("#form").empty().append(form.dom);
     form.set(value);
-    window.loadExample = function(xml_editor, example) {
+    window.with_form.set = function(xml_editor, example) {
       xml_editor.setValue(example.corpus_xml);
       return form.set(example);
     };
-    return window.mkJsonSetting = form.get;
+    return window.with_form.get = form.get;
   };
 
   window.load_form = function() {
