@@ -187,6 +187,8 @@ def application(environ, start_response):
 
     query_dict = urlparse.parse_qs(environ['QUERY_STRING'])
 
+    print query_dict
+
     post = ""
     try:
         length = int(environ.get('CONTENT_LENGTH', '0'))
@@ -236,6 +238,8 @@ def application(environ, start_response):
 
         if fmt == "makefile":
             yield makefile(settings)
+        elif fmt == "schema":
+            yield schema_str
         else:
             if incremental:
                 print "Sending result start"
