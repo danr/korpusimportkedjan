@@ -5,6 +5,7 @@ body {
   /* Main flow */
   /* Input boxes */
   /* Buttons */
+  /* Items in array: put button after title */
   /* Descriptions */
   /* Items */
   /* Selects */
@@ -49,6 +50,15 @@ body {
     padding: 0.45em 0.5em 0.2em 0.5em; }
   #settings .array > .item-btn {
     margin-bottom: 5px; }
+  #settings .array > .title {
+    display: inline-block;
+    vertical-align: top;
+    padding-top: 5px;
+    padding-right: 5px; }
+  #settings .array > .inner {
+    display: inline; }
+  #settings .array > .inner > .items {
+    display: block; }
   #settings .description {
     display: none; }
   #settings .only .description {
