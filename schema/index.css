@@ -3,23 +3,27 @@ body {
 
 #settings {
   /* Main flow */
-  /* Titles */
   /* Input boxes */
   /* Buttons */
   /* Descriptions */
   /* Items */
+  /* Selects */
   /* Drop-downs */
   /* Singles (buggy union types of only one element) */
   /* Simple objects: objects that only contain strings.
    * Example: Word segmentation positional attributes */ }
-  #settings > .nest {
+  #settings > .inner > .nest {
+    padding-top: 5px;
     padding-bottom: 5px; }
-    #settings > .nest:not(:last-child) {
+    #settings > .inner > .nest:not(:last-child) {
       border-bottom: 1px #cccccc solid; }
-    #settings > .nest > :not(.title) {
-      margin-left: 200px; }
-    #settings > .nest > .select-parent {
-      padding-bottom: 5px; }
+    #settings > .inner > .nest > .title {
+      display: inline-block;
+      vertical-align: top;
+      width: 180px;
+      margin-right: 10px; }
+    #settings > .inner > .nest > .inner {
+      display: inline-block; }
   #settings > .title {
     display: none; }
   #settings .title {
@@ -33,10 +37,12 @@ body {
     display: none !important; }
   #settings .nest .nest .string {
     display: inline; }
+  #settings .string-inner {
+    display: inline; }
   #settings input[type=text] {
     height: 2em;
     margin-bottom: 0px; }
-  #settings .item > .string > input[type=text] {
+  #settings .item > .string > .inner > input[type=text] {
     margin-right: 4px; }
   #settings .item-btn {
     margin-top: 2px;
@@ -52,21 +58,29 @@ body {
   #settings .item > .complex-object {
     border: 1px #cccccc solid;
     padding: 5px; }
+  #settings .select-parent {
+    padding-bottom: 5px; }
   #settings .dropdown-enum {
     display: inline;
     padding: 6px; }
-    #settings .dropdown-enum > .title, #settings .dropdown-enum > .select-parent {
+    #settings .dropdown-enum > .inner {
+      display: inline; }
+      #settings .dropdown-enum > .inner > .select-parent {
+        display: inline; }
+    #settings .dropdown-enum > .title {
       display: inline; }
   #settings .single > .title {
     display: none; }
   #settings .nest .nest .nest .simple-object {
     display: inline;
     border: 0; }
-    #settings .nest .nest .nest .simple-object .title {
+    #settings .nest .nest .nest .simple-object > .inner {
+      display: inline; }
+    #settings .nest .nest .nest .simple-object > .title {
       display: inline;
       font-weight: normal;
       font-size: 1em; }
-      #settings .nest .nest .nest .simple-object .title:after {
+      #settings .nest .nest .nest .simple-object > .title:after {
         content: ": "; }
-    #settings .nest .nest .nest .simple-object > .nest > .title {
+    #settings .nest .nest .nest .simple-object > .inner > .nest > .title {
       display: none; }

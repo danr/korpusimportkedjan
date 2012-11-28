@@ -46,6 +46,11 @@ voids termination.
     return schema;
   };
 
+  /*
+  # Gets a value of the gives schema populated with the default values specified in it
+  */
+
+
   get_default = function(schema) {
     if (schema.type === "object") {
       return _.object(_.map(schema.properties, function(subschema, key) {
@@ -56,7 +61,12 @@ voids termination.
     }
   };
 
-  window.schema_utils = {
+  /*
+  # Export in the json_schema_utils namespace
+  */
+
+
+  window.json_schema_utils = {
     follow_references: follow_references,
     get_default: get_default
   };

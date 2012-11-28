@@ -22,12 +22,18 @@ follow_references = (schema) ->
     rec schema
     schema
 
+###
+# Gets a value of the gives schema populated with the default values specified in it
+###
 get_default = (schema) ->
     if schema.type == "object"
         _.object _.map schema.properties, (subschema, key) -> [key, get_default(subschema)]
     else
        return schema.default
 
-window.schema_utils =
+###
+# Export in the json_schema_utils namespace
+###
+window.json_schema_utils =
     follow_references: follow_references
     get_default: get_default

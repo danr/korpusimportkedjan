@@ -1,3 +1,4 @@
+
 // Body padding
 body
   padding: 10px
@@ -6,22 +7,23 @@ body
 
   /* Main flow */
 
-  & > .nest
-    // Grey line between main entries
+  & > .inner > .nest
+    padding-top: 5px
     padding-bottom: 5px
+    // Grey line between main entries
     &:not(:last-child)
       border-bottom: 1px #ccc solid
 
-    // Hanging indent
-    & > :not(.title)
-      margin-left: 200px
+    & > .title
+      display: inline-block
+      vertical-align: top
+      width: 180px
+      margin-right: 10px
 
-    & > .select-parent
-      padding-bottom: 5px
+    & > .inner
+      display: inline-block
 
-  /* Titles */
-
-  // Surpress top title of schema
+  // Suppress top title of schema
   & > .title
     display: none
 
@@ -44,13 +46,16 @@ body
   .nest .nest .string
     display: inline
 
+  .string-inner
+    display: inline
+
   // Make input boxes a bit taller
   input[type=text]
     height: 2em
     margin-bottom: 0px
 
   // In items, give them some margin to the remove button
-  .item > .string > input[type=text]
+  .item > .string > .inner > input[type=text]
     margin-right: 4px
 
   /* Buttons */
@@ -83,11 +88,19 @@ body
     border: 1px #ccc solid
     padding: 5px
 
+  /* Selects */
+  .select-parent
+    padding-bottom: 5px
+
   /* Drop-downs */
 
   .dropdown-enum
     display: inline
-    & > .title, & > .select-parent
+    & > .inner
+      display: inline
+      & > .select-parent
+        display: inline
+    & > .title
       display: inline
     padding: 6px
 
@@ -101,13 +114,15 @@ body
      Example: Word segmentation positional attributes */
   .nest .nest .nest .simple-object
     display: inline
+    & > .inner
+      display: inline
     border: 0
-    .title
+    & > .title
       display: inline
       font-weight: normal
       font-size: 1em
       &:after
         content: ": "
-    // Surpress subobject titles
-    & > .nest > .title
+    // Suppress sub object titles
+    & > .inner > .nest > .title
       display: none
