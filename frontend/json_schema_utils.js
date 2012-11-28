@@ -52,7 +52,7 @@ voids termination.
 
 
   get_default = function(schema) {
-    if (schema.type === "object") {
+    if (schema.type === "object" && !schema["default"]) {
       return _.object(_.map(schema.properties, function(subschema, key) {
         return [key, get_default(subschema)];
       }));

@@ -26,7 +26,7 @@ follow_references = (schema) ->
 # Gets a value of the gives schema populated with the default values specified in it
 ###
 get_default = (schema) ->
-    if schema.type == "object"
+    if schema.type == "object" and not schema.default
         _.object _.map schema.properties, (subschema, key) -> [key, get_default(subschema)]
     else
        return schema.default
