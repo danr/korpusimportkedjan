@@ -65,9 +65,15 @@
 
   load_example = function(example) {
     var form;
-    form = generate(example.schema, "path");
+    form = generate(example.schema, "settings");
     $("#form").empty().append(form.dom);
     form.set(example.value);
+    $('#get_set').unbind('click').click(function() {
+      var v;
+      v = form.get();
+      $('#result').text(JSON.stringify(v));
+      return form.set(v);
+    });
     return $('#get').unbind('click').click(function() {
       var v;
       v = form.get();
@@ -107,13 +113,13 @@
       var decorator, type;
       type = simplify_type(schema);
       decorator = function(make) {
-        var dom, inner_dom, obj, _i, _len;
+        var dom, inner_dom, obj, type_desc, _i, _len;
         obj = make();
         inner_dom = obj.dom;
-        type = type.desc || (_.isArray(type) ? "union" : type);
-        obj.dom = $("<div class=\"" + type + " nest\" id=\"" + path + "\"/>");
+        type_desc = type.desc || (_.isArray(type) ? "union" : type);
+        obj.dom = $("<div class=\"" + type_desc + " nest\" id=\"" + path + "\"/>");
         if (schema.title != null) {
-          obj.dom.append($("<div class=\"title " + type + "-title\">" + schema.title + "</div>"));
+          obj.dom.append($("<div class=\"title " + type_desc + "-title\">" + schema.title + "</div>"));
         } else {
           console.log("no title:", schema);
         }

@@ -2,107 +2,112 @@
 body
   padding: 10px
 
-// Make input boxes a bit taller
-input[type=text]
-  height: 2em
-  margin-bottom: 0px
-  .item > .string > &
-    margin-right: 4px
+#settings
 
-// Style buttons
-.item-btn
-  // margin-left: 4px
-  margin-top: 2px
-  padding: 0.45em 0.5em 0.2em 0.5em
+  /* Main flow */
 
-.array > .item-btn
-  margin-bottom: 5px
+  & > .nest
+    // Grey line between main entries
+    padding-bottom: 5px
+    &:not(:last-child)
+      border-bottom: 1px #ccc solid
 
-//
-// Main flow
-//
+    // Hanging indent
+    & > :not(.title)
+      margin-left: 200px
 
-#path > .title
-  display: none
+    & > .select-parent
+      padding-bottom: 5px
 
-#path > .nest
-  // Grey line between main entries
-  padding-bottom: 5px
-  &:not(:last-child)
-    border-bottom: 1px #ccc solid
+  /* Titles */
 
-  // Hanging indent
-
-  & > :not(.title)
-    margin-left: 200px
-
+  // Surpress top title of schema
   & > .title
+    display: none
+
+  // Other titles in bold
+  .title
     font-weight: bold
 
-  & > .select-parent
-    padding-bottom: 5px
-
-.title
-  font-weight: bold
-
-.nest .nest .string
-  display: inline
-
-.nest .nest .nest .string-title
-  font-weight: normal
-  display: inline
-  &:after
-    content: ": "
-
-// Hide descriptions, except in string of enumerations of only one value (only)
-
-.description
-  display: none
-
-.only .description
-  display: inline
-
-// Don't duplicate union children's titles
-.union-child > .title
-  display: none !important
-
-// Some margin between items
-.item
-  margin: 5px 0px 5px 0px
-
-// Border around array item objects
-.item > .complex-object
-  border: 1px #ccc solid
-  padding: 5px
-
-// Drop downs
-.dropdown-enum
-  display: inline
-  & > .title, & > .select-parent
-    display: inline
-  padding: 6px
-
-// Drop downs
-.dropdown-enum
-  display: inline
-  .title
-    display: inline
-
-// Singles (buggy union types of only one element)
-
-.single
-  & > .title
-    display: none
-
-// Word segmentation positional attributes
-.nest .nest .nest .simple-object
-  display: inline
-  border: 0
-  .title
-    display: inline
+  // String inputs with a colon
+  .nest .nest .nest .string-title
     font-weight: normal
-    font-size: 1em
+    display: inline
     &:after
       content: ": "
-  & > .nest > .title
+
+  // Never duplicate union children's titles
+  .union-child > .title
+    display: none !important
+
+  /* Input boxes */
+  .nest .nest .string
+    display: inline
+
+  // Make input boxes a bit taller
+  input[type=text]
+    height: 2em
+    margin-bottom: 0px
+
+  // In items, give them some margin to the remove button
+  .item > .string > input[type=text]
+    margin-right: 4px
+
+  /* Buttons */
+
+  // Make buttons a bit larger
+  .item-btn
+    margin-top: 2px
+    padding: 0.45em 0.5em 0.2em 0.5em
+
+  .array > .item-btn
+    margin-bottom: 5px
+
+  /* Descriptions */
+  // Hide descriptions
+  .description
     display: none
+
+  // , except in string of enumerations of only one value (only)
+  .only .description
+    display: inline
+
+  /* Items */
+
+  // Some margin between items
+  .item
+    margin: 5px 0px 5px 0px
+
+  // Border around array item objects
+  .item > .complex-object
+    border: 1px #ccc solid
+    padding: 5px
+
+  /* Drop-downs */
+
+  .dropdown-enum
+    display: inline
+    & > .title, & > .select-parent
+      display: inline
+    padding: 6px
+
+  /* Singles (buggy union types of only one element) */
+
+  .single
+    & > .title
+      display: none
+
+  /* Simple objects: objects that only contain strings.
+     Example: Word segmentation positional attributes */
+  .nest .nest .nest .simple-object
+    display: inline
+    border: 0
+    .title
+      display: inline
+      font-weight: normal
+      font-size: 1em
+      &:after
+        content: ": "
+    // Surpress subobject titles
+    & > .nest > .title
+      display: none

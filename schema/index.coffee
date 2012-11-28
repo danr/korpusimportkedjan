@@ -35,9 +35,13 @@ logger = (f) -> (args...) ->
     res
 
 load_example = (example) ->
-    form = generate example.schema, "path"
+    form = generate example.schema, "settings"
     $("#form").empty().append form.dom
     form.set example.value
+    $('#get_set').unbind('click').click () ->
+        v = form.get()
+        $('#result').text JSON.stringify v
+        form.set v
     $('#get').unbind('click').click () ->
         v = form.get()
         console.log v
@@ -67,15 +71,15 @@ generate = (schema, path) -> do ->
     decorator = (make) ->
         obj = make()
         inner_dom = obj.dom
-        type = type.desc or if _.isArray type then "union" else type
-        obj.dom = $ """<div class="#{type} nest" id="#{path}"/>"""
+        type_desc = type.desc or if _.isArray type then "union" else type
+        obj.dom = $ """<div class="#{type_desc} nest" id="#{path}"/>"""
 
         if schema.title?
-            obj.dom.append $ """<div class="title #{type}-title">#{schema.title}</div>"""
+            obj.dom.append $ """<div class="title #{type_desc}-title">#{schema.title}</div>"""
         else
             console.log "no title:", schema
 
-        if (schema.type == "object")
+        if schema.type == "object"
             if _.all _.map schema.properties, ((subschema) -> subschema.type == "string")
                 obj.dom.addClass "simple-object"
             else
