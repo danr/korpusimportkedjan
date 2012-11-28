@@ -112,9 +112,10 @@ def make_Makefile(settings):
         xml_cols.append((ws['tag'],"token"))
         for e in ws['attributes']:
             key = e['key']
-            if e['attribute'] != "custom":
+            replace = e['attribute']
+            if replace != "custom":
                 # Adds w:pos -> msd in xml
-                if e['attribute'] == "dephead":
+                if replace == "dephead":
                     custom_rules += [("token.dephead",
 """%.token.dephead: %.children.sentence.token %.token.ref %.token.{0}.ref
 	python $(root)dephead.py --out $@ --sentence $(1) --ref $(2) --dephead_ref $(3)""".format(replace))]
