@@ -3,37 +3,47 @@ body {
 
 #settings {
   /* Main flow */
+  /* Titles */
   /* Input boxes */
   /* Buttons */
   /* Items in array: put button after title */
+  /* Put remove button after complex items */
   /* Descriptions */
   /* Items */
   /* Selects */
   /* Drop-downs */
-  /* Singles (buggy union types of only one element) */
   /* Simple objects: objects that only contain strings.
    * Example: Word segmentation positional attributes */ }
   #settings > .inner > .nest {
-    padding-top: 5px;
-    padding-bottom: 5px; }
+    padding-top: 15px;
+    padding-bottom: 15px; }
     #settings > .inner > .nest:not(:last-child) {
       border-bottom: 1px #cccccc solid; }
     #settings > .inner > .nest > .title {
       display: inline-block;
       vertical-align: top;
+      text-align: right;
       width: 180px;
       margin-right: 10px; }
     #settings > .inner > .nest > .inner {
       display: inline-block; }
+    #settings > .inner > .nest > .object-title {
+      padding-top: 3px; }
+    #settings > .inner > .nest > .string-title {
+      padding-top: 4px; }
+    #settings > .inner > .nest > .union-title, #settings > .inner > .nest > .multi-enum-title {
+      padding-top: 5px; }
   #settings > .title {
     display: none; }
   #settings .title {
     font-weight: bold; }
-  #settings .nest .nest .nest .string-title {
+  #settings .nest .nest .string-title {
     font-weight: normal;
-    display: inline; }
-    #settings .nest .nest .nest .string-title:after {
-      content: ": "; }
+    display: inline;
+    margin-right: 5px;
+    text-align: right; }
+  #settings .string-title:after {
+    content: ": "; }
   #settings .union-child > .title {
     display: none !important; }
   #settings .nest .nest .string {
@@ -46,19 +56,25 @@ body {
   #settings .item > .string > .inner > input[type=text] {
     margin-right: 4px; }
   #settings .item-btn {
-    margin-top: 2px;
     padding: 0.45em 0.5em 0.2em 0.5em; }
   #settings .array > .item-btn {
     margin-bottom: 5px; }
   #settings .array > .title {
     display: inline-block;
     vertical-align: top;
-    padding-top: 5px;
-    padding-right: 5px; }
+    margin-top: 5px;
+    margin-right: 5px; }
   #settings .array > .inner {
     display: inline; }
   #settings .array > .inner > .items {
     display: block; }
+  #settings .nest .nest .item-add-btn {
+    margin-top: 5px; }
+  #settings .nest .nest .array-title {
+    padding-top: 3px; }
+  #settings .item > .complex-object {
+    display: inline-block;
+    margin-right: 5px; }
   #settings .description {
     display: none; }
   #settings .only .description {
@@ -79,18 +95,16 @@ body {
         display: inline; }
     #settings .dropdown-enum > .title {
       display: inline; }
-  #settings .single > .title {
-    display: none; }
-  #settings .nest .nest .nest .simple-object {
+  #settings .simple-object {
     display: inline;
     border: 0; }
-    #settings .nest .nest .nest .simple-object > .inner {
+    #settings .simple-object > .inner {
       display: inline; }
-    #settings .nest .nest .nest .simple-object > .title {
+    #settings .simple-object > .title {
       display: inline;
       font-weight: normal;
       font-size: 1em; }
-      #settings .nest .nest .nest .simple-object > .title:after {
+      #settings .simple-object > .title:after {
         content: ": "; }
-    #settings .nest .nest .nest .simple-object > .inner > .nest > .title {
+    #settings .simple-object > .inner > .nest > .title {
       display: none; }

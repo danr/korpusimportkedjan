@@ -11,7 +11,7 @@ voids termination.
 
 
 (function() {
-  var follow_references, get_default;
+  var flatten_singleton_unions, follow_references, get_default;
 
   follow_references = function(schema) {
     var rec;
@@ -62,13 +62,51 @@ voids termination.
   };
 
   /*
+  # Flattens out union types of only one type
+  */
+
+
+  flatten_singleton_unions = function(schema) {
+    var key, subschema, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    if (_.isArray(schema.type) && schema.type.length === 1) {
+      for (key in schema.type[0]) {
+        if ((_ref = schema[key]) == null) {
+          schema[key] = schema.type[0][key];
+        }
+      }
+      schema.type = schema.type[0].type;
+    }
+    if (schema.properties != null) {
+      for (key in schema.properties) {
+        flatten_singleton_unions(schema.properties[key]);
+      }
+    }
+    if (schema.items != null) {
+      _ref1 = schema.items;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        subschema = _ref1[_i];
+        flatten_singleton_unions(subschema);
+      }
+    }
+    if (_.isArray(schema.type)) {
+      _ref2 = schema.type;
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        subschema = _ref2[_j];
+        flatten_singleton_unions(subschema);
+      }
+    }
+    return schema;
+  };
+
+  /*
   # Export in the json_schema_utils namespace
   */
 
 
   window.json_schema_utils = {
     follow_references: follow_references,
-    get_default: get_default
+    get_default: get_default,
+    flatten_singleton_unions: flatten_singleton_unions
   };
 
 }).call(this);

@@ -152,7 +152,7 @@ generate = (schema, path) -> do ->
                 item = generate schema.items, "#{path}_item"
                 item_div = $ """<div class="item">"""
 
-                rm_button = $("""<button class="btn btn-danger item-btn"><i class="icon-minus-sign">""").click () ->
+                rm_button = $("""<button class="btn btn-danger item-btn item-remove-btn"><i class="icon-remove">""").click () ->
                     item_div.remove()
                     items = _.without(items, item)
                     false
@@ -160,7 +160,7 @@ generate = (schema, path) -> do ->
                 items_div.append item_div.append item.dom, rm_button
                 return item
 
-            new_button = $("""<button class="btn btn-success item-btn"><i class="icon-plus-sign">""").click () ->
+            new_button = $("""<button class="btn btn-success item-btn item-add-btn"><i class="icon-plus">""").click () ->
                 items.push generate_item()
                 false
 
@@ -173,11 +173,6 @@ generate = (schema, path) -> do ->
                     item
                 return
             get: () -> item.get() for item in items
-
-        else if (_.isArray type) and type.length == 1
-            res = generate type[0], "#{path}_single"
-            res.dom.addClass "single"
-            res
 
         else if _.isArray type
             select_dom = $ """<select>"""

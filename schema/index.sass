@@ -8,20 +8,35 @@ body
   /* Main flow */
 
   & > .inner > .nest
-    padding-top: 5px
-    padding-bottom: 5px
+    // Padding between entries
+    padding-top: 15px
+    padding-bottom: 15px
     // Grey line between main entries
     &:not(:last-child)
       border-bottom: 1px #ccc solid
 
+    // Display title to the left, aligned to the right
     & > .title
       display: inline-block
       vertical-align: top
+      text-align: right
       width: 180px
       margin-right: 10px
 
     & > .inner
       display: inline-block
+
+    // Fix base line height of titles to be the same as the form to the right
+    & > .object-title
+      padding-top: 3px
+
+    & > .string-title
+      padding-top: 4px
+
+    & > .union-title, & > .multi-enum-title
+      padding-top: 5px
+
+  /* Titles */
 
   // Suppress top title of schema
   & > .title
@@ -31,12 +46,16 @@ body
   .title
     font-weight: bold
 
-  // String inputs with a colon
-  .nest .nest .nest .string-title
+  // Inner string titles not in bold
+  .nest .nest .string-title
     font-weight: normal
     display: inline
-    &:after
-      content: ": "
+    margin-right: 5px
+    text-align: right
+
+  // String inputs with a colon
+  .string-title:after
+    content: ": "
 
   // Never duplicate union children's titles
   .union-child > .title
@@ -62,9 +81,7 @@ body
 
   // Make buttons a bit larger
   .item-btn
-    margin-top: 2px
     padding: 0.45em 0.5em 0.2em 0.5em
-
 
   /* Items in array: put button after title */
   .array > .item-btn
@@ -73,14 +90,26 @@ body
   .array > .title
     display: inline-block
     vertical-align: top
-    padding-top: 5px
-    padding-right: 5px
+    margin-top: 5px
+    margin-right: 5px
 
   .array > .inner
     display: inline
 
   .array > .inner > .items
     display: block
+
+  // Make some top margin for add item buttons, and adjust their titles accordingly
+  .nest .nest
+    .item-add-btn
+      margin-top: 5px
+    .array-title
+      padding-top: 3px
+
+  /* Put remove button after complex items */
+  .item > .complex-object
+    display: inline-block
+    margin-right: 5px
 
   /* Descriptions */
   // Hide descriptions
@@ -92,7 +121,6 @@ body
     display: inline
 
   /* Items */
-
   // Some margin between items
   .item
     margin: 5px 0px 5px 0px
@@ -118,15 +146,9 @@ body
       display: inline
     padding: 6px
 
-  /* Singles (buggy union types of only one element) */
-
-  .single
-    & > .title
-      display: none
-
   /* Simple objects: objects that only contain strings.
      Example: Word segmentation positional attributes */
-  .nest .nest .nest .simple-object
+  .simple-object
     display: inline
     & > .inner
       display: inline

@@ -32,8 +32,26 @@ get_default = (schema) ->
        return schema.default
 
 ###
+# Flattens out union types of only one type
+###
+flatten_singleton_unions = (schema) ->
+    if _.isArray(schema.type) and schema.type.length == 1
+        for key of schema.type[0]
+            schema[key] ?= schema.type[0][key]
+        schema.type = schema.type[0].type
+    if schema.properties?
+        for key of schema.properties
+            flatten_singleton_unions schema.properties[key]
+    if schema.items?
+        flatten_singleton_unions subschema for subschema in schema.items
+    if _.isArray(schema.type)
+        flatten_singleton_unions subschema for subschema in schema.type
+    schema
+
+###
 # Export in the json_schema_utils namespace
 ###
 window.json_schema_utils =
     follow_references: follow_references
     get_default: get_default
+    flatten_singleton_unions: flatten_singleton_unions

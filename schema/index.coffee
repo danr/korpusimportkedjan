@@ -29,7 +29,7 @@ $(window.document).ready () ->
         timeout: 300000
         type: "GET"
         success: (data, textStatus, xhr) ->
-            schema = json_schema_utils.follow_references data
+            schema = json_schema_utils.flatten_singleton_unions json_schema_utils.follow_references data
             console.log schema
             example =
                 schema: schema
@@ -41,5 +41,5 @@ $(window.document).ready () ->
 
     add_example_button key, json_schema_form.examples[key] for key of json_schema_form.examples
 
-    load_example json_schema.examples.array
+    load_example json_schema_form.examples.array
 

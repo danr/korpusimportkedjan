@@ -44,7 +44,7 @@
       type: "GET",
       success: function(data, textStatus, xhr) {
         var example, schema;
-        schema = json_schema_utils.follow_references(data);
+        schema = json_schema_utils.flatten_singleton_unions(json_schema_utils.follow_references(data));
         console.log(schema);
         example = {
           schema: schema,
@@ -62,7 +62,7 @@
     for (key in json_schema_form.examples) {
       add_example_button(key, json_schema_form.examples[key]);
     }
-    return load_example(json_schema.examples.array);
+    return load_example(json_schema_form.examples.array);
   });
 
 }).call(this);

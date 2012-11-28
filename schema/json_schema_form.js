@@ -121,7 +121,7 @@
         return obj;
       };
       return decorator(function() {
-        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, res, select, select_dom, select_parent, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1;
+        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, select, select_dom, select_parent, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1;
         if (type.only != null) {
           return {
             dom: [],
@@ -257,7 +257,7 @@
             var item, item_div, rm_button;
             item = generate(schema.items, "" + path + "_item");
             item_div = $("<div class=\"item\">");
-            rm_button = $("<button class=\"btn btn-danger item-btn\"><i class=\"icon-minus-sign\">").click(function() {
+            rm_button = $("<button class=\"btn btn-danger item-btn item-remove-btn\"><i class=\"icon-remove\">").click(function() {
               item_div.remove();
               items = _.without(items, item);
               return false;
@@ -265,7 +265,7 @@
             items_div.append(item_div.append(item.dom, rm_button));
             return item;
           };
-          new_button = $("<button class=\"btn btn-success item-btn\"><i class=\"icon-plus-sign\">").click(function() {
+          new_button = $("<button class=\"btn btn-success item-btn item-add-btn\"><i class=\"icon-plus\">").click(function() {
             items.push(generate_item());
             return false;
           });
@@ -296,10 +296,6 @@
               return _results;
             }
           };
-        } else if ((_.isArray(type)) && type.length === 1) {
-          res = generate(type[0], "" + path + "_single");
-          res.dom.addClass("single");
-          return res;
         } else if (_.isArray(type)) {
           select_dom = $("<select>");
           options = (function() {
