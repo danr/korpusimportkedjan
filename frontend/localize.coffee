@@ -5,7 +5,7 @@ fallback_key = 'en'
 
 # Localizes elements with the current language_key, or with the provided one specified
 jQuery.fn.localize = () ->
-    console.log "Localizing ", $(this), " with language key #{language_key}"
+    # console.log "Localizing ", $(this), " with language key #{language_key}"
     data_loc = "data-loc-#{language_key}"
     data_loc_fallback = "data-loc-#{fallback_key}"
     localize_element = (el) ->
@@ -16,6 +16,7 @@ jQuery.fn.localize = () ->
             el.text el.attr data_loc_fallback
     $(this).find("[#{data_loc}]").each (_key, el) -> localize_element el
     localize_element $(this)
+    $(this)
 
 # Set the language key (typically to 'en' or 'se'), and change all values
 jQuery.fn.set_language = (new_language_key, new_fallback_key) ->

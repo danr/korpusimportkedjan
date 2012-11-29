@@ -4,9 +4,10 @@
 $.fn.localize_element = (entries) ->
     for key of entries
         if entries[key]?
-            console.log "Setting attr of ", $(this), " key: ", key, " value ", entries[key]
+            # console.log "Setting attr of ", $(this), " key: ", key, " value ", entries[key]
             $(this).attr "data-loc-#{key}", entries[key]
     $(this).localize()
+    $(this)
 
 ###
 # Simplify type: Finds single, multi and only enums
@@ -16,6 +17,7 @@ simplify_type = (schema) ->
         enum: schema.items.enum
         multi: true
         desc: "multi-enum"
+        enum_loc: schema.items.enum_loc
     else if schema.type == "string" and schema.enum?
         if schema.enum.length == 1
             only: schema.enum[0]
@@ -24,6 +26,7 @@ simplify_type = (schema) ->
             enum: schema.enum
             multi: false
             desc: if schema.style_enum == "dropdown" then "dropdown-enum" else "single-enum"
+            enum_loc: schema.enum_loc
     else
         schema.type
 
@@ -112,9 +115,12 @@ generate = (schema, path) -> do ->
             if schema.style_enum == "dropdown" and not type.multi
                 select = $ """<select>"""
 
+                console.log "Enum type: ", type
                 # TODO: Localize enums
                 for v in type.enum
-                    select.append $ """<option value="#{v}">#{v}</option>"""
+                    select.append $("""<option value="#{v}"/>""").localize_element
+                        se: type.enum_loc?.se?[v] or v
+                        en: type.enum_loc?.en?[v] or v
 
                 dom = $ """<div class="select-parent">"""
                 dom.append select
@@ -127,7 +133,9 @@ generate = (schema, path) -> do ->
                 toggle = if type.multi then "buttons-checkbox" else "buttons-radio"
                 dom = $ """<div class="btn-group" data-toggle="#{toggle}"/>"""
                 for v in type.enum
-                    dom.append $ """<button type="button" class="btn button-enum" id="#{v}">#{v}</button>"""
+                    dom.append $("""<button type="button" class="btn button-enum" id="#{v}"/>""").localize_element
+                        se: type.enum_loc?.se?[v] or v
+                        en: type.enum_loc?.en?[v] or v
                 dom: dom
                 set: (vs) ->
                     if type.multi

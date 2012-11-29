@@ -3,14 +3,14 @@
   var main;
 
   main = function() {
-    var buttons, example, lang, lang_key, xml_editor, _fn, _i, _len, _ref, _ref1, _ref2;
+    var example, example_buttons, lang, lang_key, language_buttons, xml_editor, _ref, _ref1;
     load_form();
     init_brat();
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
       lineNumbers: true
     });
     xml_editor.setValue("En exempeltext kommer lastad. Med vadå?");
-    buttons = (function() {
+    example_buttons = (function() {
       var _i, _len, _results;
       _results = [];
       for (_i = 0, _len = examples.length; _i < _len; _i++) {
@@ -23,19 +23,22 @@
       }
       return _results;
     })();
-    _ref = [["se", "Svenska"], ["en", "English"]];
-    _fn = function(lang_key, lang) {
-      var button;
-      button = $("<button class=\"btn-small btn-warning\" style=\"margin:5px;\"\">\n    <i class=\"icon-bookmark-empty\"></i> " + lang + "\n</button>").click(function() {
-        return $.fn.set_language(lang_key);
-      });
-      return buttons.push(button);
-    };
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      _ref1 = _ref[_i], lang_key = _ref1[0], lang = _ref1[1];
-      _fn(lang_key, lang);
-    }
-    (_ref2 = $("#example_buttons")).append.apply(_ref2, buttons);
+    (_ref = $("#example_buttons")).append.apply(_ref, example_buttons);
+    language_buttons = (function() {
+      var _i, _len, _ref1, _ref2, _results;
+      _ref1 = [["se", "Svenska"], ["en", "English"]];
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        _ref2 = _ref1[_i], lang_key = _ref2[0], lang = _ref2[1];
+        _results.push((function(lang_key, lang) {
+          return $("<button class=\"btn-small btn-warning\" style=\"margin:5px;\"\">\n    <i class=\"icon-flag\"></i> " + lang + "\n</button>").click(function() {
+            return $.fn.set_language(lang_key);
+          });
+        })(lang_key, lang));
+      }
+      return _results;
+    })();
+    (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
     $("#show_query").click(function() {
       submit(xml_editor, "makefile");
       return false;
@@ -44,10 +47,11 @@
       submit(xml_editor, "xml");
       return false;
     });
-    return $("#btn_install").click(function() {
+    $("#btn_install").click(function() {
       submit(xml_editor, "cwb");
       return false;
     });
+    return $.fn.set_language('se');
   };
 
   $(document).ready(main);

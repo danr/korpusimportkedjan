@@ -11,16 +11,13 @@
         var selectedOption=this.find('option[selected]').length>0?this.find('option[selected]'):this.find('option:nth(0)');
         var currentValue = selectedOption.val();
         var currentText = selectedOption.text();
-        select.html(
-            '<button data-toggle="dropdown" class="btn dropdown-toggle" href="javascript:;">'+
-                '<span>'+currentText+'</span>'+
-                '&nbsp;&nbsp;<span class="caret"></span>'+
-                '</button>'+
-                '<input type="hidden" value="' + this.val() + '"/>'+
-                '<ul class="dropdown-menu"></ul>');
 
-        var dropdownMenu=select.find('.dropdown-menu');
-        var first = true;
+        var button = $('<button data-toggle="dropdown" class="btn dropdown-toggle" href="javascript:;">');
+        var hidden=$('<input type="hidden"/>').val(currentValue);
+        var label=$('<span/>');
+        var dropdownMenu=$('<ul class="dropdown-menu"/>');
+
+        select.empty().append(button.append(label, $('<i class="icon-caret-down"/>')), hidden, dropdownMenu);
 
         function copy_loc(key, from, to) {
             key = 'data-loc-' + key
@@ -30,13 +27,12 @@
         }
 
         function copy_locs(from, to) {
-            // always fall back to text content for English
-            $(to).attr('data-loc-en', $(from).text())
             // and then try to populate from the data-loc fields
             copy_loc('en', from, to);
             copy_loc('se', from, to);
         }
 
+        var first = true;
         this.find('option').each(function(o, q) {
             var a = $('<a href="javascript:;" data-value="' + $(q).attr('value') + '"/>');
             copy_locs(q, a);
@@ -48,8 +44,9 @@
             }
         });
 
-        var hidden=select.find('input:hidden');
-        var label=select.find('.btn span:nth(0)');
+        copy_locs(selectedOption, label);
+        label.localize();
+
         hidden.on({
             change: function () {
 				var a_query = 'a[data-value=' + $(this).val() + ']';

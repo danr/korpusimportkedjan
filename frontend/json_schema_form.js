@@ -13,11 +13,11 @@
     var key;
     for (key in entries) {
       if (entries[key] != null) {
-        console.log("Setting attr of ", $(this), " key: ", key, " value ", entries[key]);
         $(this).attr("data-loc-" + key, entries[key]);
       }
     }
-    return $(this).localize();
+    $(this).localize();
+    return $(this);
   };
 
   /*
@@ -30,7 +30,8 @@
       return {
         "enum": schema.items["enum"],
         multi: true,
-        desc: "multi-enum"
+        desc: "multi-enum",
+        enum_loc: schema.items.enum_loc
       };
     } else if (schema.type === "string" && (schema["enum"] != null)) {
       if (schema["enum"].length === 1) {
@@ -42,7 +43,8 @@
         return {
           "enum": schema["enum"],
           multi: false,
-          desc: schema.style_enum === "dropdown" ? "dropdown-enum" : "single-enum"
+          desc: schema.style_enum === "dropdown" ? "dropdown-enum" : "single-enum",
+          enum_loc: schema.enum_loc
         };
       }
     } else {
@@ -143,7 +145,7 @@
         return obj;
       };
       return decorator(function() {
-        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, select, select_dom, select_parent, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1;
+        var dom, doms, generate_item, i, items, items_div, key, new_button, object, objects, option, options, select, select_dom, select_parent, subschema, toggle, v, with_selected, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
         if (type.only != null) {
           return {
             dom: [],
@@ -155,10 +157,14 @@
         } else if (type["enum"] != null) {
           if (schema.style_enum === "dropdown" && !type.multi) {
             select = $("<select>");
+            console.log("Enum type: ", type);
             _ref = type["enum"];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               v = _ref[_i];
-              select.append($("<option value=\"" + v + "\">" + v + "</option>"));
+              select.append($("<option value=\"" + v + "\"/>").localize_element({
+                se: ((_ref1 = type.enum_loc) != null ? (_ref2 = _ref1.se) != null ? _ref2[v] : void 0 : void 0) || v,
+                en: ((_ref3 = type.enum_loc) != null ? (_ref4 = _ref3.en) != null ? _ref4[v] : void 0 : void 0) || v
+              }));
             }
             dom = $("<div class=\"select-parent\">");
             dom.append(select);
@@ -175,10 +181,13 @@
           } else {
             toggle = type.multi ? "buttons-checkbox" : "buttons-radio";
             dom = $("<div class=\"btn-group\" data-toggle=\"" + toggle + "\"/>");
-            _ref1 = type["enum"];
-            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-              v = _ref1[_j];
-              dom.append($("<button type=\"button\" class=\"btn button-enum\" id=\"" + v + "\">" + v + "</button>"));
+            _ref5 = type["enum"];
+            for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
+              v = _ref5[_j];
+              dom.append($("<button type=\"button\" class=\"btn button-enum\" id=\"" + v + "\"/>").localize_element({
+                se: ((_ref6 = type.enum_loc) != null ? (_ref7 = _ref6.se) != null ? _ref7[v] : void 0 : void 0) || v,
+                en: ((_ref8 = type.enum_loc) != null ? (_ref9 = _ref8.en) != null ? _ref9[v] : void 0 : void 0) || v
+              }));
             }
             return {
               dom: dom,
@@ -197,12 +206,12 @@
                 }
               },
               get: function() {
-                var c, _k, _len2, _ref2, _results;
+                var c, _k, _len2, _ref10, _results;
                 if (type.multi) {
-                  _ref2 = dom.children(".active");
+                  _ref10 = dom.children(".active");
                   _results = [];
-                  for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-                    c = _ref2[_k];
+                  for (_k = 0, _len2 = _ref10.length; _k < _len2; _k++) {
+                    c = _ref10[_k];
                     _results.push($(c).attr("id"));
                   }
                   return _results;

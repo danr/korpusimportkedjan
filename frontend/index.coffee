@@ -15,7 +15,7 @@ main = ->
     xml_editor.setValue "En exempeltext kommer lastad. Med vadå?"
 
     # Add example buttons
-    buttons = for example in examples
+    example_buttons = for example in examples
         do (example) ->
             $("""
                 <button class="btn-small btn-info" style="margin:5px;"">
@@ -23,16 +23,18 @@ main = ->
                 </button>""").click ->
                     with_form.set xml_editor, example
 
-    for [lang_key, lang] in [["se", "Svenska"],["en","English"]]
+    $("#example_buttons").append(example_buttons...)
+
+    language_buttons = for [lang_key, lang] in [["se", "Svenska"],["en","English"]]
         do (lang_key, lang) ->
-            button = $("""
-                    <button class="btn-small btn-warning" style="margin:5px;"">
-                        <i class="icon-bookmark-empty"></i> #{lang}
-                    </button>""").click -> $.fn.set_language(lang_key)
-            buttons.push button
+            $("""
+                <button class="btn-small btn-warning" style="margin:5px;"">
+                    <i class="icon-flag"></i> #{lang}
+                </button>""").click ->
+                    $.fn.set_language(lang_key)
 
+    $("#language_buttons").append(language_buttons...)
 
-    $("#example_buttons").append(buttons...)
 
     # Show query button
     $("#show_query").click ->
@@ -48,5 +50,8 @@ main = ->
     $("#btn_install").click ->
         submit xml_editor, "cwb"
         false
+
+    # Set initial language to Swedish. This also sets the text value of uninitialized items.
+    $.fn.set_language('se')
 
 $(document).ready main

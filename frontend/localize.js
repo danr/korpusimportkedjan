@@ -8,7 +8,6 @@
 
   jQuery.fn.localize = function() {
     var data_loc, data_loc_fallback, localize_element;
-    console.log("Localizing ", $(this), " with language key " + language_key);
     data_loc = "data-loc-" + language_key;
     data_loc_fallback = "data-loc-" + fallback_key;
     localize_element = function(el) {
@@ -22,7 +21,8 @@
     $(this).find("[" + data_loc + "]").each(function(_key, el) {
       return localize_element(el);
     });
-    return localize_element($(this));
+    localize_element($(this));
+    return $(this);
   };
 
   jQuery.fn.set_language = function(new_language_key, new_fallback_key) {

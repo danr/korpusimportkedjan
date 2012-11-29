@@ -57,12 +57,19 @@
   <body>
     <div class="container">
       <div class="header">
-        <h2>Annoteringslabbet</h2>
+        <h2 data-loc-en="Corpus Pipeline Laboratory" data-loc-se="Annoteringslabbet"></h2>
       </div>
 
       <div class="row">
-        <div class="span12" id="example_buttons" style="text-align: right">
-          <span>Ladda exempel: </span>
+        <div class="span12" style="text-align: right">
+          <span
+            data-loc-en="Load example:"
+            data-loc-se="Ladda exempel:"></span>
+          <span id="example_buttons"></span>
+          <span
+            data-loc-en="Language:"
+            data-loc-se="Språk:"></span>
+          <span id="language_buttons"></span>
         </div>
       </div>
 
@@ -75,12 +82,15 @@
       </div>
 
       <div id="form" style="margin-bottom: 2em;">
-        Laddar formulär...
+        <span
+          data-loc-en="Loading form..."
+          data-loc-se="Laddar formulär...">
+        </span>
       </div>
 
       <div class="row">
         <div class="span12" id="progress-div" style="display: none;">
-	  	<span id="progress-text"></span>
+    	  	<span id="progress-text"></span>
           <div class="progress progress-striped active">
             <div class="bar" style="width: 0%;" id="progress-bar"></div>
           </div>
@@ -89,9 +99,27 @@
 
       <div class="row">
         <div class="span12" style="margin-bottom: 1em;">
-          <button class="btn pull-right" id="btn_submit"><i class="icon-cogs"></i> Kör!</button>
-          <button class="btn pull-right" id="btn_install"><i class="icon-wrench"></i> Installera!</button>
-          <button class="btn" id="show_query"><i class="icon-beaker"></i> Visa Makefil</button>
+          <button class="btn pull-right" id="btn_submit">
+            <i class="icon-cogs"></i>
+            <span
+              data-loc-en="Run!"
+              data-loc-se="Kör!">
+            </span>
+          </button>
+          <button class="btn pull-right" id="btn_install">
+            <i class="icon-wrench"></i>
+            <span
+              data-loc-en="Install!"
+              data-loc-se="Installera!">
+            </span>
+          </button>
+          <button class="btn" id="show_query">
+            <i class="icon-beaker"></i>
+            <span
+              data-loc-en="Show Makefile"
+              data-loc-se="Visa Makefil">
+            </span>
+          </button>
           <span id="extra_buttons" class="btn-group"></span>
         </div>
       </div>
@@ -108,3 +136,4 @@
     </div>
   </body>
 </html>
+
