@@ -6,6 +6,7 @@
 	<script type="text/javascript" src="lib/brat/client/lib/head.load.min.js"></script>
 
     <script type="text/javascript" src="lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="localize.js"></script>
 
     <script type="text/javascript" src="lib/jquery-svg/jquery.svg.js"></script>
     <script type="text/javascript" src="lib/jquery-svg/jquery.svgdom.js"></script>
@@ -67,35 +68,33 @@
 
 	  <div id="example_tree"></div>
 
-      <form id="text_form">
-        <div class="row">
-          <div class="span12">
-            <textarea id="corpus_xml" rows="4"></textarea>
+      <div class="row">
+        <div class="span12">
+          <textarea id="corpus_xml" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div id="form" style="margin-bottom: 2em;">
+        Laddar formulär...
+      </div>
+
+      <div class="row">
+        <div class="span12" id="progress-div" style="display: none;">
+	  	<span id="progress-text"></span>
+          <div class="progress progress-striped active">
+            <div class="bar" style="width: 0%;" id="progress-bar"></div>
           </div>
         </div>
+      </div>
 
-        <div id="form" style="margin-bottom: 2em;">
-          Laddar formulär...
+      <div class="row">
+        <div class="span12" style="margin-bottom: 1em;">
+          <button class="btn pull-right" id="btn_submit"><i class="icon-cogs"></i> Kör!</button>
+          <button class="btn pull-right" id="btn_install"><i class="icon-wrench"></i> Installera!</button>
+          <button class="btn" id="show_query"><i class="icon-beaker"></i> Visa Makefil</button>
+          <span id="extra_buttons" class="btn-group"></span>
         </div>
-
-        <div class="row">
-          <div class="span12" id="progress-div" style="display: none;">
-			<span id="progress-text"></span>
-            <div class="progress progress-striped active">
-              <div class="bar" style="width: 0%;" id="progress-bar"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="span12" style="margin-bottom: 1em;">
-            <button class="btn pull-right" id="btn_submit"><i class="icon-cogs"></i> Kör!</button>
-            <button class="btn pull-right" id="btn_install"><i class="icon-wrench"></i> Installera!</button>
-            <button class="btn" id="show_query"><i class="icon-beaker"></i> Visa Makefil</button>
-            <span id="extra_buttons" class="btn-group"></span>
-          </div>
-        </div>
-      </form>
+      </div>
 
       <div id="query"></div>
 

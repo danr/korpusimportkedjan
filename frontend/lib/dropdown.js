@@ -1,5 +1,9 @@
 // Makes a select element look like a bootstrap dropdown:
 // https://groups.google.com/forum/?fromgroups=#!topic/twitter-bootstrap-stackoverflow/S66cuS95wKQ
+//
+// Tweaked to accept change events on the hidden to update the dropdown label,
+// also added localization. Localization from the options in data-loc-se and data-loc-en
+// are added to the links and the label. This requires $.fn.localize() to be initialized.
 (function($) {
     $.fn.buttonSelect = function(separate_first) {
         this.hide().wrap('<div class="btn-group"/>');
@@ -17,9 +21,27 @@
 
         var dropdownMenu=select.find('.dropdown-menu');
         var first = true;
+
+        function copy_loc(key, from, to) {
+            key = 'data-loc-' + key
+            if ($(from).attr(key)) {
+                $(to).attr(key,$(from).attr(key));
+            }
+        }
+
+        function copy_locs(from, to) {
+            // always fall back to text content for English
+            $(to).attr('data-loc-en', $(from).text())
+            // and then try to populate from the data-loc fields
+            copy_loc('en', from, to);
+            copy_loc('se', from, to);
+        }
+
         this.find('option').each(function(o, q) {
-            dropdownMenu.
-                append('<li><a href="javascript:;" data-value="' + $(q).attr('value') + '">' + $(q).text() + '</a></li>');
+            var a = $('<a href="javascript:;" data-value="' + $(q).attr('value') + '"/>');
+            copy_locs(q, a);
+            a.localize()
+            dropdownMenu.append($('<li/>').append(a));
             if (first && separate_first) {
                 first = false;
                 dropdownMenu.append('<li class="divider"/>');
@@ -31,7 +53,8 @@
         hidden.on({
             change: function () {
 				var a_query = 'a[data-value=' + $(this).val() + ']';
-				label.text($(this).siblings().find(a_query).text());
+                copy_locs(a_query, label);
+                label.localize();
             }
         });
         dropdownMenu.find('a').click(function() {

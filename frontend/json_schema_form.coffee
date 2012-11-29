@@ -1,4 +1,14 @@
 ###
+# Localize element
+###
+$.fn.localize_element = (entries) ->
+    for key of entries
+        if entries[key]?
+            console.log "Setting attr of ", $(this), " key: ", key, " value ", entries[key]
+            $(this).attr "data-loc-#{key}", entries[key]
+    $(this).localize()
+
+###
 # Simplify type: Finds single, multi and only enums
 ###
 simplify_type = (schema) ->
@@ -66,7 +76,9 @@ generate = (schema, path) -> do ->
         obj.dom = $ """<div class="#{type_desc} nest" id="#{path}"/>"""
 
         if schema.title?
-            obj.dom.append $ """<div class="title #{type_desc}-title">#{schema.title}</div>"""
+            obj.dom.append $("""<div class="title #{type_desc}-title">""").localize_element
+                en: schema.title
+                se: schema.title_se
         else
             console.log "no title:", schema
 
@@ -77,7 +89,9 @@ generate = (schema, path) -> do ->
                 obj.dom.addClass "complex-object"
 
         if schema.description?
-            obj.dom.append $ """<div class="description">#{schema.description}</div>"""
+            obj.dom.append $("""<div class="description"/>""").localize_element
+                en: schema.description
+                se: schema.description_se
 
         inner_div = $ """<div class="inner #{type_desc}-inner">/"""
         inner_div.append dom for dom in inner_dom
@@ -98,6 +112,7 @@ generate = (schema, path) -> do ->
             if schema.style_enum == "dropdown" and not type.multi
                 select = $ """<select>"""
 
+                # TODO: Localize enums
                 for v in type.enum
                     select.append $ """<option value="#{v}">#{v}</option>"""
 
@@ -176,9 +191,10 @@ generate = (schema, path) -> do ->
 
         else if _.isArray type
             select_dom = $ """<select>"""
-
             options = for subschema, i in type
-                select_dom.append $ """<option value="#{i}">#{subschema.title}</option>"""
+                select_dom.append $("""<option value="#{i}">""").localize_element
+                    en: subschema.title
+                    se: subschema.title_se
                 option = generate subschema, "#{path}_#{i}"
                 if subschema.default?
                     option.set subschema.default

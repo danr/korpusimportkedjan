@@ -76,7 +76,17 @@ make_relation_from_rel = (r) ->
         targets: []
     ]
 
+###
+# Draws a brat tree from a words array to a div given its id
+###
 window.draw_brat_tree = (words, to_div) ->
+
+    entity_types = []
+    relation_types = []
+    entities = []
+    relations = []
+    added_pos = []
+    added_rel = []
 
     add_word = (word, start, stop) ->
 
@@ -98,13 +108,6 @@ window.draw_brat_tree = (words, to_div) ->
                   , ["child", "T" + word.ref]]
                 ]
             relations.push relation
-
-    entity_types = []
-    relation_types = []
-    entities = []
-    relations = []
-    added_pos = []
-    added_rel = []
 
     text = words.join(" ")
     ix = 0

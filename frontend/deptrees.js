@@ -84,8 +84,19 @@
     };
   };
 
+  /*
+  # Draws a brat tree from a words array to a div given its id
+  */
+
+
   window.draw_brat_tree = function(words, to_div) {
     var add_word, added_pos, added_rel, collData, docData, entities, entity_types, ix, relation_types, relations, text, word, _i, _len;
+    entity_types = [];
+    relation_types = [];
+    entities = [];
+    relations = [];
+    added_pos = [];
+    added_rel = [];
     add_word = function(word, start, stop) {
       var entity, relation;
       if ($.inArray(word.pos, added_pos) === -1) {
@@ -103,12 +114,6 @@
         return relations.push(relation);
       }
     };
-    entity_types = [];
-    relation_types = [];
-    entities = [];
-    relations = [];
-    added_pos = [];
-    added_rel = [];
     text = words.join(" ");
     ix = 0;
     for (_i = 0, _len = words.length; _i < _len; _i++) {

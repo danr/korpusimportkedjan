@@ -17,11 +17,21 @@ main = ->
     # Add example buttons
     buttons = for example in examples
         do (example) ->
-            button = $("""
+            $("""
                 <button class="btn-small btn-info" style="margin:5px;"">
                     <i class="icon-book"></i> #{example.title}
                 </button>""").click ->
                     with_form.set xml_editor, example
+
+    for [lang_key, lang] in [["se", "Svenska"],["en","English"]]
+        do (lang_key, lang) ->
+            button = $("""
+                    <button class="btn-small btn-warning" style="margin:5px;"">
+                        <i class="icon-bookmark-empty"></i> #{lang}
+                    </button>""").click -> $.fn.set_language(lang_key)
+            buttons.push button
+
+
     $("#example_buttons").append(buttons...)
 
     # Show query button
