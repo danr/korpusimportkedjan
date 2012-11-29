@@ -16,7 +16,7 @@
       for (_i = 0, _len = examples.length; _i < _len; _i++) {
         example = examples[_i];
         _results.push((function(example) {
-          return $("<button class=\"btn-small btn-info\" style=\"margin:5px;\"\">\n    <i class=\"icon-book\"></i> " + example.title + "\n</button>").click(function() {
+          return $("<button class=\"btn btn-small btn-info\" style=\"margin:5px;\"\">\n    <i class=\"icon-book\"></i> " + example.title + "\n</button>").click(function() {
             return with_form.set(xml_editor, example);
           });
         })(example));
@@ -31,7 +31,7 @@
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         _ref2 = _ref1[_i], lang_key = _ref2[0], lang = _ref2[1];
         _results.push((function(lang_key, lang) {
-          return $("<button class=\"btn-small btn-warning\" style=\"margin:5px;\"\">\n    <i class=\"icon-flag\"></i> " + lang + "\n</button>").click(function() {
+          return $("<button class=\"btn btn-small btn-warning\" style=\"margin:5px;\"\">\n    <i class=\"icon-flag\"></i> " + lang + "\n</button>").click(function() {
             return $.fn.set_language(lang_key);
           });
         })(lang_key, lang));

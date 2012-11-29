@@ -11,6 +11,11 @@ hr {
     margin: 0 0 1em;
 }
 
+#example_buttons i, #language_buttons i, #btn_install i, #btn_submit i, #show_query i {
+    margin-top: 3px;
+    margin-left: -3px;
+}
+
 .row-button {
     margin-left: .5em;
     padding: 0.45em 0.5em 0.2em;

@@ -18,7 +18,7 @@ main = ->
     example_buttons = for example in examples
         do (example) ->
             $("""
-                <button class="btn-small btn-info" style="margin:5px;"">
+                <button class="btn btn-small btn-info" style="margin:5px;"">
                     <i class="icon-book"></i> #{example.title}
                 </button>""").click ->
                     with_form.set xml_editor, example
@@ -28,7 +28,7 @@ main = ->
     language_buttons = for [lang_key, lang] in [["se", "Svenska"],["en","English"]]
         do (lang_key, lang) ->
             $("""
-                <button class="btn-small btn-warning" style="margin:5px;"">
+                <button class="btn btn-small btn-warning" style="margin:5px;"">
                     <i class="icon-flag"></i> #{lang}
                 </button>""").click ->
                     $.fn.set_language(lang_key)
