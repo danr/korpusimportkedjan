@@ -39,8 +39,16 @@
       return _results;
     })();
     (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
+    $("#query").click(function() {
+      $(this).text("");
+      return false;
+    });
     $("#show_query").click(function() {
       submit(xml_editor, "makefile");
+      return false;
+    });
+    $("#show_settings_json").click(function() {
+      $("#query").text(JSON.stringify(with_form.get(), void 0, 4));
       return false;
     });
     $("#btn_submit").click(function() {

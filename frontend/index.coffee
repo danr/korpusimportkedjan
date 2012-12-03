@@ -35,10 +35,18 @@ main = ->
 
     $("#language_buttons").append(language_buttons...)
 
+    $("#query").click ->
+        $(this).text ""
+        false
 
     # Show query button
     $("#show_query").click ->
         submit xml_editor, "makefile"
+        false
+
+    # Show json settings button
+    $("#show_settings_json").click ->
+        $("#query").text JSON.stringify with_form.get(), undefined, 4
         false
 
     # Submit

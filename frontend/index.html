@@ -97,34 +97,47 @@
         </div>
       </div>
 
+      <pre id="query" class="original-pre">
+      </pre>
+
+
       <div class="row">
         <div class="span12" style="margin-bottom: 1em;">
-          <button class="btn pull-right" id="btn_submit">
-            <i class="icon-cogs"></i>
-            <span
-              data-loc-en="Run!"
-              data-loc-se="Kör!">
-            </span>
-          </button>
-          <button class="btn pull-right" id="btn_install">
-            <i class="icon-wrench"></i>
-            <span
-              data-loc-en="Install!"
-              data-loc-se="Installera!">
-            </span>
-          </button>
-          <button class="btn" id="show_query">
-            <i class="icon-beaker"></i>
-            <span
-              data-loc-en="Show Makefile"
-              data-loc-se="Visa Makefil">
-            </span>
-          </button>
+          <span class="btn-group">
+            <button class="btn" id="show_query">
+              <i class="icon-beaker"></i>
+              <span
+                data-loc-en="Show Makefile"
+                data-loc-se="Visa Makefil">
+              </span>
+            </button>
+            <button class="btn" id="show_settings_json">
+              <i class="icon-beaker"></i>
+              <span
+                data-loc-en="Show JSON Settings"
+                data-loc-se="Visa Formulärets JSON">
+              </span>
+            </button>
+          </span>
           <span id="extra_buttons" class="btn-group"></span>
+          <span class="pull-right btn-group">
+            <button class="btn" id="btn_install">
+              <i class="icon-wrench"></i>
+              <span
+                data-loc-en="Install!"
+                data-loc-se="Installera!">
+              </span>
+            </button>
+            <button class="btn" id="btn_submit">
+              <i class="icon-cogs"></i>
+              <span
+                data-loc-en="Run!"
+                data-loc-se="Kör!">
+              </span>
+            </button>
+          </span>
         </div>
       </div>
-
-      <div id="query"></div>
 
       <div id="errors"></div>
 

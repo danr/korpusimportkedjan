@@ -48,9 +48,7 @@
     return function(value, schema) {
       if (schema.type === "object" && _.isObject(value)) {
         return all(map(schema.properties, function(subschema, key) {
-          return (function() {
-            return (value[key] != null) && type_match(value[key], subschema);
-          })();
+          return (value[key] != null) && type_match(value[key], subschema);
         }));
       } else if (schema.type === "array" && _.isArray(value)) {
         return all(value, function(v) {

@@ -29,7 +29,7 @@ type_match = do ->
 
     (value, schema) ->
         if schema.type == "object" and _.isObject(value)
-            all map schema.properties, (subschema, key) -> do ->
+            all map schema.properties, (subschema, key) ->
                 value[key]? and type_match value[key], subschema
         else if schema.type == "array" and _.isArray(value)
             all value, (v) -> type_match v, schema.items
