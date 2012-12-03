@@ -42,8 +42,6 @@ window.submit = (xml_editor, format) ->
             progress.clear()
             if format is "makefile"
                 $("#query").text data
-            else if format is "cwb"
-                $("#result").empty().append $ """<a href="http://localhost/app">Visa korpusen i Korp</a>"""
             else
                 show_errors data
                 make_table data, settings.attributes

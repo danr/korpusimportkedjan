@@ -54,11 +54,6 @@ main = ->
         submit xml_editor, "xml"
         false
 
-    # Install
-    $("#btn_install").click ->
-        submit xml_editor, "cwb"
-        false
-
     # Set initial language to Swedish. This also sets the text value of uninitialized items.
     $.fn.set_language('se')
 

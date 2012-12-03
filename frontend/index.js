@@ -55,10 +55,6 @@
       submit(xml_editor, "xml");
       return false;
     });
-    $("#btn_install").click(function() {
-      submit(xml_editor, "cwb");
-      return false;
-    });
     return $.fn.set_language('se');
   };
 

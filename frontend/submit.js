@@ -37,8 +37,6 @@
         progress.clear();
         if (format === "makefile") {
           $("#query").text(data);
-        } else if (format === "cwb") {
-          $("#result").empty().append($("<a href=\"http://localhost/app\">Visa korpusen i Korp</a>"));
         } else {
           show_errors(data);
           make_table(data, settings.attributes);
