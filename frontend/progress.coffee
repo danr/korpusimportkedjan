@@ -12,32 +12,25 @@ progress.clear = ->
     $('#progress-text').text ""
 
 progress.handle = (data) ->
-    finished = -1 != data.indexOf '</result>'
-
-    if finished
+    if -1 != data.indexOf '</result>'
         progress.clear()
         return
-
-    if -1 == data.indexOf '</incremental>'
-        data += '</incremental>'
-    data += '</result>'
+    else
+        data += '</result>'
 
     json = $.xml2json data
-    percent = 100
-    command = ""
-    i = json.incremental
 
-    if i
-        steps = (Number i.steps) + 1
-        step = 0
-        if i.increment
-            ilen = i.increment.length
-            if ilen > 0
-                step = i.increment[ilen-1].step
-                command = i.increment[ilen-1].command
+    if increment = _.last(json.increment)
+        steps = Number increment.steps
+        step = Number increment.step
+        command = increment.command
         percent = if steps > 0 then step / steps * 100 else 100
-        if command?
-            $('#progress-text').text "Kör kommando #{command}..."
-        else
-            $('#progress-text').text ""
         $('#progress-bar').css "width",(percent + '%')
+        if command?
+            $('#progress-text').localize_element
+                se: "Kör kommando #{command}..."
+                en: "Running command #{command}..."
+        else
+            $('#progress-text').localize_element
+                se: ""
+                en: ""

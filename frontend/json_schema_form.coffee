@@ -1,13 +1,3 @@
-###
-# Localize element
-###
-$.fn.localize_element = (entries) ->
-    for key of entries
-        if entries[key]?
-            # console.log "Setting attr of ", $(this), " key: ", key, " value ", entries[key]
-            $(this).attr "data-loc-#{key}", entries[key]
-    $(this).localize()
-    $(this)
 
 ###
 # Simplify type: Finds single, multi and only enums

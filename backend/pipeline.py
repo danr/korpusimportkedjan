@@ -24,7 +24,7 @@ def enum(*sequential):
 Status = enum('Init', 'Running', 'Done', 'Error')
 
 """The possible message types from the pipeline"""
-Message = enum('StatusChange', 'Increment', 'IncrementHeader', 'IncrementFooter')
+Message = enum('StatusChange', 'Increment')
 
 def finished(status):
     """The statuses that comprise a finished build"""
@@ -93,17 +93,14 @@ class Build(object):
         # Output from make, line by line
         self.make_out = []
 
-    def increment_header(self):
-        """The increment header message"""
-        return '<incremental steps="%s">\n' % self.steps
+        # Set increments to dummy values
+        self.command = ""
+        self.steps = 0
+        self.step = 0
 
     def increment_msg(self):
         """The current increment message"""
-        return '<increment command="%s" step="%s"/>\n' % (self.command, self.step)
-
-    def increment_footer(self):
-        """The increment footer message"""
-        return '</incremental>\n'
+        return '<increment command="%s" step="%s" steps="%s"/>\n' % (self.command, self.step, self.steps)
 
     def send_to_all(self, msg):
         """Sends a message to all listeners"""
@@ -114,17 +111,15 @@ class Build(object):
         self.status = status
         self.send_to_all((Message.StatusChange, self.status))
 
-    def notify_increment_running(self):
-        """Notify that we have started running and inform how many steps we will take"""
-        self.send_to_all((Message.IncrementHeader, self.increment_header()))
-
-    def notify_step(self):
+    def notify_step(self, new_cmd=None, new_step=None, new_steps=None):
         """Notifies all listeners that the increment has been increased"""
+        if new_step is not None:
+            self.step = new_step
+        if new_cmd is not None:
+            self.command = new_cmd
+        if new_steps is not None:
+            self.steps = new_steps
         self.send_to_all((Message.Increment, self.increment_msg()))
-
-    def notify_increment_completion(self):
-        """Notify completion, by sending a </increment>"""
-        self.send_to_all((Message.IncrementFooter, self.increment_footer()))
 
     def make_files(self):
         """
@@ -177,35 +172,32 @@ class Build(object):
 
         # Do a dry run to get the number of invocations that will be made
         stdout, _ = make(make_settings + ['--dry-run']).communicate("")
-        self.steps = stdout.count(self.pipeline_settings.python_interpreter)
+        steps = stdout.count(self.pipeline_settings.python_interpreter)
 
         # Start make for real
         self.make_process = make(make_settings)
 
-        self.step = 0
-        self.command = ""
         self.change_status(Status.Running)
 
         # Process the output from make
-        self.notify_increment_running()
+        self.notify_step(new_cmd="", new_step=0, new_steps=steps + 1)
+        step = 0
         for line in iter(self.make_process.stdout.readline, ''):
             # print line.rstrip()
             self.make_out += [line]
             if self.pipeline_settings.python_interpreter in line:
-                self.step += 1;
+                step += 1;
                 argstring = line.split(self.pipeline_settings.python_interpreter)[1]
                 arguments = argstring.lstrip().split()
-                print argstring
-                print arguments
-                self.command = " ".join(arguments[1:3]) if "--" in arguments[3] else arguments[1]
-                self.notify_step()
-        self.notify_increment_completion()
+                command = " ".join(arguments[1:3]) if "--" in arguments[3] else arguments[1]
+                self.notify_step(new_step=step, new_cmd=command)
+        self.notify_step(new_cmd="", new_step=step+1)
 
         # Send warnings
         try:
             with open(self.warnings_log_file, "r") as f:
                 self.warnings = f.read().rstrip()
-        except IOError as e:
+        except IOError:
             self.warnings = None
 
         # The corpus should now be in self.out_file

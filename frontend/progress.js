@@ -16,37 +16,31 @@
   };
 
   progress.handle = function(data) {
-    var command, finished, i, ilen, json, percent, step, steps;
-    finished = -1 !== data.indexOf('</result>');
-    if (finished) {
+    var command, increment, json, percent, step, steps;
+    if (-1 !== data.indexOf('</result>')) {
       progress.clear();
       return;
+    } else {
+      data += '</result>';
     }
-    if (-1 === data.indexOf('</incremental>')) {
-      data += '</incremental>';
-    }
-    data += '</result>';
     json = $.xml2json(data);
-    percent = 100;
-    command = "";
-    i = json.incremental;
-    if (i) {
-      steps = (Number(i.steps)) + 1;
-      step = 0;
-      if (i.increment) {
-        ilen = i.increment.length;
-        if (ilen > 0) {
-          step = i.increment[ilen - 1].step;
-          command = i.increment[ilen - 1].command;
-        }
-      }
+    if (increment = _.last(json.increment)) {
+      steps = Number(increment.steps);
+      step = Number(increment.step);
+      command = increment.command;
       percent = steps > 0 ? step / steps * 100 : 100;
+      $('#progress-bar').css("width", percent + '%');
       if (command != null) {
-        $('#progress-text').text("Kör kommando " + command + "...");
+        return $('#progress-text').localize_element({
+          se: "Kör kommando " + command + "...",
+          en: "Running command " + command + "..."
+        });
       } else {
-        $('#progress-text').text("");
+        return $('#progress-text').localize_element({
+          se: "",
+          en: ""
+        });
       }
-      return $('#progress-bar').css("width", percent + '%');
     }
   };
 

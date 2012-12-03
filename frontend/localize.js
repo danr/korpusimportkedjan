@@ -6,6 +6,22 @@
 
   fallback_key = 'en';
 
+  /*
+  # Localize element
+  */
+
+
+  $.fn.localize_element = function(entries) {
+    var key;
+    for (key in entries) {
+      if (entries[key] != null) {
+        $(this).attr("data-loc-" + key, entries[key]);
+      }
+    }
+    $(this).localize();
+    return $(this);
+  };
+
   jQuery.fn.localize = function() {
     var data_loc, data_loc_fallback, localize_element;
     data_loc = "data-loc-" + language_key;

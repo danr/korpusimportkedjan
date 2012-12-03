@@ -3,6 +3,17 @@
 language_key = 'se'
 fallback_key = 'en'
 
+###
+# Localize element
+###
+$.fn.localize_element = (entries) ->
+    for key of entries
+        if entries[key]?
+            # console.log "Setting attr of ", $(this), " key: ", key, " value ", entries[key]
+            $(this).attr "data-loc-#{key}", entries[key]
+    $(this).localize()
+    $(this)
+
 # Localizes elements with the current language_key, or with the provided one specified
 jQuery.fn.localize = () ->
     # console.log "Localizing ", $(this), " with language key #{language_key}"
