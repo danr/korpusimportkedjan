@@ -1,5 +1,38 @@
 # -*- mode: python; coding: utf-8 -*-
 
+################################################################################
+#
+# Making a debug object
+#
+################################################################################
+import sys
+
+class Writer(object):
+    def __init__(self, mode='a'):
+        self.log = open("/dev/shm/annotate.log", mode)
+        sys.stdout = self
+        sys.stderr = self
+
+    def write(self, msg):
+        self.log.write(msg)
+        self.flush()
+
+    def flush(self):
+        self.log.flush()
+
+    def close(self):
+        self.log.close()
+
+w = Writer('w')
+print "Restarted"
+w.flush()
+
+################################################################################
+#
+# General imports
+#
+################################################################################
+
 from xml.sax.saxutils import escape
 from threading import Thread
 from Queue import Queue
@@ -8,16 +41,37 @@ import urlparse
 import json
 
 import os
-import sys
 
+################################################################################
+#
+# Append path to annotate and backend
+#
+################################################################################
+paths = ['/home/dan/annotate/python','/export/htdocs_sb/annoteringslabb/']
+for path in paths:
+    if path not in sys.path:
+        sys.path.append(path)
+
+os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
+
+################################################################################
+#
+# Open JSON Schema settings and the validator
+#
+################################################################################
 from schema_utils import DefaultValidator
 
-with open("settings_schema.json","r") as f:
+with open("/export/htdocs_sb/annoteringslabb/settings_schema.json","r") as f:
     schema_str = f.read()
 
 settings_schema = json.loads(schema_str)
 settings_validator = DefaultValidator(settings_schema)
 
+################################################################################
+#
+# Pipeline Settings
+#
+################################################################################
 class PipelineSettings(object):
     """Static pipeline settings"""
 
@@ -37,18 +91,15 @@ class PipelineSettings(object):
     processes = 2
 
     # Log file
-    log_file = os.path.join(directory, 'log')
+    log_file = os.path.join(directory, 'log.txt')
 
 pipeline_settings = PipelineSettings()
 
-# Append path to annotate and backend
-paths = ['/home/dan/annotate/python','/export/htdocs/dan/backend']
-for path in paths:
-    if path not in sys.path:
-        sys.path.append(path)
-
-os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
-
+################################################################################
+#
+# Pipeline Environment Settings
+#
+################################################################################
 # Where the models are hosted. Replaces SB_MODELS environment variable if it does not exist
 os.environ['SB_MODELS'] = os.environ.get('SB_MODELS','/home/dan/annotate/models')
 
@@ -57,27 +108,24 @@ os.environ['remote_cwb_datadir']="null"
 os.environ['remote_cwb_registry']="null"
 os.environ['remote_host']="null"
 
+################################################################################
+#
 # Ongoing and finished builds
+#
+################################################################################
 builds = dict()
 
 from make_makefile import makefile
 from pipeline import Build, Status, Message, finished, make_trace
 
-class Writer(object):
-    def __init__(self, mode='a'):
-        self.log = open(pipeline_settings.log_file, mode)
-
-    def write(self, msg):
-        self.log.write(msg)
-        self.flush()
-
-    def flush(self):
-        self.log.flush()
-
-    def close(self):
-        self.log.close()
 
 request=0
+
+################################################################################
+#
+# Utility functions for running the pipeline
+#
+################################################################################
 
 def mk_putstr(build_hash, request_number):
     def putstr(msg):
@@ -153,10 +201,19 @@ def join_build(build, incremental, putstr):
         putstr("Getting result...")
         yield get_result()
 
+################################################################################
+#
+# Application function
+#
+################################################################################
+
 def application(environ, start_response):
     """
     Parses the data, but most processing is done in the function build
     """
+    w = Writer()
+    print "Continuing"
+    w.flush()
     global request
     request+=1
 
