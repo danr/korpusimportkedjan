@@ -96,7 +96,7 @@ $ -> $.reject
     # Paragraph 2
     paragraph2: ''
      # Message displayed below closing link
-    closeMessage: 'Du kan fortsätta ändå – all funktionalitet är densamma – men så fort du önskar att Korp och annoteringslabbet vore snyggare och snabbare är det bara att installera Firefox, det tar bara en minut.'
+    closeMessage: 'Du kan fortsätta ändå – med begränsad funktionalitet – men så fort du önskar att Korp och annoteringslabbet vore snyggare och snabbare är det bara att installera Firefox, det tar bara en minut.'
     # Text for closing link
     closeLink: 'Stäng varningen'
     # If cookies should be used to remmember if the window was closed (see cookieSettings for more options)

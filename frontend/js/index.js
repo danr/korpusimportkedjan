@@ -97,7 +97,7 @@
       header: 'Du använder en omodern webbläsare',
       paragraph1: 'Korp och annoteringslabbet använder sig av moderna webbteknologier som inte stödjs av din webbläsare. En lista på de mest populära moderna alternativen visas nedan. Firefox rekommenderas varmt.',
       paragraph2: '',
-      closeMessage: 'Du kan fortsätta ändå – all funktionalitet är densamma – men så fort du önskar att Korp och annoteringslabbet vore snyggare och snabbare är det bara att installera Firefox, det tar bara en minut.',
+      closeMessage: 'Du kan fortsätta ändå – med begränsad funktionalitet – men så fort du önskar att Korp och annoteringslabbet vore snyggare och snabbare är det bara att installera Firefox, det tar bara en minut.',
       closeLink: 'Stäng varningen',
       closeCookie: true,
       cookieSettings: {
