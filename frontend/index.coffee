@@ -35,6 +35,10 @@ main = ->
 
     $("#language_buttons").append(language_buttons...)
 
+    $("#title_text").click ->
+        with_form.load_defaults()
+        false
+
     $("#query").click ->
         $(this).text ""
         false

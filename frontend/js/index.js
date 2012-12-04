@@ -39,6 +39,10 @@
       return _results;
     })();
     (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
+    $("#title_text").click(function() {
+      with_form.load_defaults();
+      return false;
+    });
     $("#query").click(function() {
       $(this).text("");
       return false;

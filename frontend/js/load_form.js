@@ -9,6 +9,9 @@
     },
     set: function() {
       return console.log("Error: Form not loaded!");
+    },
+    load_defaults: function() {
+      return console.log("Error: Form not loaded!");
     }
   };
 
@@ -20,6 +23,9 @@
     window.with_form.set = function(xml_editor, example) {
       xml_editor.setValue(example.corpus_xml);
       return form.set(example);
+    };
+    window.with_form.load_defaults = function() {
+      return form.set(value);
     };
     return window.with_form.get = form.get;
   };

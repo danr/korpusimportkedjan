@@ -1,6 +1,7 @@
 window.with_form =
     get: () -> console.log "Error: Form not loaded!"
     set: () -> console.log "Error: Form not loaded!"
+    load_defaults: () -> console.log "Error: Form not loaded!"
 
 set_form = (schema, value) ->
 
@@ -11,6 +12,9 @@ set_form = (schema, value) ->
     window.with_form.set = (xml_editor, example) ->
         xml_editor.setValue example.corpus_xml
         form.set example
+
+    window.with_form.load_defaults = () ->
+        form.set value
 
     window.with_form.get = form.get
 
