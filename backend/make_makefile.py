@@ -116,12 +116,9 @@ def make_Makefile(settings):
             if replace != "custom":
                 # Adds w:pos -> msd in xml
                 if replace == "dephead":
-                    custom_rules += [("token.dephead",
-"""%.token.dephead: %.children.sentence.token %.token.ref %.token.{0}.ref
-	python $(root)dephead.py --out $@ --sentence $(1) --ref $(2) --dephead_ref $(3)""".format(replace))]
                     replace += ".ref"
                 xml_cols.append((mk_xml_attr(ws['tag'],key),
-                                 mk_file_attr('token',e['attribute'])))
+                                 mk_file_attr('token',replace)))
             else:
                 # Adds w:language -> token.language in xml and
                 #      token.language -> language in columns
