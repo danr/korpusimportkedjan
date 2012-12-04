@@ -41,11 +41,11 @@
   };
 
   saldo_link = function(s) {
-    return "<a href=\"http://spraakbanken.gu.se/karp/#search=sense%7C" + s + "\">" + s + "</a>";
+    return "<a target=\"_blank\" href=\"" + config.karp_address + "#search=sense%7C" + s + "\">" + s + "</a>";
   };
 
   lemgram_link = function(s) {
-    return "<a href=\"http://spraakbanken.gu.se/karp/#search=lemgram%7C" + s + "\">" + s + "</a>";
+    return "<a target=\"_blank\" href=\"" + config.karp_address + "#search=lemgram%7C" + s + "\">" + s + "</a>";
   };
 
   span = function(w) {

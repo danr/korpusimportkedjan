@@ -20,9 +20,9 @@ split_pipes = (f) ->
         # characters, just return a space char
         (if a.join("") then a.map(f).join(", ") else "&nbsp;")
 
-saldo_link = (s) -> """<a href="http://spraakbanken.gu.se/karp/#search=sense%7C#{s}">#{s}</a>"""
+saldo_link = (s) -> """<a target="_blank" href="#{config.karp_address}#search=sense%7C#{s}">#{s}</a>"""
 
-lemgram_link = (s) -> """<a href="http://spraakbanken.gu.se/karp/#search=lemgram%7C#{s}">#{s}</a>"""
+lemgram_link = (s) -> """<a target="_blank" href="#{config.karp_address}#search=lemgram%7C#{s}">#{s}</a>"""
 
 span = (w) -> $("<span/>").html w
 

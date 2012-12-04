@@ -25,7 +25,7 @@ window.submit = (xml_editor, format) ->
 
     text = xml_editor.getValue()
 
-    req_url = "http://spraakbanken.gu.se/ws/annoteringslabbet" +
+    req_url = config.address +
         "?settings=" + JSON.stringify(settings) +
         "&incremental=" + (String incremental) +
         "&format=" + format

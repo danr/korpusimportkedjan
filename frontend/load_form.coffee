@@ -17,7 +17,7 @@ set_form = (schema, value) ->
 window.load_form = () ->
 
     $.ajax
-        url: "http://spraakbanken.gu.se/ws/annoteringslabbet"
+        url: config.address
         data:
             format: "schema"
         dataType: "json"
