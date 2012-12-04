@@ -110,57 +110,39 @@ window.make_table = (data, attributes) ->
             else if child.nodeName == "sentence"
                 co.yld -> div.append tabulate_sentence columns, $.xml2json(child), make_deptrees
             else
-                new_div = $("<div style='border: 1px red solid; padding:5px'><span>#{child.nodeName}</span></div>")
+                new_div = $("<div style='border: 3px grey solid; margin:3px; padding: 3px'><span>&lt;#{child.nodeName}&gt;</span></div>")
                 div.append(new_div)
                 display(child,new_div)
 
-    # tables.append display (data.getElementsByTagName "corpus")[0]
-
     corpus = data.getElementsByTagName "corpus"
-    m = display(corpus[0],tables)()
+    display_suspended = display(corpus[0],tables)
 
-    while true
-        console.log "M:", m
+    SLICE_SIZE = 4
+
+    show_next = (m_suspended, fuel) ->
+        m = m_suspended()
         if m.result?
             console.log "RESULT:", m.result
-            break
         else if m.cont?
             console.log "OUTPUT:", m.output, m.output()
-            m = m.cont("created!")()
-        else
-            console.log "???:", m
-            break
-            m = m({suspended: true})
+            new_suspended = m.cont("created!")
+            if fuel > 0
+                show_next new_suspended, (fuel-1)
+            else
+                link = $ """<a href="#">Ladda fler meningar...</a>"""
+                load_more = $("<div/>").append(link)
+                show_more = ->
+                    load_more.detach()
+                    show_next new_suspended, SLICE_SIZE
+                    false
+                tables.append load_more
+                link.click show_more
+                load_more.waypoint show_more,
+                    offset: "100%"
+                    triggerOnce: true
+                    onlyOnScroll: true
 
-
-
-    ###
-    SLICE_SIZE = 8
-
-    # Shows a slice of the sentences, from an index
-    # A div is appended, when shown shows the next slide using jquery-waypoint.
-    show_from = (ix) ->
-        next = ix + SLICE_SIZE
-        if sentences.length > ix
-            for i in [ix...Math.min next, sentences.length]
-                tables.append tabulate_sentence columns, sentences[i], make_deptrees
-
-        if sentences.length > next
-            show_more = ->
-                load_more.detach()
-                show_from next
-                false
-            link = $ """<a href="#">Ladda fler meningar...</a>"""
-            load_more = $("<div/>").append(link)
-            tables.append load_more
-            link.click show_more
-            load_more.waypoint show_more,
-                offset: "100%"
-                triggerOnce: true
-                onlyOnScroll: true
-
-    show_from 0
-    ###
+    show_next(display_suspended, SLICE_SIZE)
 
     new_window = (mime, content) ->
         w = window.open(",")
