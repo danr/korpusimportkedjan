@@ -86,7 +86,7 @@ window.examples =
             ]
         attributes: all_attributes
         corpus_xml: """
-'<text title="Dannes Superkorpus">
+<text title="Dannes Superkorpus">
   <chapter name="Dan berättar om korpusen">
     <p name="Första paragrafen">
       <s mood="glada">
