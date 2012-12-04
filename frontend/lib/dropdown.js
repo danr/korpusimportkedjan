@@ -8,7 +8,10 @@
     $.fn.buttonSelect = function(separate_first) {
         this.hide().wrap('<div class="btn-group"/>');
         var select = this.parent();
-        var selectedOption=this.find('option[selected]').length>0?this.find('option[selected]'):this.find('option:nth(0)');
+        var selectedOption=
+            this.find('option[selected]').length>0 ?
+            this.find('option[selected]'):
+            this.find('option:nth(0)');
         var currentValue = selectedOption.val();
         var currentText = selectedOption.text();
 
@@ -44,13 +47,14 @@
             }
         });
 
-        copy_locs(selectedOption, label);
+        copy_locs(selectedOption.get(0), label);
         label.localize();
 
         hidden.on({
             change: function () {
-				var a_query = 'a[data-value=' + $(this).val() + ']';
-                copy_locs(a_query, label);
+				var a_query = 'a[data-value=' + $(hidden).val() + ']';
+                var a = $(select).find(a_query);
+                copy_locs(a, label);
                 label.localize();
             }
         });
