@@ -13,3 +13,6 @@
 [submodule "frontend/lib/jquery-color"]
 	path = frontend/lib/jquery-color
 	url = https://github.com/jquery/jquery-color.git
+[submodule "frontend/lib/jquery-reject"]
+	path = frontend/lib/jquery-reject
+	url = https://github.com/TurnWheel/jReject.git

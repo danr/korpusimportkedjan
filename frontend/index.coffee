@@ -1,5 +1,4 @@
 main = ->
-
     # Make the form
     load_form()
 
@@ -62,3 +61,47 @@ main = ->
     $.fn.set_language('se')
 
 $(document).ready main
+
+# Warn users that use old browsers
+$ -> $.reject
+    reject:
+        all: false
+        msie5: true
+        msie6: true
+        msie7: true
+        msie8: true
+    imagePath: "lib/jquery-reject/images/"
+    display: ['firefox','chrome','safari','opera']
+    browserShow: true
+    # Settings for which browsers to display
+    browserInfo:
+        firefox:
+            # Text below the icon
+            text: 'Firefox'
+            # URL For icon/text link
+            url: 'http://www.mozilla.com/firefox/'
+        safari:
+            text: 'Safari'
+            url: 'http://www.apple.com/safari/download/'
+        opera:
+            text: 'Opera'
+            url: 'http://www.opera.com/download/'
+        chrome:
+            text: 'Chrome'
+            url: 'http://www.google.com/chrome/'
+    # Header of pop-up window
+    header: 'Du använder en omodern webbläsare'
+    # Paragraph 1
+    paragraph1: 'Korp och annoteringslabbet använder sig av moderna webbteknologier som inte stödjs av din webbläsare. En lista på de mest populära moderna alternativen visas nedan. Firefox rekommenderas varmt.'
+    # Paragraph 2
+    paragraph2: ''
+     # Message displayed below closing link
+    closeMessage: 'Du kan fortsätta ändå – all funktionalitet är densamma – men så fort du önskar att Korp och annoteringslabbet vore snyggare och snabbare är det bara att installera Firefox, det tar bara en minut.'
+    # Text for closing link
+    closeLink: 'Stäng varningen'
+    # If cookies should be used to remmember if the window was closed (see cookieSettings for more options)
+    closeCookie: true
+    # Cookie settings are only used if closeCookie is true
+    cookieSettings:
+        path: '/' # Path for the cookie to be saved on (should be root domain in most cases)
+        expires: 100000 # Expiration Date (in seconds), 0 (default) means it ends with the current session

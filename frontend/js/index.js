@@ -64,4 +64,47 @@
 
   $(document).ready(main);
 
+  $(function() {
+    return $.reject({
+      reject: {
+        all: false,
+        msie5: true,
+        msie6: true,
+        msie7: true,
+        msie8: true
+      },
+      imagePath: "lib/jquery-reject/images/",
+      display: ['firefox', 'chrome', 'safari', 'opera'],
+      browserShow: true,
+      browserInfo: {
+        firefox: {
+          text: 'Firefox',
+          url: 'http://www.mozilla.com/firefox/'
+        },
+        safari: {
+          text: 'Safari',
+          url: 'http://www.apple.com/safari/download/'
+        },
+        opera: {
+          text: 'Opera',
+          url: 'http://www.opera.com/download/'
+        },
+        chrome: {
+          text: 'Chrome',
+          url: 'http://www.google.com/chrome/'
+        }
+      },
+      header: 'Du använder en omodern webbläsare',
+      paragraph1: 'Korp och annoteringslabbet använder sig av moderna webbteknologier som inte stödjs av din webbläsare. En lista på de mest populära moderna alternativen visas nedan. Firefox rekommenderas varmt.',
+      paragraph2: '',
+      closeMessage: 'Du kan fortsätta ändå – all funktionalitet är densamma – men så fort du önskar att Korp och annoteringslabbet vore snyggare och snabbare är det bara att installera Firefox, det tar bara en minut.',
+      closeLink: 'Stäng varningen',
+      closeCookie: true,
+      cookieSettings: {
+        path: '/',
+        expires: 100000
+      }
+    });
+  });
+
 }).call(this);
