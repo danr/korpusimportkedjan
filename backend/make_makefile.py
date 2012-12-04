@@ -129,9 +129,6 @@ def make_Makefile(settings):
                                  mk_file_attr('token',key)))
                 columns.append((mk_file_attr('token',key),key))
 
-    # add the obligatory structural attribute sentence.id
-    structs.append(('sentence.id','sentence:id'))
-
     # Sentence and Paragraph segmentation
     def add_segmenter(setting,name,chunk,model=None):
         if setting == "none":
@@ -157,9 +154,16 @@ def make_Makefile(settings):
                               filename=name)
             return [makefile_comment("Using tag " + setting['tag'] + " for " + name)]
 
+    # add the obligatory structural attribute sentence.id
+    structs.append(('sentence.id','sentence:id'))
+
+    # and similar for paragraph if there is some segmentation
+    if settings['paragraph_segmenter'] != "none":
+        structs.append(('paragraph.n','paragraph'))
+
     sentence_chunk = text if settings['paragraph_segmenter'] == "none" else "paragraph"
     sentence = add_segmenter(settings['sentence_segmenter'], "sentence", sentence_chunk, "$(punkt_model)")
-    paragraph = add_segmenter(settings['paragraph_segmenter'], "paragraph", text)
+    paragraph = add_segmenter(settings['paragraph_segmenter'], "paragraph", text, "$(punkt_model)")
 
     def add_structural_attributes(tag,attributes,add_xml=False):
         if len(attributes) > 0 or add_xml:
