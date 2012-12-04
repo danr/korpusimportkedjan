@@ -33,7 +33,7 @@
       sp = (s === "|" ? "" : s.substring(1, s.length - 1));
       a = sp.split("|");
       if (a.join("")) {
-        return a.map(f).join(", ");
+        return _.map(a, f).join(", ");
       } else {
         return "&nbsp;";
       }
@@ -66,8 +66,8 @@
     }
     table.append(header);
     words = to_array(sent.w);
-    append_array_to_table(table, words.map(function(word) {
-      return columns.map(function(col) {
+    append_array_to_table(table, _.map(words, function(word) {
+      return _.map(columns, function(col) {
         return span(col.correct(word[col.id] || "&nbsp;"));
       });
     }));

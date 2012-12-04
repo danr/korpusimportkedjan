@@ -18,7 +18,7 @@ split_pipes = (f) ->
 
         # return them comma separated, of if the array contains no
         # characters, just return a space char
-        (if a.join("") then a.map(f).join(", ") else "&nbsp;")
+        (if a.join("") then _.map(a,f).join(", ") else "&nbsp;")
 
 saldo_link = (s) -> """<a target="_blank" href="#{config.karp_address}#search=sense%7C#{s}">#{s}</a>"""
 
@@ -35,9 +35,9 @@ tabulate_sentence = (columns, sent, make_deptrees) ->
     table.append header
 
     words = to_array(sent.w)
-    append_array_to_table table, words.map (word) ->
-        columns.map (col) ->
-            span col.correct(word[col.id] or "&nbsp;")
+    append_array_to_table table, _.map(words, (word) ->
+        _.map(columns, (col) ->
+            span col.correct(word[col.id] or "&nbsp;")))
 
     if make_deptrees
         deprel_div = $("<div/>").attr("id", sent.id)
