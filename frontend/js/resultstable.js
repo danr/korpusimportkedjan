@@ -74,6 +74,13 @@
     if (make_deptrees) {
       deprel_div = $("<div/>").attr("id", sent.id);
       table.prepend($("<tr/>").append($("<td/>").attr("colspan", columns.length).css("background-color", "#FFFFFF").append(deprel_div)));
+      /*
+              deprel_div.waypoint (-> draw_brat_tree words, sent.id),
+                      offset: "100%"
+                      triggerOnce: true
+                      onlyOnScroll: true
+      */
+
       deprel_div.show("slow", function() {
         return draw_brat_tree(words, sent.id);
       });
@@ -82,7 +89,8 @@
   };
 
   window.make_table = function(data, attributes) {
-    var SLICE_SIZE, col, columns, correct, loading, make_deptrees, new_window, s, sentences, show_from, tables, xml_sentences;
+    var col, columns, corpus, correct, display, loading, m, make_deptrees, new_window, s, sentences, tables, xml_sentences;
+    window.data = data;
     col = function(s) {
       return {
         name: s,
@@ -130,33 +138,68 @@
     });
     loading = $("<div class=\"loading\"><p>Laddar fler meningar&hellip;</p></div>");
     tables = $("<div/>");
-    SLICE_SIZE = 8;
-    show_from = function(ix) {
-      var i, link, load_more, next, show_more, _i, _ref;
-      next = ix + SLICE_SIZE;
-      if (sentences.length > ix) {
-        for (i = _i = ix, _ref = Math.min(next, sentences.length); ix <= _ref ? _i < _ref : _i > _ref; i = ix <= _ref ? ++_i : --_i) {
-          tables.append(tabulate_sentence(columns, sentences[i], make_deptrees));
+    display = function(tag, div) {
+      return co.forM(tag.childNodes, function(child) {
+        var new_div;
+        if (child.nodeName === "#text") {
+          return co.ret("ignored");
+        } else if (child.nodeName === "sentence") {
+          return co.yld(function() {
+            return div.append(tabulate_sentence(columns, $.xml2json(child), make_deptrees));
+          });
+        } else {
+          new_div = $("<div style='border: 1px red solid; padding:5px'><span>" + child.nodeName + "</span></div>");
+          div.append(new_div);
+          return display(child, new_div);
         }
-      }
-      if (sentences.length > next) {
-        show_more = function() {
-          load_more.detach();
-          show_from(next);
-          return false;
-        };
-        link = $("<a href=\"#\">Ladda fler meningar...</a>");
-        load_more = $("<div/>").append(link);
-        tables.append(load_more);
-        link.click(show_more);
-        return load_more.waypoint(show_more, {
-          offset: "100%",
-          triggerOnce: true,
-          onlyOnScroll: true
+      });
+    };
+    corpus = data.getElementsByTagName("corpus");
+    m = display(corpus[0], tables)();
+    while (true) {
+      console.log("M:", m);
+      if (m.result != null) {
+        console.log("RESULT:", m.result);
+        break;
+      } else if (m.cont != null) {
+        console.log("OUTPUT:", m.output, m.output());
+        m = m.cont("created!")();
+      } else {
+        console.log("???:", m);
+        break;
+        m = m({
+          suspended: true
         });
       }
-    };
-    show_from(0);
+    }
+    /*
+        SLICE_SIZE = 8
+    
+        # Shows a slice of the sentences, from an index
+        # A div is appended, when shown shows the next slide using jquery-waypoint.
+        show_from = (ix) ->
+            next = ix + SLICE_SIZE
+            if sentences.length > ix
+                for i in [ix...Math.min next, sentences.length]
+                    tables.append tabulate_sentence columns, sentences[i], make_deptrees
+    
+            if sentences.length > next
+                show_more = ->
+                    load_more.detach()
+                    show_from next
+                    false
+                link = $ """<a href="#">Ladda fler meningar...</a>"""
+                load_more = $("<div/>").append(link)
+                tables.append load_more
+                link.click show_more
+                load_more.waypoint show_more,
+                    offset: "100%"
+                    triggerOnce: true
+                    onlyOnScroll: true
+    
+        show_from 0
+    */
+
     new_window = function(mime, content) {
       var w;
       w = window.open(",");

@@ -42,12 +42,20 @@ tabulate_sentence = (columns, sent, make_deptrees) ->
     if make_deptrees
         deprel_div = $("<div/>").attr("id", sent.id)
         table.prepend $("<tr/>").append($("<td/>").attr("colspan", columns.length).css("background-color", "#FFFFFF").append(deprel_div))
+        ###
+        deprel_div.waypoint (-> draw_brat_tree words, sent.id),
+                offset: "100%"
+                triggerOnce: true
+                onlyOnScroll: true
+        ###
         deprel_div.show "slow", ->
             draw_brat_tree words, sent.id
 
     table
 
 window.make_table = (data, attributes) ->
+
+    window.data = data
 
     col = (s) ->
         name: s
@@ -95,6 +103,38 @@ window.make_table = (data, attributes) ->
 
     tables = $ "<div/>"
 
+    display = (tag,div) ->
+        co.forM tag.childNodes, (child) ->
+            if child.nodeName == "#text"
+                co.ret "ignored"
+            else if child.nodeName == "sentence"
+                co.yld -> div.append tabulate_sentence columns, $.xml2json(child), make_deptrees
+            else
+                new_div = $("<div style='border: 1px red solid; padding:5px'><span>#{child.nodeName}</span></div>")
+                div.append(new_div)
+                display(child,new_div)
+
+    # tables.append display (data.getElementsByTagName "corpus")[0]
+
+    corpus = data.getElementsByTagName "corpus"
+    m = display(corpus[0],tables)()
+
+    while true
+        console.log "M:", m
+        if m.result?
+            console.log "RESULT:", m.result
+            break
+        else if m.cont?
+            console.log "OUTPUT:", m.output, m.output()
+            m = m.cont("created!")()
+        else
+            console.log "???:", m
+            break
+            m = m({suspended: true})
+
+
+
+    ###
     SLICE_SIZE = 8
 
     # Shows a slice of the sentences, from an index
@@ -120,6 +160,7 @@ window.make_table = (data, attributes) ->
                 onlyOnScroll: true
 
     show_from 0
+    ###
 
     new_window = (mime, content) ->
         w = window.open(",")

@@ -9,7 +9,7 @@
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
       lineNumbers: true
     });
-    xml_editor.setValue("En exempeltext kommer lastad. Med vadå?");
+    xml_editor.setValue("En exempeltext kommer lastad. Med vadå?\n\nEn korp, en karp och ett labb!");
     example_buttons = (function() {
       var _i, _len, _results;
       _results = [];
