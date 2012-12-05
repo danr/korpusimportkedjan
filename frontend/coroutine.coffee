@@ -25,15 +25,6 @@ forM = (xs,f) ->
           bind forM(_.tail(xs),f), (as) ->
              ret([].concat([a],as))
 
-forM_ = (xs,f) ->
-    if _.isEmpty xs
-        ret {}
-    else
-        bind (f(_.head(xs))), (a) ->
-          bind forM(_.tail(xs),f), (as) ->
-             ret {}
-
-
 # tests:
 
 if false
@@ -84,7 +75,4 @@ if window?
         yld: yld
         bind: bind
         forM: forM
-        forM_: forM_
-
-
 
