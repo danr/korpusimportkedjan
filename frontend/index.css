@@ -14,13 +14,20 @@ hr {
 .table {
   margin-bottom: 0px; }
 
+.drawing {
+  position: absolute;
+  left: 1000px;
+  top: 10000px;
+  width: 800px;
+  height: 10000px; }
+
 #result .tag_header, #result .tag_footer, #result .tag_closed {
   font-family: monospace;
   color: #117700; }
 #result .tag_header, #result .tag_closed, #result .tag_footer {
   cursor: pointer; }
 #result .tag_outline {
-  border: 1px solid gray;
+  border: 1px solid #dddddd;
   margin-top: 3px;
   padding: 3px; }
 #result .tag_header:before {

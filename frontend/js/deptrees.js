@@ -89,8 +89,8 @@
   */
 
 
-  window.draw_brat_tree = function(words, to_div) {
-    var add_word, added_pos, added_rel, collData, docData, entities, entity_types, ix, len, relation_types, relations, text, word, _i, _len;
+  window.draw_brat_tree = function(words, to_div, attach_to) {
+    var add_word, added_pos, added_rel, collData, dispatcher, div, docData, entities, entity_types, ix, len, make_visible, relation_types, relations, text, word, _i, _len;
     entity_types = [];
     relation_types = [];
     entities = [];
@@ -149,7 +149,22 @@
       entities: entities,
       relations: relations
     };
-    return Util.embed(to_div, collData, docData, webFontURLs);
+    div = $("#" + to_div);
+    make_visible = function() {
+      div.appendTo("body");
+      div.show();
+      return div.addClass("drawing");
+    };
+    make_visible();
+    dispatcher = Util.embed(to_div, collData, docData, webFontURLs);
+    dispatcher.on('newSourceData', function() {
+      return make_visible();
+    });
+    return dispatcher.on('doneRendering', function() {
+      div.removeClass("drawing");
+      div.detach();
+      return div.appendTo(attach_to);
+    });
   };
 
 }).call(this);

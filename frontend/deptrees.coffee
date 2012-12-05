@@ -79,7 +79,7 @@ make_relation_from_rel = (r) ->
 ###
 # Draws a brat tree from a XML words array to a div given its id
 ###
-window.draw_brat_tree = (words, to_div) ->
+window.draw_brat_tree = (words, to_div, attach_to) ->
 
     entity_types = []
     relation_types = []
@@ -129,5 +129,20 @@ window.draw_brat_tree = (words, to_div) ->
         entities: entities
         relations: relations
 
-    Util.embed to_div, collData, docData, webFontURLs
+    div = $("#" + to_div)
+    make_visible = ->
+        div.appendTo("body")
+        div.show()
+        div.addClass("drawing")
+    make_visible()
+    dispatcher = Util.embed to_div, collData, docData, webFontURLs
+    dispatcher.on 'newSourceData', ->
+        make_visible()
+        # console.log "Starting Rendering", div
+    dispatcher.on 'doneRendering', ->
+        div.removeClass("drawing")
+        div.detach()
+        div.appendTo(attach_to)
+        # console.log "Done Rendering", div
+
 
