@@ -27,9 +27,14 @@ xml_attr_value = (x,a) -> x.attributes.getNamedItem(a).value
 
 # Makes a table and deptree for a sentence
 # First argument is a tuple of settings, second argument is the sentence in XML
+#
+# tabulate_sentence :: ([Column], Bool) -> XML -> ()
 tabulate_sentence = (columns, make_deptrees) -> (sent) ->
     table = $("""<table class="table table-striped table-bordered table-condensed"/>""")
     header = $("<tr/>")
+    header.append $("<th>").localize_element
+        se: "ord"
+        en: "word"
     header.append $ """<th>#{col.name}</th>""" for col in columns
     table.append header
 
@@ -56,22 +61,34 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
 # First argument is the sentence_handler (tabulate_sentence partially applied with settings),
 # second argument is the current position in the XML, and the div to append to.
 #
-# display :: (XML -> ()) -> (XMLDom, DOM) -> Coroutine
+# display :: (XML -> ()) -> (XML, DOM) -> Coroutine
 display = (sentence_handler) ->
     rec = (tag,div) ->
         co.forM tag.children, (child) ->
+            header = $ "<span class='tag_header'>#{child.nodeName}</span>"
+            for attr in child.attributes
+                header.append $ """
+                    <span class="name">#{attr.name}</span><span class="value">#{attr.value}</span>
+                """
+            footer = $ "<span class='tag_footer'>#{child.nodeName}</span><span>&nbsp;</span>"
+            contents = $ "<div/>"
+            closed = header.clone().removeClass("tag_header").addClass("tag_closed").hide()
+            for e in [header,footer]
+                e.click ->
+                    closed.show()
+                    e.hide() for e in [header,contents,footer]
+            closed.click ->
+                closed.hide()
+                e.show() for e in [header,contents,footer]
+            div.append $("<div class='tag_outline'/>").append closed, header, contents, footer
+
             if child.nodeName == "sentence"
-                console.log "Making a sentence from ", $(child)
-                co.yld -> div.append sentence_handler child
+                co.yld -> contents.append sentence_handler child
             else
-                div.append child_div = $ """
-                    <div style='border: 3px grey solid; margin:3px; padding: 3px'>
-                        <span>&lt;#{child.nodeName}&gt;</span>
-                    </div>"""
-                rec child, child_div
+                rec child, contents
 
 # The number of sentences to load in one go (fuel argument to show_next)
-SLICE_SIZE = 4
+SLICE_SIZE = 5
 
 # Shows fuel many sentences. If we run out of them, returns,
 # otherwise puts a waypoint suspension of itself.

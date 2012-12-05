@@ -1,0 +1,94 @@
+
+input[type=text]
+  height: 2em
+
+button.dropdown-toggle
+  height: 2em
+
+hr
+  margin: 0 0 1em
+
+#example_buttons i, #language_buttons i, #btn_install i, #btn_submit i, #show_query i
+  margin-top: 3px
+  margin-left: -3px
+
+.table
+  margin-bottom: 0px
+
+#result
+  .tag_header, .tag_footer, .tag_closed
+    // from bootstrap .code
+    font-family: monospace
+    // from code mirror .cm-tag
+    color: #170
+
+  .tag_header, .tag_closed, .tag_footer
+    cursor: pointer
+
+  .tag_outline
+    border: 1px solid gray
+    margin-top: 3px
+    padding: 3px
+
+  .tag_header:before
+    content: "<"
+  .tag_header:after
+    content: ">"
+
+  .tag_footer
+    float: right
+  .tag_footer:before
+    content: "</"
+  .tag_footer:after
+    content: ">"
+
+  .tag_closed:before
+    content: "<"
+  .tag_closed:after
+    content: "/>"
+
+  // from cm-attribute
+  .name
+    color: #00c
+
+  // from cm-string
+  .value
+    color: #a11
+
+  .name:after
+    content: "="
+  .value:before
+    content: '"'
+  .value:after
+    content: '"'
+  .name
+    padding-left: 0.4em
+
+.row-button
+  margin-left: .5em
+  padding: 0.45em 0.5em 0.2em
+
+.dropdown-toggle > .icon-caret-down
+  float: right
+  position: relative
+  top: 3px
+  left: 3px
+
+.dropdown-toggle span:first-child
+  float: left
+
+.dropdown-toggle
+  min-width: 8em
+
+.original-pre
+  background-color: inherit
+  font-size: inherit
+  border: none
+  padding: 0
+
+
+svg
+  border: none
+
+.sentnum
+  display: none

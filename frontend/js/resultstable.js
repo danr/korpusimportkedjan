@@ -57,6 +57,10 @@
       var col, cols, deprel_div, header, sent_id, table, word, _i, _len;
       table = $("<table class=\"table table-striped table-bordered table-condensed\"/>");
       header = $("<tr/>");
+      header.append($("<th>").localize_element({
+        se: "ord",
+        en: "word"
+      }));
       for (_i = 0, _len = columns.length; _i < _len; _i++) {
         col = columns[_i];
         header.append($("<th>" + col.name + "</th>"));
@@ -98,21 +102,55 @@
     var rec;
     return rec = function(tag, div) {
       return co.forM(tag.children, function(child) {
-        var child_div;
+        var attr, closed, contents, e, footer, header, _i, _j, _len, _len1, _ref, _ref1;
+        header = $("<span class='tag_header'>" + child.nodeName + "</span>");
+        _ref = child.attributes;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          attr = _ref[_i];
+          header.append($("<span class=\"name\">" + attr.name + "</span><span class=\"value\">" + attr.value + "</span>"));
+        }
+        footer = $("<span class='tag_footer'>" + child.nodeName + "</span><span>&nbsp;</span>");
+        contents = $("<div/>");
+        closed = header.clone().removeClass("tag_header").addClass("tag_closed").hide();
+        _ref1 = [header, footer];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          e = _ref1[_j];
+          e.click(function() {
+            var _k, _len2, _ref2, _results;
+            closed.show();
+            _ref2 = [header, contents, footer];
+            _results = [];
+            for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+              e = _ref2[_k];
+              _results.push(e.hide());
+            }
+            return _results;
+          });
+        }
+        closed.click(function() {
+          var _k, _len2, _ref2, _results;
+          closed.hide();
+          _ref2 = [header, contents, footer];
+          _results = [];
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            e = _ref2[_k];
+            _results.push(e.show());
+          }
+          return _results;
+        });
+        div.append($("<div class='tag_outline'/>").append(closed, header, contents, footer));
         if (child.nodeName === "sentence") {
-          console.log("Making a sentence from ", $(child));
           return co.yld(function() {
-            return div.append(sentence_handler(child));
+            return contents.append(sentence_handler(child));
           });
         } else {
-          div.append(child_div = $("<div style='border: 3px grey solid; margin:3px; padding: 3px'>\n    <span>&lt;" + child.nodeName + "&gt;</span>\n</div>"));
-          return rec(child, child_div);
+          return rec(child, contents);
         }
       });
     };
   };
 
-  SLICE_SIZE = 4;
+  SLICE_SIZE = 5;
 
   show_next = function(m_suspended, fuel) {
     var dom_link, dom_load_more, m, new_suspended, show_more;
