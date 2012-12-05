@@ -85,12 +85,12 @@
   };
 
   /*
-  # Draws a brat tree from a words array to a div given its id
+  # Draws a brat tree from a XML words array to a div given its id
   */
 
 
   window.draw_brat_tree = function(words, to_div) {
-    var add_word, added_pos, added_rel, collData, docData, entities, entity_types, ix, relation_types, relations, text, word, _i, _len;
+    var add_word, added_pos, added_rel, collData, docData, entities, entity_types, ix, len, relation_types, relations, text, word, _i, _len;
     entity_types = [];
     relation_types = [];
     entities = [];
@@ -98,28 +98,47 @@
     added_pos = [];
     added_rel = [];
     add_word = function(word, start, stop) {
-      var entity, relation;
-      if ($.inArray(word.pos, added_pos) === -1) {
-        added_pos.push(word.pos);
-        entity_types.push(make_entity_from_pos(word.pos));
+      var attr, dephead, deprel, entity, pos, ref, relation, _ref;
+      _ref = (function() {
+        var _i, _len, _ref, _results;
+        _ref = ["pos", "ref", "dephead", "deprel"];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          attr = _ref[_i];
+          _results.push(word.attributes.getNamedItem(attr).value);
+        }
+        return _results;
+      })(), pos = _ref[0], ref = _ref[1], dephead = _ref[2], deprel = _ref[3];
+      if (!_.contains(added_pos, pos)) {
+        added_pos.push(pos);
+        entity_types.push(make_entity_from_pos(pos));
       }
-      if ($.inArray(word.deprel, added_rel) === -1) {
-        added_rel.push(word.deprel);
-        relation_types.push(make_relation_from_rel(word.deprel));
+      if (!_.contains(added_rel, deprel)) {
+        added_rel.push(deprel);
+        relation_types.push(make_relation_from_rel(deprel));
       }
-      entity = ["T" + word.ref, word.pos, [[start, stop]]];
+      entity = ["T" + ref, pos, [[start, stop]]];
       entities.push(entity);
-      if (word.deprel !== "ROOT") {
-        relation = ["R" + word.ref, word.deprel, [["parent", "T" + word.dephead], ["child", "T" + word.ref]]];
+      if (deprel !== "ROOT") {
+        relation = ["R" + ref, deprel, [["parent", "T" + dephead], ["child", "T" + ref]]];
         return relations.push(relation);
       }
     };
-    text = words.join(" ");
+    text = ((function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = words.length; _i < _len; _i++) {
+        word = words[_i];
+        _results.push(word.textContent);
+      }
+      return _results;
+    })()).join(" ");
     ix = 0;
     for (_i = 0, _len = words.length; _i < _len; _i++) {
       word = words[_i];
-      add_word(word, ix, ix + word.length);
-      ix += word.length + 1;
+      len = word.textContent.length;
+      add_word(word, ix, ix + len);
+      ix += len + 1;
     }
     collData = {
       entity_types: entity_types,

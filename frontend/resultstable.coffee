@@ -23,42 +23,46 @@ saldo_link = (s) -> """<a target="_blank" href="#{config.karp_address}#search=se
 
 lemgram_link = (s) -> """<a target="_blank" href="#{config.karp_address}#search=lemgram%7C#{s}">#{s}</a>"""
 
+xml_attr_value = (x,a) -> x.attributes.getNamedItem(a).value
+
 # Makes a table and deptree for a sentence
-# First argument is a tuple of settings, second argument is the sentence in JSON
+# First argument is a tuple of settings, second argument is the sentence in XML
 tabulate_sentence = (columns, make_deptrees) -> (sent) ->
     table = $("""<table class="table table-striped table-bordered table-condensed"/>""")
     header = $("<tr/>")
     header.append $ """<th>#{col.name}</th>""" for col in columns
     table.append header
 
-    words = to_array sent.w
     append_array_to_table table,
-        for word in words
-            for col in columns
-                $("<span/>").html col.correct(word[col.id] or "&nbsp;")
+        for word in sent.children
+            cols = for col in columns
+                $("<span/>").html col.correct xml_attr_value word, col.id
+            cols.unshift $("<span/>").text word.textContent
+            cols
 
     if make_deptrees
-        deprel_div = $("<div/>").attr("id", sent.id)
+        sent_id = xml_attr_value sent, "id"
+        deprel_div = $("<div/>").attr "id", sent_id
         table
             .prepend $("<tr/>")
             .append($("<td/>")
                 .attr("colspan", columns.length)
                 .css("background-color", "#FFFFFF")
                 .append(deprel_div))
-        deprel_div.show "slow", -> draw_brat_tree words, sent.id
+        deprel_div.show "slow", -> draw_brat_tree sent.children, sent_id
 
     table
 
 # First argument is the sentence_handler (tabulate_sentence partially applied with settings),
 # second argument is the current position in the XML, and the div to append to.
 #
-# display :: (JSON -> ()) -> (XMLDom, DOM) -> Coroutine
+# display :: (XML -> ()) -> (XMLDom, DOM) -> Coroutine
 display = (sentence_handler) ->
     rec = (tag,div) ->
         co.forM tag.children, (child) ->
             if child.nodeName == "sentence"
                 console.log "Making a sentence from ", $(child)
-                co.yld -> div.append sentence_handler $.xml2json child
+                co.yld -> div.append sentence_handler child
             else
                 div.append child_div = $ """
                     <div style='border: 3px grey solid; margin:3px; padding: 3px'>
@@ -110,9 +114,9 @@ window.make_table = (data, attributes) ->
         id: s
 
     # Always write the word
-    columns.unshift
-        name: "ord"
-        id: "text"
+    # columns.unshift
+    #     name: "ord"
+    #     id: "text"
 
     # Remove those columns that are not part of the generated attributes,
     columns = _.filter columns, (col) -> _.contains(attributes, col.id)

@@ -77,7 +77,7 @@ make_relation_from_rel = (r) ->
     ]
 
 ###
-# Draws a brat tree from a words array to a div given its id
+# Draws a brat tree from a XML words array to a div given its id
 ###
 window.draw_brat_tree = (words, to_div) ->
 
@@ -90,30 +90,35 @@ window.draw_brat_tree = (words, to_div) ->
 
     add_word = (word, start, stop) ->
 
-        if $.inArray(word.pos, added_pos) is -1
-            added_pos.push word.pos
-            entity_types.push make_entity_from_pos(word.pos)
+        [pos,ref,dephead,deprel] = for attr in ["pos", "ref", "dephead", "deprel"]
+            word.attributes.getNamedItem(attr).value
 
-        if $.inArray(word.deprel, added_rel) is -1
-            added_rel.push word.deprel
-            relation_types.push make_relation_from_rel(word.deprel)
+        unless _.contains added_pos, pos
+            added_pos.push pos
+            entity_types.push make_entity_from_pos pos
 
-        entity = ["T" + word.ref, word.pos, [[start, stop]]]
+        unless _.contains added_rel, deprel
+            added_rel.push deprel
+            relation_types.push make_relation_from_rel deprel
+
+        entity = ["T" + ref, pos, [[start, stop]]]
         entities.push entity
 
-        unless word.deprel is "ROOT"
+        unless deprel is "ROOT"
             relation =
-                [ "R" + word.ref, word.deprel
-                , [ ["parent", "T" + word.dephead]
-                  , ["child", "T" + word.ref]]
+                [ "R" + ref, deprel
+                , [ ["parent", "T" + dephead ]
+                  , ["child", "T" + ref]
+                  ]
                 ]
             relations.push relation
 
-    text = words.join(" ")
+    text = (word.textContent for word in words).join(" ")
     ix = 0
     for word in words
-        add_word word, ix, ix + word.length
-        ix += word.length + 1
+        len = word.textContent.length
+        add_word word, ix, ix + len
+        ix += len + 1
 
     collData =
         entity_types: entity_types
