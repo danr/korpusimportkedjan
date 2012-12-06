@@ -48,7 +48,7 @@
       return false;
     });
     $("#show_query").click(function() {
-      submit(xml_editor, True);
+      submit(xml_editor, true);
       return false;
     });
     $("#show_settings_json").click(function() {

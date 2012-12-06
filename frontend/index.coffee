@@ -44,7 +44,7 @@ main = ->
 
     # Show query button
     $("#show_query").click ->
-        submit xml_editor, True
+        submit xml_editor, true
         false
 
     # Show json settings button
