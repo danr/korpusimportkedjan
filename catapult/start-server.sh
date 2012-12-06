@@ -13,7 +13,7 @@ MALT_MODEL=$SB_MODELS/swemalt-1.7.mco
 PROCESSES=2
 VERBOSE=true
 
-export PIPELINE_DIR=/dev/shm/pipeline
+export PIPELINE_DIR=/export/htdocs_sb/annoteringslabb/pipeline
 export MAKEFILE_DIR=.
 export CATALAUNCH_DIR=.
 
