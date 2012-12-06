@@ -129,6 +129,12 @@ def handle(client_sock, verbose, annotators):
     args = [ arg.replace('\\ ',' ').replace('\\\\','\\')
              for arg in re.split(splitter, data) ]
 
+    ### PING? ###
+    if len(args) == 2 and  args[1] == "PING":
+        chunk_send("PONG")
+        return
+
+
     # If the first argument is -m, the following argument is a module
     # name instead of a script name
     module_flag = len(args) > 2 and args[1] == '-m'
