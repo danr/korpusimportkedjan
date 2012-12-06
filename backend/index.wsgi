@@ -10,8 +10,8 @@ import sys, time
 class Writer(object):
     def __init__(self, mode='a'):
         self.log = open("/export/htdocs_sb/annoteringslabb/pipeline/annotate.log", mode)
-        # sys.stdout = self
-        # sys.stderr = self
+        sys.stdout = self
+        sys.stderr = self
 
     def write(self, msg):
         self.log.write(msg)
@@ -164,6 +164,34 @@ def builds_cleanup(timeout=86400):
     for h in to_remove:
         del builds[h]
         yield "<removed hash='%s'>\n" % h
+
+################################################################################
+#
+# Ping
+#
+################################################################################
+
+def ping():
+    try:
+        t0 = time.time()
+        from subprocess import Popen, PIPE
+        cmd = [pipeline_settings.catalaunch_binary, pipeline_settings.socket_file, "PING"]
+        stdout, stderr = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+        t1 = time.time()
+    except e:
+        yield "<error>Failed to ping catapult</error>\n"
+    else:
+        t = round(t1 - t0,4)
+        if not stderr and stdout == "PONG":
+            yield "<catapult time='%s'>%s</catapult>\n" % (t, stdout)
+        else:
+            yield """<error>
+<catapult time='%s'>
+<stdout>%s</stdout>
+<stderr>%s</stderr>
+</catapult>
+</error>
+""" % (t, stdout, stderr)
 
 ################################################################################
 #
@@ -320,6 +348,9 @@ def application(environ, start_response):
             yield makefile(settings)
         elif "schema" in paths:
             yield schema_str
+        elif "ping" in paths:
+            for k in ping():
+                yield k
         elif "status" in paths:
             for k in builds_status():
                 yield k
