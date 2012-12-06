@@ -11,9 +11,7 @@ main = ->
     )
 
     # Set the initial text
-    xml_editor.setValue """En exempeltext kommer lastad. Med vadå?
-
-    En korp, en karp och ett labb!"""
+    xml_editor.setValue "En exempeltext kommer lastad. Med vadå?"
 
     # Add example buttons
     example_buttons = for example in examples
