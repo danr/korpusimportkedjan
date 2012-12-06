@@ -5,13 +5,13 @@
 # Making a debug object
 #
 ################################################################################
-import sys
+import sys, time
 
 class Writer(object):
     def __init__(self, mode='a'):
-        self.log = open("/dev/shm/annotate.log", mode)
-        sys.stdout = self
-        sys.stderr = self
+        self.log = open("/export/htdocs_sb/annoteringslabb/pipeline/annotate.log", mode)
+        # sys.stdout = self
+        # sys.stderr = self
 
     def write(self, msg):
         self.log.write(msg)
@@ -23,24 +23,16 @@ class Writer(object):
     def close(self):
         self.log.close()
 
-w = Writer('w')
-print "Restarted"
+dateformat = "%Y-%m-%d %H:%M:%S"
+def log(msg):
+    print "%s: %s" % (time.strftime(dateformat), msg)
+
+def pretty_epoch_time(t):
+    return time.strftime(dateformat, time.localtime(t))
+
+w = Writer()
+log("Restarted index.wsgi")
 w.flush()
-
-################################################################################
-#
-# General imports
-#
-################################################################################
-
-from xml.sax.saxutils import escape
-from threading import Thread
-from Queue import Queue
-
-import urlparse
-import json
-
-import os
 
 ################################################################################
 #
@@ -52,20 +44,8 @@ for path in paths:
     if path not in sys.path:
         sys.path.append(path)
 
+import os
 os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
-
-################################################################################
-#
-# Open JSON Schema settings and the validator
-#
-################################################################################
-from schema_utils import DefaultValidator
-
-with open("/export/htdocs_sb/annoteringslabb/settings_schema.json","r") as f:
-    schema_str = f.read()
-
-settings_schema = json.loads(schema_str)
-settings_validator = DefaultValidator(settings_schema)
 
 ################################################################################
 #
@@ -76,7 +56,7 @@ class PipelineSettings(object):
     """Static pipeline settings"""
 
     # Where the pipeline is hosted
-    directory = '/dev/shm/pipeline/'
+    directory = '/export/htdocs_sb/annoteringslabb/pipeline'
 
     # Socket file
     socket_file = os.path.join(directory, 'pipeline.sock')
@@ -89,9 +69,6 @@ class PipelineSettings(object):
 
     # The number of processes (sent as a -j flag to make)
     processes = 2
-
-    # Log file
-    log_file = os.path.join(directory, 'log.txt')
 
 pipeline_settings = PipelineSettings()
 
@@ -110,14 +87,89 @@ os.environ['remote_host']="null"
 
 ################################################################################
 #
+# Loading local modules
+#
+################################################################################
+try:
+    from make_makefile import makefile
+    from pipeline import Build, Status, Message, finished, make_trace
+except BaseException as e:
+    log("Failed to import local modules")
+    log(e)
+
+
+################################################################################
+#
+# General imports
+#
+################################################################################
+
+try:
+    from xml.sax.saxutils import escape
+    from threading import Thread
+    from Queue import Queue
+
+    import urlparse
+    import json
+except BaseException as e:
+    log("Failed general imports")
+    log(e)
+    log(make_trace())
+
+################################################################################
+#
+# Open JSON Schema settings and the validator
+#
+################################################################################
+try:
+    from schema_utils import DefaultValidator
+
+    with open("/export/htdocs_sb/annoteringslabb/settings_schema.json","r") as f:
+        schema_str = f.read()
+
+    settings_schema = json.loads(schema_str)
+    settings_validator = DefaultValidator(settings_schema)
+except BaseException as e:
+    log("Failed to open JSON schema or making the default validator")
+    log(e)
+    log(make_trace())
+
+
+################################################################################
+#
 # Ongoing and finished builds
 #
 ################################################################################
 builds = dict()
 
-from make_makefile import makefile
-from pipeline import Build, Status, Message, finished, make_trace
+def builds_status():
+    for h, b in builds.iteritems():
+        yield ("<build hash='%s' status='%s' since='%s' accessed='%s' accessed-secs-ago='%s'/>\n" %
+                (h, Status.lookup[b.status],
+                    pretty_epoch_time(b.status_change_time),
+                    pretty_epoch_time(b.accessed_time),
+                    round(time.time() - b.accessed_time,1)))
 
+def builds_cleanup(timeout=86400):
+    """
+    Removes builds that are finished and haven't been accessed within the timeout,
+    which is by default 24 hours.
+    """
+    to_remove = []
+    for h, b in builds.iteritems():
+        if finished(b.status) and time.time() - b.accessed_time > timeout:
+            log("Removing %s" % h)
+            b.remove_files()
+            to_remove.append(h)
+    for h in to_remove:
+        del builds[h]
+        yield "<removed hash='%s'>\n" % h
+
+################################################################################
+#
+# Eh, global request counter
+#
+################################################################################
 
 request=0
 
@@ -129,7 +181,7 @@ request=0
 
 def mk_putstr(build_hash, request_number):
     def putstr(msg):
-        print "%s (%d) %s" % (build_hash, request, msg)
+        log("%s (%d) %s" % (build_hash, request, msg))
     return putstr
 
 def build(original_text, settings, incremental, fmt, request_number):
@@ -150,8 +202,9 @@ def build(original_text, settings, incremental, fmt, request_number):
         t = Thread(target=Build.run, args=[build, fmt])
         t.start()
     else:
-        putstr("Joining existing build")
         build = builds[build.build_hash]
+        putstr("Joining existing build which started at %s" %
+                pretty_epoch_time(build.status_change_time))
 
     return join_build(build, incremental, putstr)
 
@@ -167,6 +220,7 @@ def join_build(build, incremental, putstr):
 
     def get_result():
         assert(finished(build.status))
+        build.access()
         if incremental:
             return build.result() + '</result>\n'
         else:
@@ -175,7 +229,8 @@ def join_build(build, incremental, putstr):
 
     # Result already exists
     if finished(build.status):
-        putstr("Result already exists")
+        putstr("Result already exists since %s" %
+                pretty_epoch_time(build.status_change_time))
         yield get_result()
 
     # Listen for completion
@@ -186,10 +241,8 @@ def join_build(build, incremental, putstr):
 
         while True:
             msg_type, msg = queue.get()
-            putstr("Message %s: %s" % (Message.lookup[msg_type],
-                                       Status.lookup[msg]
-                                       if msg_type == Message.StatusChange
-                                       else str(msg).rstrip()))
+            if msg_type == Message.StatusChange:
+                putstr("Message %s" % Status.lookup[msg])
             # Has status changed to finished?
             if msg_type == Message.StatusChange:
                 if finished(msg):
@@ -212,14 +265,16 @@ def application(environ, start_response):
     Parses the data, but most processing is done in the function build
     """
     w = Writer()
-    print "Continuing"
+    log("Continuing index.wsgi")
     w.flush()
     global request
     request+=1
 
-    query_dict = urlparse.parse_qs(environ['QUERY_STRING'])
+    query_dict = urlparse.parse_qs(environ.get('QUERY_STRING',""))
 
-    print query_dict
+    paths = environ.get('PATH_INFO',"").split("/")
+
+    log("(%s): %s %s" % (request, "/".join(paths), query_dict))
 
     post = ""
     try:
@@ -232,12 +287,6 @@ def application(environ, start_response):
     if length == 0:
         post = query_dict.get('text', [''])[0]
 
-    fmt = query_dict.get('format', ['xml'])[0]
-    fmt = fmt.lower()
-
-    incremental = query_dict.get('incremental', [''])[0]
-    incremental = incremental.lower() == 'true'
-
     error = None
 
     try:
@@ -249,17 +298,17 @@ def application(environ, start_response):
     for e in sorted(settings_validator.iter_errors(settings)):
         if error is None:
             error = ""
-        print e
+        log(e)
         error += str(e) + "\n"
 
     if error is not None:
-        print error
+        log(error)
         status = '400 Bad Request'
         response_headers = [('Content-Type', 'text/plain'),
                             ('Access-Control-Allow-Origin', '*')]
 
         start_response(status, response_headers)
-        yield '<result><error>' + error + '</error>\n</result>\n'
+        yield '<result>\n<error>' + error + '</error>\n</result>\n'
     else:
         status = '200 OK'
         response_headers = [('Content-Type', 'text/plain'),
@@ -267,17 +316,26 @@ def application(environ, start_response):
 
         start_response(status, response_headers)
 
-        if fmt == "makefile":
+        if "makefile" in paths:
             yield makefile(settings)
-        elif fmt == "schema":
+        elif "schema" in paths:
             yield schema_str
+        elif "status" in paths:
+            for k in builds_status():
+                yield k
+        elif "cleanup" in paths:
+            for k in builds_cleanup():
+                yield k
         else:
+            incremental = query_dict.get('incremental', [''])[0]
+            incremental = incremental.lower() == 'true'
+
             if incremental:
                 print "Sending result start"
                 yield "<result>\n"
 
             try:
-                for k in build(post, settings, incremental, fmt, int(request)):
+                for k in build(post, settings, incremental, "xml", int(request)):
                     yield k
 
             except:

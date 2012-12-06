@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from make_makefile import makefile
+from subprocess import Popen, PIPE, call
 from xml.sax.saxutils import escape
-from Queue import Queue
-
-import threading
 
 import errno
 import os
+import time
 
-import sb.util as util
-
-from make_makefile import makefile
+def log(msg):
+    print "%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg)
 
 def enum(*sequential):
     """
@@ -21,7 +20,7 @@ def enum(*sequential):
     return type('Enum', (), enums)
 
 """The possible statuses of a pipeline"""
-Status = enum('Init', 'Running', 'Done', 'Error')
+Status = enum('Init', 'Running', 'Done', 'Error', 'Deleted')
 
 """The possible message types from the pipeline"""
 Message = enum('StatusChange', 'Increment')
@@ -40,8 +39,7 @@ def make_hash(*texts):
     return hashlib.sha1("".join(texts)).hexdigest()
 
 def make(settings):
-    from subprocess import Popen, PIPE
-    util.log.info("CALL: /usr/bin/make %s", ' '.join(settings))
+    log("CALL: /usr/bin/make %s" % ' '.join(settings))
     return Popen(['/usr/bin/make'] + settings,
                  shell=False, close_fds=False,
                  stdin=None, stdout=PIPE, stderr=PIPE)
@@ -50,12 +48,11 @@ def mkdir(d):
     try:
         os.makedirs(d, mode=0777)
     except OSError as exc:
-
         if exc.errno == errno.EEXIST:
             pass
         else:
             raise
-    util.system.call_binary('chmod', ['777', d, '-v'])
+    call(['chmod', '777', d, '-v'])
 
 def rmfile(f):
     try:
@@ -72,6 +69,10 @@ def make_trace():
     return "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
 
 class Build(object):
+    def access(self):
+        """Updates the access time of this build"""
+        self.accessed_time = time.time()
+
     def __init__(self, pipeline_settings, text, settings):
         """
         Creates the necessary directories and the makefile for this
@@ -89,6 +90,8 @@ class Build(object):
         self.settings = settings
 
         self.status = None
+
+        self.access()
 
         # Output from make, line by line
         self.make_out = []
@@ -109,6 +112,7 @@ class Build(object):
     def change_status(self, status):
         """Change the status and notify all listeners"""
         self.status = status
+        self.status_change_time = time.time()
         self.send_to_all((Message.StatusChange, self.status))
 
     def notify_step(self, new_cmd=None, new_step=None, new_steps=None):
@@ -149,10 +153,18 @@ class Build(object):
         if os.path.isfile(self.text_file):
             # This file has probably been built by a previous incarnation of the pipeline
             # (index.wsgi script has been restarted)
-            util.log.info("File exists and is not rewritten: %s", self.build_hash)
+            log("File exists and is not rewritten: %s" % self.build_hash)
         else:
             with open(self.text_file, 'w') as f:
                 f.write(self.text)
+
+    def remove_files(self):
+        """
+        Removes the files associated with this build.
+        """
+        self.change_status(Status.Deleted)
+        log("Removing files")
+        call(['rm', '-rf', self.directory])
 
     def _run(self, fmt):
         """
@@ -183,7 +195,7 @@ class Build(object):
         self.notify_step(new_cmd="", new_step=0, new_steps=steps + 1)
         step = 0
         for line in iter(self.make_process.stdout.readline, ''):
-            # print line.rstrip()
+            # log(line.rstrip())
             self.make_out += [line]
             if self.pipeline_settings.python_interpreter in line:
                 step += 1;
@@ -217,7 +229,7 @@ class Build(object):
             self._run(fmt)
         except:
             self.trace = make_trace()
-            print self.trace
+            log(self.trace)
             self.stdout = "".join(self.make_out)
             if self.make_process:
                 self.stderr = self.make_process.stderr.read().rstrip()
