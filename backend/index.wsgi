@@ -199,7 +199,7 @@ def ping():
 #
 ################################################################################
 
-request=0
+requests=0
 
 ################################################################################
 #
@@ -207,12 +207,12 @@ request=0
 #
 ################################################################################
 
-def mk_putstr(build_hash, request_number):
+def mk_putstr(build_hash, request):
     def putstr(msg):
         log("%s (%d) %s" % (build_hash, request, msg))
     return putstr
 
-def build(original_text, settings, incremental, fmt, request_number):
+def build(original_text, settings, incremental, fmt, request):
     """
     Starts a build for this corpus. If it is already running,
     joins it. Messages from the build is received on a queue.
@@ -220,7 +220,7 @@ def build(original_text, settings, incremental, fmt, request_number):
 
     build = Build(pipeline_settings, original_text, settings)
 
-    putstr = mk_putstr(build.build_hash, request_number)
+    putstr = mk_putstr(build.build_hash, request)
 
     # Start build or listen to existing build
     if build.build_hash not in builds:
@@ -236,6 +236,15 @@ def build(original_text, settings, incremental, fmt, request_number):
 
     return join_build(build, incremental, putstr)
 
+def join_from_hash(hashnumber, incremental, request):
+    build = builds.get(hashnumber, None)
+    if build is not None:
+        return join_build(build, incremental, mk_putstr(hashnumber, request))
+    else:
+        def error():
+            yield "<error>No such build!</error>\n</result>\n"
+        return error()
+
 def join_build(build, incremental, putstr):
     """
     Joins an existing build, and sends increment messages
@@ -249,11 +258,10 @@ def join_build(build, incremental, putstr):
     def get_result():
         assert(finished(build.status))
         build.access()
-        if incremental:
-            return build.result() + '</result>\n'
-        else:
-            return '<result>\n' + build.result() + '</result>\n'
+        return build.result() + '</result>\n'
 
+    # Send this build's hash
+    yield "<build hash='%s'/>\n" % build.build_hash
 
     # Result already exists
     if finished(build.status):
@@ -263,6 +271,7 @@ def join_build(build, incremental, putstr):
 
     # Listen for completion
     else:
+
         if incremental and build.status == Status.Running:
             putstr("Already running, sending increment message")
             yield build.increment_msg()
@@ -295,8 +304,11 @@ def application(environ, start_response):
     w = Writer()
     log("Continuing index.wsgi")
     w.flush()
-    global request
-    request+=1
+    global requests
+    requests+=1
+
+    # local copy
+    request = int(requests)
 
     query_dict = urlparse.parse_qs(environ.get('QUERY_STRING',""))
 
@@ -344,6 +356,9 @@ def application(environ, start_response):
 
         start_response(status, response_headers)
 
+        incremental = query_dict.get('incremental', [''])[0]
+        incremental = incremental.lower() == 'true'
+
         if "makefile" in paths:
             yield makefile(settings)
         elif "schema" in paths:
@@ -357,23 +372,23 @@ def application(environ, start_response):
         elif "cleanup" in paths:
             for k in builds_cleanup():
                 yield k
+        elif "join" in paths:
+            log("Joining, sending result start")
+            yield "<result>\n"
+            hashnumber = query_dict.get('hash', [''])[0]
+            for k in join_from_hash(hashnumber, incremental, request):
+                yield k
         else:
-            incremental = query_dict.get('incremental', [''])[0]
-            incremental = incremental.lower() == 'true'
-
-            if incremental:
-                print "Sending result start"
-                yield "<result>\n"
+            log("Sending result start")
+            yield "<result>\n"
 
             try:
-                for k in build(post, settings, incremental, "xml", int(request)):
+                for k in build(post, settings, incremental, "xml", request):
                     yield k
 
             except:
                 trace = make_trace()
-                print trace
-                if not incremental:
-                    yield '<result>'
+                log(trace)
                 yield '<trace>' + escape(trace) + '</trace>\n'
                 yield '</result>\n'
 
