@@ -41,6 +41,7 @@
     (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
     $("#title_text").click(function() {
       with_form.load_defaults();
+      window.location.hash = "";
       return false;
     });
     $("#query").click(function() {
