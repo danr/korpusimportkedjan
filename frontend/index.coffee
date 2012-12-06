@@ -37,6 +37,7 @@ main = ->
     $("#title_text").click ->
         with_form.load_defaults()
         window.location.hash = ""
+        $("#result").empty()
         false
 
     $("#query").click ->

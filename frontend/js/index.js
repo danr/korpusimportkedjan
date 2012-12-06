@@ -42,6 +42,7 @@
     $("#title_text").click(function() {
       with_form.load_defaults();
       window.location.hash = "";
+      $("#result").empty();
       return false;
     });
     $("#query").click(function() {
