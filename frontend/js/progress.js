@@ -23,7 +23,12 @@
     } else {
       data += '</result>';
     }
-    data = $.parseXML(data);
+    try {
+      data = $.parseXML(data);
+    } catch (e) {
+      progress.clear();
+      return;
+    }
     address.set_from_xml(data);
     json = $.xml2json(data);
     if (increment = _.last(json.increment)) {
