@@ -12,9 +12,6 @@ hr
   margin-top: 3px
   margin-left: -3px
 
-.table
-  margin-bottom: 0px
-
 .drawing
   position: absolute
   left: 1000px
@@ -23,16 +20,35 @@ hr
   height: 10000px
 
 #result
+  .tag_outline:not(.disabled) > * > .table
+    margin-bottom: 0px
+
+  .hide
+    display: none
+
+  .disabled > .tag_closed
+    line-height: 2.6em
+
+  .tag_xmlbutton
+    font-family: monospace
+    float: right
+
   .tag_header, .tag_footer, .tag_closed
     // from bootstrap .code
     font-family: monospace
     // from code mirror .cm-tag
     color: #170
 
-  .tag_header, .tag_closed, .tag_footer
+  .tag_header, .tag_closed, .tag_footer, .tag_xmlbutton
     cursor: pointer
 
-  .tag_outline
+  .tag_footer.disabled, .tag_xmlbutton.disabled, .tag_header.disabled, .tag_floatfix.disabled
+    display: none
+
+  .tag_outline.disabled, .table_bordered.disabled
+    border: none
+
+  .tag_outline:not(.disabled)
     border: 1px solid #ddd
     margin-top: 3px
     padding: 3px

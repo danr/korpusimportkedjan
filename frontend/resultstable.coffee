@@ -87,32 +87,69 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
 #
 # display :: (XML -> ()) -> (XML, DOM) -> Coroutine
 display = (sentence_handler) ->
-    rec = (tag,div) ->
-        for child in tag.children
-            do ->
-                header = $ "<span class='tag_header'>#{child.nodeName}</span>"
-                for attr in child.attributes
-                    header.append $ """
-                        <span class="name">#{attr.name}</span><span class="value">#{attr.value}</span>
-                    """
-                footer = $ "<span class='tag_footer'>#{child.nodeName}</span><span>&nbsp;</span>"
-                contents = $ "<div/>"
-                closed = header.clone().removeClass("tag_header").addClass("tag_closed").hide()
-                for el in [header,footer]
-                    el.click ->
-                        closed.show()
-                        e.hide() for e in [header,contents,footer]
-                        delay_viewport_change()
-                closed.click ->
-                    closed.hide()
-                    e.show() for e in [header,contents,footer]
-                    delay_viewport_change()
-                div.append $("<div class='tag_outline table-bordered'/>").append closed, header, contents, footer
+    disabled = $("#show_tags").attr("checked") isnt "checked"
+    console.log "Disabled:", disabled
+    rec = (tag,div) -> for child in tag.children
+        do (child) ->
+            header = $ "<span class='tag_header'>#{child.nodeName}</span>"
+            for attr in child.attributes
+                header.append $ """
+                    <span class="name">#{attr.name}</span><span class="value">#{attr.value}</span>
+                """
+            xml_button = $("<span class='tag_xmlbutton'>XML</span>").localize_element(
+                    en: "Show XML"
+                    se: "Visa XML"
+                ).click ->
+                    new_window "application/xml", (new XMLSerializer()).serializeToString child
+                    false
 
-                if child.nodeName == "sentence"
-                    contents.append sentence_handler child
-                else
-                    rec child, contents
+            closed = header.clone().removeClass("tag_header").addClass("tag_closed").addClass("hide")
+            footer = $ """
+                <span class='tag_floatfix'>&nbsp;</span>
+                <span class='tag_footer'>#{child.nodeName}</span>
+            """
+            contents = $ "<div width='100%'/>"
+            outline = $("<div width='100%' class='tag_outline table-bordered'/>")
+                .append closed, header, xml_button, contents, footer
+            fields = [header,footer,xml_button]
+
+            if disabled
+                e.addClass("disabled") for e in [outline].concat(fields)
+
+            div.append outline
+
+            for el in [header,footer]
+                el.click ->
+                    closed.removeClass("hide")
+                    e.addClass("hide") for e in [contents].concat(fields)
+                    delay_viewport_change()
+
+            closed.click ->
+                closed.addClass("hide")
+                e.removeClass("hide") for e in [contents].concat(fields)
+                delay_viewport_change()
+
+            if child.nodeName == "sentence"
+                outline.addClass "tag_sentence"
+                contents.append sentence_handler child
+            else
+                rec child, contents
+
+$(document).ready ->
+    $("#show_tags").change ->
+        disabled = $(this).attr("checked") is "checked"
+        query = $(".tag_header,.tag_xmlbutton,.tag_outline,.tag_footer,.tag_floatfix")
+        if disabled
+            query.removeClass("disabled")
+        else
+            query.addClass("disabled")
+    return
+
+new_window = (mime, content) ->
+    w = window.open(",")
+    w.document.open mime, "replace"
+    w.document.write content
+    w.document.close()
 
 
 window.make_table = (data, attributes) ->
@@ -156,13 +193,7 @@ window.make_table = (data, attributes) ->
         corpus = (data.getElementsByTagName "corpus")[0]
         (display tabulate_sentence columns, make_deptrees) corpus, tables_div
 
-    new_window = (mime, content) ->
-        w = window.open(",")
-        w.document.open mime, "replace"
-        w.document.write content
-        w.document.close()
-
-    $("#extra_buttons").empty().append $("""<button class="btn">Visa XML</button>""").click ->
+    $("#extra_buttons").empty().append $("""<button class="btn">XML</button>""").click ->
         new_window "application/xml", (new XMLSerializer()).serializeToString data
         false
 

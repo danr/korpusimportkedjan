@@ -32,10 +32,7 @@
 
   window.load_form = function() {
     return $.ajax({
-      url: config.address,
-      data: {
-        format: "schema"
-      },
+      url: config.address + "/schema",
       dataType: "json",
       timeout: 300000,
       type: "GET",

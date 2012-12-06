@@ -17,7 +17,6 @@
     <script type="text/javascript" src="lib/jquery-svg/jquery.svgdom.js"></script>
 
     <script type="text/javascript" src="lib/jquery-ajaxprogress/jquery.ajaxprogress.js"></script>
-    <script type="text/javascript" src="lib/jquery-waypoints/waypoints.js"></script>
     <script type="text/javascript" src="lib/jquery.inview.js"></script>
     <script type="text/javascript" src="lib/jquery-color/jquery.color.js"></script>
 
@@ -135,7 +134,12 @@
             </button>
           </span>
           <span id="extra_buttons" class="btn-group"></span>
-          <span class="pull-right btn-group">
+          <span class="pull-right">
+            <input type="checkbox" id="show_tags">
+            <span
+              data-loc-en="Show tags"
+              data-loc-se="Visa taggar">
+            </span>
             <button class="btn" id="btn_submit">
               <i class="icon-cogs"></i>
               <span

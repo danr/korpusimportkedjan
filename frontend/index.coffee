@@ -46,7 +46,7 @@ main = ->
 
     # Show query button
     $("#show_query").click ->
-        submit xml_editor, "makefile"
+        submit xml_editor, True
         false
 
     # Show json settings button
@@ -56,7 +56,7 @@ main = ->
 
     # Submit
     $("#btn_submit").click ->
-        submit xml_editor, "xml"
+        submit xml_editor
         false
 
     # Set initial language to Swedish. This also sets the text value of uninitialized items.

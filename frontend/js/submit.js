@@ -18,24 +18,27 @@
     }
   };
 
-  window.submit = function(xml_editor, format) {
+  window.submit = function(xml_editor, makefile) {
     var incremental, req_url, settings, text;
+    if (makefile == null) {
+      makefile = false;
+    }
     settings = with_form.get();
-    incremental = format !== "makefile";
+    incremental = !makefile;
     text = xml_editor.getValue();
-    req_url = config.address + "?settings=" + JSON.stringify(settings) + "&incremental=" + (String(incremental)) + "&format=" + format;
+    req_url = config.address + (makefile ? "/makefile" : "/") + "?settings=" + JSON.stringify(settings) + "&incremental=" + (String(incremental));
     if (incremental) {
       progress.initialize();
     }
     $.ajax({
       url: req_url,
-      dataType: format === "makefile" ? "text" : "xml",
+      dataType: makefile ? "text" : "xml",
       timeout: 300000,
       type: "POST",
       data: text,
       success: function(data, textStatus, xhr) {
         progress.clear();
-        if (format === "makefile") {
+        if (makefile) {
           $("#query").text(data);
         } else {
           show_errors(data);

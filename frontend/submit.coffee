@@ -17,30 +17,30 @@ show_errors = (data) ->
         $("#errors").append error_div
     return
 
-window.submit = (xml_editor, format) ->
+window.submit = (xml_editor, makefile=false) ->
 
     settings = with_form.get()
 
-    incremental = format isnt "makefile"
+    incremental = not makefile
 
     text = xml_editor.getValue()
 
     req_url = config.address +
+        (if makefile then "/makefile" else "/") +
         "?settings=" + JSON.stringify(settings) +
-        "&incremental=" + (String incremental) +
-        "&format=" + format
+        "&incremental=" + (String incremental)
 
     progress.initialize() if incremental
 
     $.ajax
         url: req_url
-        dataType: if format is "makefile" then "text" else "xml"
+        dataType: if makefile then "text" else "xml"
         timeout: 300000
         type: "POST"
         data: text
         success: (data, textStatus, xhr) ->
             progress.clear()
-            if format is "makefile"
+            if makefile
                 $("#query").text data
             else
                 show_errors data

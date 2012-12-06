@@ -48,7 +48,7 @@
       return false;
     });
     $("#show_query").click(function() {
-      submit(xml_editor, "makefile");
+      submit(xml_editor, True);
       return false;
     });
     $("#show_settings_json").click(function() {
@@ -56,7 +56,7 @@
       return false;
     });
     $("#btn_submit").click(function() {
-      submit(xml_editor, "xml");
+      submit(xml_editor);
       return false;
     });
     return $.fn.set_language('se');

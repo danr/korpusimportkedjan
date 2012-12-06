@@ -11,9 +11,6 @@ hr {
   margin-top: 3px;
   margin-left: -3px; }
 
-.table {
-  margin-bottom: 0px; }
-
 .drawing {
   position: absolute;
   left: 1000px;
@@ -21,12 +18,25 @@ hr {
   width: 800px;
   height: 10000px; }
 
+#result .tag_outline:not(.disabled) > * > .table {
+  margin-bottom: 0px; }
+#result .hide {
+  display: none; }
+#result .disabled > .tag_closed {
+  line-height: 2.6em; }
+#result .tag_xmlbutton {
+  font-family: monospace;
+  float: right; }
 #result .tag_header, #result .tag_footer, #result .tag_closed {
   font-family: monospace;
   color: #117700; }
-#result .tag_header, #result .tag_closed, #result .tag_footer {
+#result .tag_header, #result .tag_closed, #result .tag_footer, #result .tag_xmlbutton {
   cursor: pointer; }
-#result .tag_outline {
+#result .tag_footer.disabled, #result .tag_xmlbutton.disabled, #result .tag_header.disabled, #result .tag_floatfix.disabled {
+  display: none; }
+#result .tag_outline.disabled, #result .table_bordered.disabled {
+  border: none; }
+#result .tag_outline:not(.disabled) {
   border: 1px solid #dddddd;
   margin-top: 3px;
   padding: 3px; }
