@@ -60,6 +60,9 @@ main = ->
     # Set initial language to Swedish. This also sets the text value of uninitialized items.
     $.fn.set_language('se')
 
+    # Check if we have a hash in the status bar, if so, load it
+    address.try_join_with_hash()
+
 $(document).ready main
 
 # Warn users that use old browsers

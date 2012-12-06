@@ -214,31 +214,29 @@
     return w.document.close();
   };
 
-  window.make_table = function(data, attributes) {
-    var columns, make_deptrees, required, s, _i, _len, _ref;
-    columns = (function() {
-      var _i, _len, _ref, _results;
-      _ref = ["pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"];
-      _results = [];
+  window.make_table = function(data) {
+    var attr, attributes, columns, make_deptrees, required, words, _i, _j, _len, _len1, _ref, _ref1;
+    columns = [];
+    attributes = [];
+    words = data.getElementsByTagName("w");
+    if (words.length > 0) {
+      _ref = words[0].attributes;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        s = _ref[_i];
-        _results.push({
-          name: s,
-          id: s
+        attr = _ref[_i];
+        attributes.push(attr.name);
+        columns.push({
+          name: attr.name,
+          id: attr.name
         });
       }
-      return _results;
-    })();
-    columns = _.filter(columns, function(col) {
-      return _.contains(attributes, col.id);
-    });
+    }
     if (_.contains(attributes, "msd")) {
       columns = _.reject(columns, function(col) {
         return col.id === "pos";
       });
     }
     (function() {
-      var col, correct, _i, _len, _results;
+      var col, correct, _j, _len1, _results;
       correct = {
         msd: function(s) {
           return s.split(".").join(". ");
@@ -250,16 +248,16 @@
         suffix: split_pipes(lemgram_link)
       };
       _results = [];
-      for (_i = 0, _len = columns.length; _i < _len; _i++) {
-        col = columns[_i];
+      for (_j = 0, _len1 = columns.length; _j < _len1; _j++) {
+        col = columns[_j];
         _results.push(col.correct = correct[col.id] || _.identity);
       }
       return _results;
     })();
     make_deptrees = true;
-    _ref = ["word", "pos", "ref", "dephead", "deprel"];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      required = _ref[_i];
+    _ref1 = ["pos", "ref", "dephead", "deprel"];
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      required = _ref1[_j];
       make_deptrees = make_deptrees && _.contains(attributes, required);
     }
     (function() {
@@ -273,6 +271,7 @@
       return false;
     }));
     delay_viewport_change();
+    address.set_from_xml(data);
   };
 
 }).call(this);

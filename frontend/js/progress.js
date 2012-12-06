@@ -23,6 +23,8 @@
     } else {
       data += '</result>';
     }
+    data = $.parseXML(data);
+    address.set_from_xml(data);
     json = $.xml2json(data);
     if (increment = _.last(json.increment)) {
       steps = Number(increment.steps);

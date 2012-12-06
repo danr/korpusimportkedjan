@@ -152,21 +152,20 @@ new_window = (mime, content) ->
     w.document.close()
 
 
-window.make_table = (data, attributes) ->
+window.make_table = (data) ->
 
-    columns = for s in ["pos", "msd", "lemma", "lex", "saldo", "prefix", "suffix", "ref", "dephead", "deprel"]
-        name: s
-        id: s
+    columns = []
+    attributes = []
 
-    # Always write the word
-    # columns.unshift
-    #     name: "ord"
-    #     id: "text"
+    words = data.getElementsByTagName("w")
+    if words.length > 0
+        for attr in words[0].attributes
+            attributes.push attr.name
+            columns.push
+                name: attr.name
+                id: attr.name
 
-    # Remove those columns that are not part of the generated attributes,
-    columns = _.filter columns, (col) -> _.contains(attributes, col.id)
-
-    # and remove pos if msd is present
+    # Remove pos if msd is present
     if _.contains(attributes, "msd")
         columns = _.reject columns, (col) -> col.id == "pos"
 
@@ -185,7 +184,7 @@ window.make_table = (data, attributes) ->
 
     # Only make dependency trees if all required attributes are present
     make_deptrees = true
-    for required in ["word", "pos", "ref", "dephead", "deprel"]
+    for required in ["pos", "ref", "dephead", "deprel"]
         make_deptrees = make_deptrees and _.contains(attributes, required)
 
     do ->
@@ -198,6 +197,8 @@ window.make_table = (data, attributes) ->
         false
 
     delay_viewport_change()
+
+    address.set_from_xml data
 
     return
 

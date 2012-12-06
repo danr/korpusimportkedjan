@@ -18,15 +18,27 @@
     }
   };
 
-  window.submit = function(xml_editor, makefile) {
+  window.submit = function(xml_editor, makefile, join_with_hash) {
     var incremental, req_url, settings, text;
     if (makefile == null) {
       makefile = false;
     }
+    if (join_with_hash == null) {
+      join_with_hash = null;
+    }
     settings = with_form.get();
     incremental = !makefile;
-    text = xml_editor.getValue();
-    req_url = config.address + (makefile ? "/makefile" : "/") + "?settings=" + JSON.stringify(settings) + "&incremental=" + (String(incremental));
+    text = join_with_hash ? "" : xml_editor.getValue();
+    req_url = config.address;
+    if (join_with_hash) {
+      req_url += "/join?hash=" + join_with_hash;
+    } else {
+      if (makefile) {
+        req_url += "/makefile";
+      }
+      req_url += "?settings=" + JSON.stringify(settings);
+    }
+    req_url += "&incremental=" + (String(incremental));
     if (incremental) {
       progress.initialize();
     }
@@ -42,7 +54,7 @@
           $("#query").text(data);
         } else {
           show_errors(data);
-          make_table(data, settings.attributes);
+          make_table(data);
         }
       },
       progress: function(data, e) {

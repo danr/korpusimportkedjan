@@ -17,18 +17,24 @@ show_errors = (data) ->
         $("#errors").append error_div
     return
 
-window.submit = (xml_editor, makefile=false) ->
+window.submit = (xml_editor, makefile=false, join_with_hash=null) ->
 
     settings = with_form.get()
 
     incremental = not makefile
 
-    text = xml_editor.getValue()
+    text = if join_with_hash then "" else xml_editor.getValue()
 
-    req_url = config.address +
-        (if makefile then "/makefile" else "/") +
-        "?settings=" + JSON.stringify(settings) +
-        "&incremental=" + (String incremental)
+    req_url = config.address
+
+    if join_with_hash
+        req_url += "/join?hash=" + join_with_hash
+    else
+        if makefile
+            req_url += "/makefile"
+        req_url += "?settings=" + JSON.stringify(settings)
+
+    req_url += "&incremental=" + (String incremental)
 
     progress.initialize() if incremental
 
@@ -44,7 +50,7 @@ window.submit = (xml_editor, makefile=false) ->
                 $("#query").text data
             else
                 show_errors data
-                make_table data, settings.attributes
+                make_table data
             return
 
         progress: (data, e) ->

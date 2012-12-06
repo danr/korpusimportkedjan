@@ -59,7 +59,8 @@
       submit(xml_editor);
       return false;
     });
-    return $.fn.set_language('se');
+    $.fn.set_language('se');
+    return address.try_join_with_hash();
   };
 
   $(document).ready(main);
