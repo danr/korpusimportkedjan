@@ -11,7 +11,7 @@ MALT_JAR=/home/dan/annotate/bin/maltparser-1.7.1/maltparser-1.7.1.jar
 MALT_MODEL=$SB_MODELS/swemalt-1.7.mco
 
 PROCESSES=2
-VERBOSE=true
+VERBOSE=false
 
 export PIPELINE_DIR=/export/htdocs_sb/annoteringslabb/pipeline
 export MAKEFILE_DIR=.

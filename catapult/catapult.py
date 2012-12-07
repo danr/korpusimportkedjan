@@ -1,17 +1,15 @@
-"""
-catapult: runs python scripts in already running processes to
-eliminate the python interpreter startup time.
-
-Run scripts in the catapult with the c program catalaunch.
-
-The lexicon for sb.saldo.annotate and sb.saldo.compound can be
-pre-loaded and shared between processes. See the variable annotators
-in handle and start.
-"""
+# catapult: runs python scripts in already running processes to eliminate the
+# python interpreter startup time.
+#
+# The lexicon for sb.saldo.annotate and sb.saldo.compound can be pre-loaded and
+# shared between processes. See the variable annotators in handle and start.
+#
+# Run scripts in the catapult with the c program catalaunch.
 
 from multiprocessing import Process, cpu_count
 from decorator import decorator
 
+import logging
 import os
 import re
 import runpy
@@ -22,14 +20,16 @@ import sb.util as util
 
 RECV_LEN = 4096
 
-"""
-Important to preload all modules otherwise processes will need to do
-it upon request, introducing new delays.
-
-These imports uses the __all__ variables in the __init__ files.
-"""
+# Important to preload all modules otherwise processes will need to do
+# it upon request, introducing new delays.
+#
+# These imports uses the __all__ variables in the __init__ files.
 from sb.util import *
 from sb import *
+
+logging.basicConfig(format = "%(process)d %(asctime)-15s %(message)s")
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 """
 Splits at every space that is not preceded by a backslash.
@@ -73,32 +73,23 @@ def handle(client_sock, verbose, annotators):
 
     def set_stdout_stderr():
         """
-        Put stdout and stderr to the client_sock, or /dev/null if not
-        verbose. Returns the clean-up handler.
+        Put stdout and stderr to the client_sock, if verbose.
+        Returns the clean-up handler.
         """
 
         class Writer(object):
             def write(self, msg):
-                chunk_send(msg)
+                log.debug(msg)
+                if verbose:
+                    chunk_send(msg)
 
             def flush(self):
                 pass
 
-        # file descriptors are for output in non-python code,
-        # stds are for python's own output
-        #orig_fds = os.dup(1), os.dup(2)
         orig_stds = sys.stdout, sys.stderr
-        if verbose:
-            #os.dup2(client_sock.fileno(), 1)
-            #os.dup2(client_sock.fileno(), 2)
-            w = Writer()
-            sys.stdout = w
-            sys.stderr = w
-        #     null_fds = []
-        # else:
-        #     null_fds = [ os.open(os.devnull, os.O_RDWR) for i in xrange(2) ]
-        #     os.dup2(null_fds[0], 1)
-        #     os.dup2(null_fds[1], 2)
+        w = Writer()
+        sys.stdout = w
+        sys.stderr = w
 
         def cleanup():
             """
@@ -106,10 +97,6 @@ def handle(client_sock, verbose, annotators):
             """
             sys.stdout = orig_stds[0]
             sys.stderr = orig_stds[1]
-            # os.dup2(orig_fds[0], 1)
-            # os.dup2(orig_fds[1], 2)
-            # map(os.close, null_fds)
-            # map(os.close, orig_fds)
             client_sock.close()
 
         return cleanup
@@ -131,9 +118,9 @@ def handle(client_sock, verbose, annotators):
 
     ### PING? ###
     if len(args) == 2 and  args[1] == "PING":
+        log.info("Ping requested")
         chunk_send("PONG")
         return
-
 
     # If the first argument is -m, the following argument is a module
     # name instead of a script name
@@ -148,9 +135,9 @@ def handle(client_sock, verbose, annotators):
         old_pwd = os.getcwd()
         pwd = args.pop(0)
 
-        if verbose:
-             util.log.info('Running %s %s, in directory %s',
-                           args[0], ' '.join(args[1:]), pwd)
+        log.info('Running %s', args[0])
+        log.debug('with arguments: %s', ' '.join(args[1:]))
+        log.debug('in directory %s', pwd)
 
         # Set stdout and stderr, which returns the cleaup function
         cleanup = set_stdout_stderr()
@@ -178,14 +165,13 @@ def handle(client_sock, verbose, annotators):
             # If file does not exist, send the error message
             chunk_send("%s\n" % sys.exc_info()[1])
             cleanup()
-            util.log.error("%s\n" % sys.exc_info()[1])
+            log.exception("File does not exist")
         except:
             # Send other errors, and if verbose, send tracebacks
             chunk_send("%s\n" % sys.exc_info()[1])
-            for i in xrange(2):
-                traceback.print_exception(*sys.exc_info())
-                i or cleanup()
-            util.log.error("Error: %s\n", sys.exc_info()[1])
+            traceback.print_exception(*sys.exc_info())
+            cleanup()
+            log.exception()
         finally:
             cleanup()
 
@@ -194,10 +180,10 @@ def handle(client_sock, verbose, annotators):
         # Run the cleanup function if there is one (only used with malt)
         annotators.get((args[0], 'cleanup'), lambda: None)()
 
-        if verbose:
-             util.log.info('Completed %s', args[0])
+        log.info('Completed %s', args[0])
 
     else:
+        log.info('Cannot handle %s', data)
         chunk_send('Cannot handle %s\n' % data)
         client_sock.close()
 
@@ -222,25 +208,25 @@ def worker(server_socket, verbose, annotators, malt_args=None):
 
                 malt_process = malt.maltstart(**malt_args)
                 if verbose:
-                    util.log.info('(Re)started malt process: %s', malt_process)
+                    log.info('(Re)started malt process: %s', malt_process)
                 process_dict['process'] = malt_process
                 annotators['sb.malt'] = set_last_argument(process_dict)(malt.maltparse)
 
             elif verbose:
-                util.log.info("Not restarting malt this time")
+                log.info("Not restarting malt this time")
 
         start_malt()
         annotators['sb.malt', 'cleanup'] = start_malt
 
     if verbose:
-        util.log.info("Worker running!")
+        log.info("Worker running!")
 
     while True:
         client_sock, addr = server_socket.accept()
         try:
             handle(client_sock, verbose, annotators)
         except:
-            util.log.error('Error in handling code: %s', sys.exc_info()[1])
+            log.exception('Error in handling code')
             traceback.print_exception(*sys.exc_info())
         finally:
             client_sock.close()
@@ -266,12 +252,13 @@ def start(socket_path, processes=1, verbose='false',
 
 
     if os.path.exists(socket_path):
-        util.log.info('socket %s already exists', socket_path)
+        log.error('socket %s already exists', socket_path)
         exit(1)
 
     verbose = verbose.lower() == 'true'
 
-    util.log.info('Verbose: %s', verbose)
+    log.info('Verbose: %s', verbose)
+
 
     # If processes does not contain an int, set it to the number of processors
     try:
@@ -302,7 +289,7 @@ def start(socket_path, processes=1, verbose='false',
         annotators[('sb.fsv','--annotate_full')] = set_last_argument(lexicons)(fsv.annotate_full)
 
     if verbose:
-        util.log.info('Loaded annotators: %s', annotators.keys())
+        log.info('Loaded annotators: %s', annotators.keys())
 
     if malt_jar and malt_model:
         malt_args = dict(maltjar=malt_jar, model=malt_model,
