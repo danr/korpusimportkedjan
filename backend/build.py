@@ -40,8 +40,6 @@ class Build(object):
 
         self.build_hash = make_hash(self.text, self.makefile_contents)
 
-        self.log = logging.getLogger('pipeline.%s.%s' % (__name__, self.build_hash))
-
         self.settings = settings
 
         self.status = None
@@ -118,7 +116,7 @@ class Build(object):
         if os.path.isfile(self.text_file):
             # This file has probably been built by a previous incarnation of the pipeline
             # (index.wsgi script has been restarted)
-            self.log.info("File exists and is not rewritten: %s" % self.build_hash)
+            log.info("File exists and is not rewritten: %s" % self.build_hash)
         else:
             with open(self.text_file, 'w') as f:
                 f.write(self.text)
@@ -128,7 +126,7 @@ class Build(object):
         Removes the files associated with this build.
         """
         self.change_status(Status.Deleted)
-        self.log.info("Removing files")
+        log.info("Removing files")
         rmdir(self.directory)
 
     def _run(self, fmt):
@@ -200,7 +198,7 @@ class Build(object):
             self._run(fmt)
         except:
             self.trace = make_trace()
-            self.log.exception("Error when running make")
+            log.exception("Error when running make")
             self.stdout = "".join(self.make_out)
             if self.make_process:
                 self.stderr = self.make_process.stderr.read().rstrip()
