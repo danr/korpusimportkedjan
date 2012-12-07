@@ -15,42 +15,12 @@ if __name__ == "__main__":
 # The rest of the code does not need to be configured
 ################################################################################
 
-import sys, time,  os
+import sys, os, logging
 
-# Making a debug writer object.
-
-class Writer(object):
-    def __init__(self, mode='a'):
-        if log_file_location is not None:
-            self.log = open(log_file_location, mode)
-            sys.stdout = self
-            sys.stderr = self
-            self.active = True
-        else:
-            self.active = False
-
-    def write(self, msg):
-        if self.active:
-            self.log.write(msg)
-            self.flush()
-
-    def flush(self):
-        if self.active:
-            self.log.flush()
-
-    def close(self):
-        if self.active:
-            self.log.close()
-
-def log(msg):
-    """
-    Drop-in-replacement for log in logger.py if that module cannot be loaded
-    """
-    print "%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg)
-
-w = Writer()
-log("Restarted index.wsgi")
-w.flush()
+logging.basicConfig(filename = log_file_location, format = "%(asctime)-15s %(message)s")
+log = logging.getLogger('pipeline')
+log.setLevel(logging.INFO)
+log.info("Restarted index.wsgi")
 
 # Setting the path
 for path in paths:
@@ -63,15 +33,13 @@ os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
 try:
     from handlers import handlers
 except ImportError as e:
-    log("Failed to import handlers")
-    log(e)
+    log.exception("Failed to import handlers")
 
 # Import make_trace
 try:
     from make_trace import make_trace
 except BaseException as e:
-    log("Failed to import trace")
-    log(e)
+    log.exception("Failed to import trace")
 
 # Ongoing and finished builds
 builds = dict() # TODO: This could load builds from earlier invocations
@@ -85,18 +53,13 @@ def application(environ, start_response):
     Handles the incoming request
     """
 
-    # Need to start a new logger here
-    w = Writer()
-    log("Continuing index.wsgi")
-    w.flush()
-
     global requests
     requests+=1
     request = int(requests)
 
     path = environ.get('PATH_INFO',"")
 
-    log("(%s): %s" % (request, path))
+    log.info("Handling %s (request %s)" % (path, request))
 
     status = "200 OK"
     response_headers = [('Content-Type', 'text/plain'),
@@ -104,16 +67,13 @@ def application(environ, start_response):
     start_response(status, response_headers)
 
     def unknown():
-        yield "No handler for path %s" % path
+        yield "No handler for path %s\n" % path
 
     try:
-        return handlers(builds, environ, request).get(path.rstrip('/'), unknown)()
-    except e:
-        def error():
-            yield "Error in handler code: %s" % e
-            yield make_trace()
-        map(log, error)
-        return error()
+        return handlers(builds, environ).get(path.rstrip('/'), unknown)()
+    except BaseException as e:
+        log.exception("Error in handler code")
+        return ["Error in handler code: %s\n" % e, make_trace()]
 
 if __name__ == "__main__":
     """
@@ -123,9 +83,12 @@ if __name__ == "__main__":
     try:
         import eventlet
         from eventlet import wsgi
+        log.info("Eventlet: monkey patching")
         eventlet.monkey_patch()
+        log.info("Eventlet: starting server")
         wsgi.server(eventlet.listen(("", 8051)), application, minimum_chunk_size=1, max_size=100, keepalive=True)
     except ImportError, NameError:
+        log.exception("Cannot find eventlet, resorting to wsgiref")
         from wsgiref.simple_server import make_server
         httpd = make_server("", 8051, application)
         httpd.serve_forever()
