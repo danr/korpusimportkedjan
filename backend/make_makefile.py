@@ -1,3 +1,4 @@
+# Makes a makefile from a JSON object that validates the schema
 
 import re
 import json
@@ -217,11 +218,7 @@ def makefile(d):
     validated against the schema in settings_schema.json.
     """
 
-    import pprint
-    pp = pprint.PrettyPrinter()
-
-    settings_str = re.sub(r"u'",r"'", # remove ugly u in u'strings'
-                          makefile_comment(pp.pformat(d)))
+    settings_str = makefile_comment(json.dumps(d, indent=2))
     return str(linearise_Makefile([settings_str,""] + make_Makefile(d)))
 
 if __name__ == '__main__':
@@ -254,61 +251,3 @@ if __name__ == '__main__':
 
     sb.util.run.main(json_to_Makefile)
 
-# Example settings for make_Makefile
-settings = {'attributes': ['word', 'pos', 'msd', 'lemma', 'lex', 'saldo', 'prefix', 'suffix', 'ref', 'dephead', 'deprel'],
-            'corpus': 'corpus title',
-            'dateformat': '%d%h%ms',
-            'datefrom': 'chapter.date',
-            'dateregex': None,
-            'datesplitter': None,
-            'dateto': 'chapter.date',
-            'extra_tags': [{'attributes': ['name'], 'tag': 'chapter'},
-                           {'attributes': ['name'], 'tag': 'section'}],
-            'paragraph_segmenter': 'blanklines',
-            'random': 'sentence',
-            'root': {'attributes': ['title', 'author'], 'tag': 'text'},
-            'sentence_segmenter': {'attributes': ['mood', 'id'], 'tag': 's'},
-            'word_segmenter': {'attributes': {'egennamn': None, 'pos': 'msd'},
-                               'tag': 'w'},
-            'xml_skip': [{'attributes': [], 'tag': 'some_tag'},
-                         {'attributes': ['content'], 'tag': 'footnote'}]}
-
-"""
-An example _old style_ makefile which can be run on linearise_Makefile
-"""
-example = [
-    ("corpus","dannes_superkorpus"),
-    ("original_dir","original"),
-    ("files","$(basename $(notdir $(wildcard $(original_dir)/*.xml)))"),
-    "",
-    [
-        ("vrt_annotations", ["word", "pos", "msd", "baseform", "lemgram", "saldo", "prefix", "suffix", "ref", "dephead.ref", "deprel", "egennamn.value", "sentence.id", "sentence.mood", "paragraph.namn", "kapitel.namn", "text.korpusnamn", "n"]),
-        ("vrt_columns",     ["word", "pos", "msd", "lemma",    "lex",     "saldo", "prefix", "suffix", "ref", "dephead",     "deprel", "egennamn"]),
-        ("vrt_structs",     ["-",    "-",   "-",   "-",        "-",       "-",     "-",      "-",      "-",   "-",           "-",      "-",              "sentence:id", "sentence:mood", "paragraph:namn", "kapitel:namn", "text:korpusnamn"])
-        ],
-    "",
-    [
-        ("xml_elements",    ["text", "p",         "p:namn",         "s",        "s:mood",        "text:korpusnamn", "kapitel:namn", "egennamn:value"]),
-        ("xml_annotations", ["text", "paragraph", "paragraph.namn", "sentence", "sentence.mood", "text.korpusnamn", "kapitel.namn", "egennamn.value"])
-        ],
-    "",
-    "include ../Makefile.common",
-    "",
-    ("token_chunk","sentence"),
-    ("token_segmenter","punkt_word"),
-    "",
-    ("sentence_chunk","paragraph"),
-    ("sentence_segmenter","punkt_sentence"),
-    ("sentence_model","$(punkt_model)"),
-    "",
-    ("paragraph_chunk","text"),
-    ("paragraph_segmenter","blanklines"),
-    "",
-    ("sentence_order","position"),
-    ("paragraph_order","position"),
-    "",
-    ("parents","token.text|token|text token.sentence|token|sentence token.paragraph|token|paragraph token.kapitel|token|kapitel.namn token.egennamn|token|egennamn.value"),
-    ("chains","token.text.korpusnamn token.sentence.mood token.paragraph.namn token.kapitel.namn token.egennamn.value"),
-    "",
-    "include ../Makefile.rules",
-    ]

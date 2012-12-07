@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
-################################################################################
-#
 # The Pipeline: the most central part is the Build class that contains the
 # information about an initalised, running, or finished build.
-#
-################################################################################
 
-from make_makefile import makefile
-from config import Config
 from subprocess import Popen, PIPE, call
 from xml.sax.saxutils import escape
-from logger import log
-from enums import Status, Message, finished
-from make_trace import make_trace
 
 import errno
 import os
 import time
+
+from config import Config
+from enums import Status, Message, finished
+from logger import log
+from make_makefile import makefile
+from make_trace import make_trace
 
 def make_hash(*texts):
     """

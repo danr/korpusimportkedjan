@@ -1,17 +1,17 @@
-from xml.sax.saxutils import escape
-from threading import Thread
 from Queue import Queue
+from threading import Thread
+from xml.sax.saxutils import escape
 
-import urlparse
 import json
 import time
+import urlparse
 
 from config import Config
-from make_makefile import makefile
-from pipeline import Build
-from logger import dateformat, log
 from enums import Status, Message, finished
+from logger import dateformat, log
+from make_makefile import makefile
 from make_trace import make_trace
+from pipeline import Build
 
 # Open JSON Schema settings and the validator.
 # Location of this file is set in config.py.

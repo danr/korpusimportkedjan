@@ -1,8 +1,4 @@
-################################################################################
-#
 # Enums used in the pipeline
-#
-################################################################################
 
 def enum(*sequential):
     """
@@ -12,10 +8,10 @@ def enum(*sequential):
     enums['lookup'] = dict((value, key) for key, value in enums.iteritems())
     return type('Enum', (), enums)
 
-"""The possible statuses of a pipeline"""
+# The possible statuses of a pipeline
 Status = enum('Init', 'Running', 'Done', 'Error', 'Deleted')
 
-"""The possible message types from the pipeline"""
+# The possible message types from the pipeline
 Message = enum('StatusChange', 'Increment')
 
 def finished(status):

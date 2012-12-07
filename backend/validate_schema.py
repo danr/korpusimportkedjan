@@ -1,9 +1,7 @@
-"""
-Validates the json schema in settings_schema.json
-and tries in on the example dannes_superkorpus.json.
-
-A successful run should is a silent run.
-"""
+# Validates the json schema in settings_schema.json
+# and tries in on the example dannes_superkorpus.json.
+#
+# A successful run should only print the default settings back.
 
 from schema_utils import DefaultValidator
 import json
@@ -32,4 +30,6 @@ validator.validate(instance)
 Test using the default populator
 """
 
-validator.validate({})
+e = {}
+validator.validate(e)
+print json.dumps(e, indent=4)

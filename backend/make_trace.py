@@ -1,10 +1,10 @@
-################################################################################
-#
-# Makes a traceback
-#
-################################################################################
+# Making a traceback
+
+import traceback, sys
 
 def make_trace():
-    from sys import exc_type, exc_value, exc_traceback
-    import traceback
-    return "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    """
+    Returns a traceback.
+    """
+    return "".join(traceback.format_exception(*sys.exc_info()))
+

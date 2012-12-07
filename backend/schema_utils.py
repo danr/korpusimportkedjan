@@ -1,3 +1,5 @@
+# This validator populates missing values with the default values in a schema.
+
 from jsonschema import Draft3Validator
 
 class DefaultValidator(Draft3Validator):

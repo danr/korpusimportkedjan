@@ -2,6 +2,9 @@
 #
 # Pipeline Configuration
 #
+# Besides this configuration, there are also a few variables in the top
+# of index.wsgi that needs to be configured.
+#
 ################################################################################
 import os
 

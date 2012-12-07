@@ -9,7 +9,8 @@ paths = ['/home/dan/annotate/python','/export/htdocs_sb/annoteringslabb/']
 
 # The log file location. Set this to None if you rather want to log to stdout
 log_file_location = "/export/htdocs_sb/annoteringslabb/pipeline/annotate.log"
-# log_file_location = None
+if __name__ == "__main__":
+    log_file_location = None
 
 # The rest of the code does not need to be configured
 ################################################################################
@@ -61,7 +62,7 @@ os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
 # Loading handlers
 try:
     from handlers import handlers
-except BaseException as e:
+except ImportError as e:
     log("Failed to import handlers")
     log(e)
 
