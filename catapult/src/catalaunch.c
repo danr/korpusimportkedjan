@@ -2,20 +2,28 @@
 
   catalaunch: starts processes on the catapult
 
-  First argument is the socket file, remaining arguments are as to the python command,
-  supporting paths to scripts, and modules with -m. Examples:
+  First argument is the socket file, remaining arguments are as to the python
+  command, supporting paths to scripts, and modules with -m. Examples:
 
   catalaunch catapult.sockfile -m sb.saldo --xml_to_pickle minisaldo.xml
   catalaunch catapult.sockfile script.py any arguments
 
-  If the catapult is verbose, then the script's stdout and stderr will
-  be printed on stdout.
+  If the catapult is verbose, then the script's stdout and stderr will be
+  printed on stdout.
 
   The catalaunch process terminates when the socket exits.
 
   The internal protocol first sends the current working directory, and then the
-  command line arguments, separated by spaces. For this reason, spaces in arguments
-  are escaped with backslash, so therefore backslashes are escaped by backslashes.
+  command line arguments, separated by spaces. For this reason, spaces in
+  arguments are escaped with backslash, so therefore backslashes are escaped by
+  backslashes.  The message is terminated with a backlash without any following
+  character.
+
+  If the messages exceed the sending length, they are chunked.
+
+  However, this is not implemented for sending the working directory, so if it
+  is too long (exceeds PWD_LEN), it will be cut. Try not to use paths exceeding
+  2000 characters.
 
 */
 #include <stdio.h>
@@ -44,7 +52,7 @@ int main(int argc, char **argv)
 
     // Open the socket
     if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
+        perror("socket: Opening the socket failed");
         exit(1);
     }
 
@@ -53,7 +61,7 @@ int main(int argc, char **argv)
     strcpy(remote.sun_path, argv[1]);
     len = strlen(remote.sun_path) + sizeof(remote.sun_family);
     if (connect(s, (struct sockaddr *)&remote, len) == -1) {
-        perror("connect");
+        perror("connect: Connecting to socket failed");
         exit(1);
     }
 
@@ -83,9 +91,8 @@ int main(int argc, char **argv)
             // send this part of the message if we're about to exceed
             // the buffer length
             if (p >= SEND_LEN-4) {
-				msg[p] = '\0';
                 if (send(s, msg, p, 0) < 0) {
-                    perror("send");
+                    perror("send: Sending error");
                     return -1;
                 }
                 p = 0; // reset position to start
@@ -93,12 +100,12 @@ int main(int argc, char **argv)
         }
     }
 
-	msg[p++] = '\\';
-	msg[p+1] = '\0';
+    // Send the terminating backsalsh.
+    msg[p++] = '\\';
 
     // send remaining part of the message
     if (send(s, msg, p, 0) < 0) {
-        perror("send");
+        perror("send: Sending error");
         return -1;
     }
 
@@ -112,7 +119,7 @@ int main(int argc, char **argv)
     fflush(stdout);
 
     if (n < 0) {
-        perror("recv");
+        perror("recv: Receiving error");
     }
 
     close(s);
