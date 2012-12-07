@@ -16,19 +16,10 @@ from utils import pretty_epoch_time, query, text
 
 log = logging.getLogger('pipeline.' + __name__)
 
-# Open JSON Schema settings and the validator.
-# Location of this file is set in config.py.
-with open(Config.schema_file,"r") as f:
-    schema_str = f.read()
-
-settings_schema = json.loads(schema_str)
-settings_validator = DefaultValidator(settings_schema)
-
 # The handlers
 def handlers(builds, environ):
     """
-    Returns the handlers under given a builds dictionary,
-    and the wsgi environment
+    Returns the handlers with a builds dictionary, and wsgi environment
     """
     return {
         '': lambda: handle(builds, environ),
@@ -41,6 +32,26 @@ def handlers(builds, environ):
         '/cleanup': lambda: cleanup(builds)
     }
 
+# Open JSON Schema settings and the validator.
+# Location of this file is set in config.py.
+try:
+    with open(Config.schema_file,"r") as f:
+        schema_str = f.read()
+except:
+    log.exception("Error reading JSON schema settings file")
+    schema_str = "{}"
+
+try:
+    settings_schema = json.loads(schema_str)
+except:
+    log.exception("Error parsing JSON is schema settings")
+    settings_schema = {}
+
+try:
+    settings_validator = DefaultValidator(settings_schema)
+except:
+    log.exception("Error starting validator for JSON schema settings")
+
 # /schema handler
 def schema():
     yield schema_str
@@ -52,10 +63,10 @@ def status(builds):
     """
     for h, b in builds.iteritems():
         yield ("<build hash='%s' status='%s' since='%s' accessed='%s' accessed-secs-ago='%s'/>\n" %
-                (h, Status.lookup[b.status],
-                    pretty_epoch_time(b.status_change_time),
-                    pretty_epoch_time(b.accessed_time),
-                    round(time.time() - b.accessed_time,1)))
+               (h, Status.lookup[b.status],
+                   pretty_epoch_time(b.status_change_time),
+                   pretty_epoch_time(b.accessed_time),
+                   round(time.time() - b.accessed_time,1)))
 
 # /cleanup handler
 def cleanup(builds, timeout=86400):
