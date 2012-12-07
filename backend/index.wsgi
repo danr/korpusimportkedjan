@@ -46,7 +46,7 @@ try:
     from resume_builds import resume_builds
     builds = resume_builds()
 except ImportError as e:
-    log.exception("Failed to import handlers")
+    log.exception("Failed to resume builds")
     builds = dict()
 
 # Global request counter
