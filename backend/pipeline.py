@@ -1,33 +1,22 @@
 # -*- coding: utf-8 -*-
+################################################################################
+#
+# The Pipeline: the most central part is the Build class that contains the
+# information about an initalised, running, or finished build.
+#
+################################################################################
 
 from make_makefile import makefile
+from config import Config
 from subprocess import Popen, PIPE, call
 from xml.sax.saxutils import escape
+from logger import log
+from enums import Status, Message, finished
+from make_trace import make_trace
 
 import errno
 import os
 import time
-
-def log(msg):
-    print "%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg)
-
-def enum(*sequential):
-    """
-    Makes an enumerator type: http://stackoverflow.com/a/1695250/165544
-    """
-    enums = dict(zip(sequential, range(len(sequential))))
-    enums['lookup'] = dict((value, key) for key, value in enums.iteritems())
-    return type('Enum', (), enums)
-
-"""The possible statuses of a pipeline"""
-Status = enum('Init', 'Running', 'Done', 'Error', 'Deleted')
-
-"""The possible message types from the pipeline"""
-Message = enum('StatusChange', 'Increment')
-
-def finished(status):
-    """The statuses that comprise a finished build"""
-    return status == Status.Done or status == Status.Error
 
 def make_hash(*texts):
     """
@@ -39,12 +28,18 @@ def make_hash(*texts):
     return hashlib.sha1("".join(texts)).hexdigest()
 
 def make(settings):
+    """
+    Calls make with a given settings (a dict containing JSON valid by the schema)
+    """
     log("CALL: /usr/bin/make %s" % ' '.join(settings))
     return Popen(['/usr/bin/make'] + settings,
                  shell=False, close_fds=False,
                  stdin=None, stdout=PIPE, stderr=PIPE)
 
 def mkdir(d):
+    """
+    Makes a directory
+    """
     try:
         os.makedirs(d, mode=0777)
     except OSError as exc:
@@ -55,6 +50,9 @@ def mkdir(d):
     call(['chmod', '777', d, '-v'])
 
 def rmfile(f):
+    """
+    Removes a file
+    """
     try:
         os.remove(f)
     except OSError as exc:
@@ -63,22 +61,23 @@ def rmfile(f):
         else:
             raise
 
-def make_trace():
-    from sys import exc_type, exc_value, exc_traceback
-    import traceback
-    return "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-
 class Build(object):
+    """
+    The Build class.
+
+    Register yourself with a queue to the queues list to get messages
+    about status changes and incremental messages.
+    """
+
     def access(self):
         """Updates the access time of this build"""
         self.accessed_time = time.time()
 
-    def __init__(self, pipeline_settings, text, settings):
+    def __init__(self, text, settings):
         """
         Creates the necessary directories and the makefile for this
-        file. Returns the hash and the directory the pipeline runs on
+        text and the JSON settings.
         """
-
         self.queues = []
 
         self.text = text
@@ -86,11 +85,11 @@ class Build(object):
 
         self.build_hash = make_hash(self.text, self.makefile_contents)
 
-        self.pipeline_settings = pipeline_settings
         self.settings = settings
 
         self.status = None
 
+        # Deem this build as accessed now.
         self.access()
 
         # Output from make, line by line
@@ -102,21 +101,30 @@ class Build(object):
         self.step = 0
 
     def increment_msg(self):
-        """The current increment message"""
+        """
+        The current increment message
+        """
         return '<increment command="%s" step="%s" steps="%s"/>\n' % (self.command, self.step, self.steps)
 
     def send_to_all(self, msg):
-        """Sends a message to all listeners"""
+        """
+        Sends a message to all listeners
+        """
         map(lambda q: q.put(msg), self.queues)
 
     def change_status(self, status):
-        """Change the status and notify all listeners"""
+        """
+        Change the status and notify all listeners
+        """
         self.status = status
         self.status_change_time = time.time()
         self.send_to_all((Message.StatusChange, self.status))
 
-    def notify_step(self, new_cmd=None, new_step=None, new_steps=None):
-        """Notifies all listeners that the increment has been increased"""
+    def change_step(self, new_cmd=None, new_step=None, new_steps=None):
+        """
+        Changes the current step, and notifies all listeners that the increment
+        has been changed.
+        """
         if new_step is not None:
             self.step = new_step
         if new_cmd is not None:
@@ -132,7 +140,7 @@ class Build(object):
         """
         self.change_status(Status.Init)
 
-        self.directory = os.path.join(self.pipeline_settings.directory, self.build_hash)
+        self.directory = os.path.join(Config.directory, self.build_hash)
 
         self.original_dir = os.path.join(self.directory, 'original')
         self.annotations_dir =  os.path.join(self.directory, 'annotations')
@@ -168,12 +176,12 @@ class Build(object):
 
     def _run(self, fmt):
         """
-        Run make, sending increments, and eventually obtaining the built corpus
+        Run make, sending increments, and eventually change status to done.
         """
         make_settings = ['-C', self.directory,
                          'dir_chmod=777',
-                         '-j', str(self.pipeline_settings.processes),
-                         "python=%s" % self.pipeline_settings.python_interpreter]
+                         '-j', str(Config.processes),
+                         "python=%s" % Config.python_interpreter]
 
         if fmt == 'vrt' or fmt == 'cwb':
             make_settings = [fmt] + make_settings
@@ -184,26 +192,32 @@ class Build(object):
 
         # Do a dry run to get the number of invocations that will be made
         stdout, _ = make(make_settings + ['--dry-run']).communicate("")
-        steps = stdout.count(self.pipeline_settings.python_interpreter)
+        steps = stdout.count(Config.python_interpreter)
 
-        # Start make for real
+        # Start make for real. First set up some environment variables
+        os.environ['SB_MODELS'] = Config.sb_models
+        # No remote installations allowed
+        os.environ['remote_cwb_datadir']="null"
+        os.environ['remote_cwb_registry']="null"
+        os.environ['remote_host']="null"
+
+        # Now, make!
         self.make_process = make(make_settings)
 
         self.change_status(Status.Running)
 
         # Process the output from make
-        self.notify_step(new_cmd="", new_step=0, new_steps=steps + 1)
+        self.change_step(new_cmd="", new_step=0, new_steps=steps + 1)
         step = 0
         for line in iter(self.make_process.stdout.readline, ''):
-            # log(line.rstrip())
-            self.make_out += [line]
-            if self.pipeline_settings.python_interpreter in line:
+            self.make_out.append(line)
+            if Config.python_interpreter in line:
                 step += 1;
-                argstring = line.split(self.pipeline_settings.python_interpreter)[1]
+                argstring = line.split(Config.python_interpreter)[1]
                 arguments = argstring.lstrip().split()
                 command = " ".join(arguments[1:3]) if "--" in arguments[3] else arguments[1]
-                self.notify_step(new_step=step, new_cmd=command)
-        self.notify_step(new_cmd="", new_step=step+1)
+                self.change_step(new_step=step, new_cmd=command)
+        self.change_step(new_cmd="", new_step=step+1)
 
         # Send warnings
         try:
@@ -240,16 +254,16 @@ class Build(object):
         Returns the result: either a built corpus with possible warning messages,
         or the error messages for an unsuccessful build
         """
-        assert(self.status == Status.Done or self.status == Status.Error)
+        assert(finished(self.status))
         if self.status == Status.Done:
             out = []
-            self.warnings and out.append('<warning>' + escape(self.warnings) + '</warning>')
+            if self.warnings:
+                out.append('<warning>' + escape(self.warnings) + '</warning>')
             with open(self.out_file, "r") as f:
                 out.append(f.read())
             return "\n".join(out)
         else:
-            out = []
-            out.append('<trace>' + escape(self.trace) + '</trace>')
-            out.append('<stderr>' + escape(self.stderr) + '</stderr>')
-            out.append('<stdout>' + escape(self.stdout) + '</stdout>')
+            out = ['<trace>' + escape(self.trace) + '</trace>',
+                   '<stderr>' + escape(self.stderr) + '</stderr>',
+                   '<stdout>' + escape(self.stdout) + '</stdout>']
             return "\n".join(out) + "\n"
