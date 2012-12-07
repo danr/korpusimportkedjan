@@ -42,8 +42,12 @@ except BaseException as e:
     log.exception("Failed to import trace")
 
 # Ongoing and finished builds
-builds = dict() # TODO: This could load builds from earlier invocations
-                #       in the pipeline directory.
+try:
+    from resume_builds import resume_builds
+    builds = resume_builds()
+except ImportError as e:
+    log.exception("Failed to import handlers")
+    builds = dict()
 
 # Global request counter
 requests=0

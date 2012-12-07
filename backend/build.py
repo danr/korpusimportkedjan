@@ -28,19 +28,32 @@ class Build(object):
         """Updates the access time of this build"""
         self.accessed_time = time.time()
 
-    def __init__(self, text, settings):
+    def __init__(self, text, settings, init_from_hash=None):
         """
         Creates the necessary directories and the makefile for this
         text and the JSON settings.
         """
         self.queues = []
 
-        self.text = text
-        self.makefile_contents = makefile(settings)
+        if init_from_hash:
+            self.build_hash = init_from_hash
+        else:
+            self.text = text
+            self.makefile_contents = makefile(settings)
+            self.build_hash = make_hash(self.text, self.makefile_contents)
+            self.settings = settings
 
-        self.build_hash = make_hash(self.text, self.makefile_contents)
+        # Directories
+        self.directory = os.path.join(Config.directory, self.build_hash)
 
-        self.settings = settings
+        self.original_dir = os.path.join(self.directory, 'original')
+        self.annotations_dir =  os.path.join(self.directory, 'annotations')
+        self.export_dir = os.path.join(self.directory, 'export')
+        self.warnings_log_file = os.path.join(self.directory,'warnings.log');
+
+        # and files
+        self.makefile = os.path.join(self.directory, 'Makefile')
+        self.text_file = os.path.join(self.original_dir, 'text.xml')
 
         self.status = None
 
@@ -74,6 +87,7 @@ class Build(object):
         self.status = status
         self.status_change_time = time.time()
         self.send_to_all((Message.StatusChange, self.status))
+        log.info("%s: %s", self.build_hash, Status.lookup[self.status])
 
     def change_step(self, new_cmd=None, new_step=None, new_steps=None):
         """
@@ -95,16 +109,6 @@ class Build(object):
         """
         self.change_status(Status.Init)
 
-        self.directory = os.path.join(Config.directory, self.build_hash)
-
-        self.original_dir = os.path.join(self.directory, 'original')
-        self.annotations_dir =  os.path.join(self.directory, 'annotations')
-        self.export_dir = os.path.join(self.directory, 'export')
-        self.warnings_log_file = os.path.join(self.directory,'warnings.log');
-
-        self.makefile = os.path.join(self.directory, 'Makefile')
-
-        self.text_file = os.path.join(self.original_dir, 'text.xml')
 
         # Make directories
         map(mkdir, [self.original_dir, self.annotations_dir])
@@ -222,3 +226,4 @@ class Build(object):
                    '<stderr>' + escape(self.stderr) + '</stderr>',
                    '<stdout>' + escape(self.stdout) + '</stdout>']
             return "\n".join(out) + "\n"
+
