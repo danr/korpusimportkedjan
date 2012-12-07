@@ -24,15 +24,12 @@ class Build(object):
     about status changes and incremental messages.
     """
 
-    def access(self):
-        """Updates the access time of this build"""
-        self.accessed_time = time.time()
-
     def __init__(self, text, settings, init_from_hash=None):
         """
         Creates the necessary directories and the makefile for this
         text and the JSON settings.
         """
+        self.status = None
         self.queues = []
 
         if init_from_hash:
@@ -55,7 +52,6 @@ class Build(object):
         self.makefile = os.path.join(self.directory, 'Makefile')
         self.text_file = os.path.join(self.original_dir, 'text.xml')
 
-        self.status = None
 
         # Deem this build as accessed now.
         self.access()
@@ -67,6 +63,11 @@ class Build(object):
         self.command = ""
         self.steps = 0
         self.step = 0
+
+    def access(self):
+        """Updates the access time of this build"""
+        self.accessed_time = time.time()
+
 
     def increment_msg(self):
         """
@@ -87,7 +88,7 @@ class Build(object):
         self.status = status
         self.status_change_time = time.time()
         self.send_to_all((Message.StatusChange, self.status))
-        log.info("%s: %s", self.build_hash, Status.lookup[self.status])
+        log.info("%s: Status changed to %s", self.build_hash, Status.lookup[self.status])
 
     def change_step(self, new_cmd=None, new_step=None, new_steps=None):
         """
@@ -108,7 +109,6 @@ class Build(object):
         directories, the original corpus and the makefile
         """
         self.change_status(Status.Init)
-
 
         # Make directories
         map(mkdir, [self.original_dir, self.annotations_dir])
@@ -187,7 +187,7 @@ class Build(object):
 
         # The corpus should now be in self.out_file
         # Its contents is not stored because of memory reasons
-        assert os.path.isfile(self.out_file)
+        # assert os.path.isfile(self.out_file)
 
         self.change_status(Status.Done)
 
@@ -218,9 +218,14 @@ class Build(object):
             out = []
             if self.warnings:
                 out.append('<warning>' + escape(self.warnings) + '</warning>')
-            with open(self.out_file, "r") as f:
-                out.append(f.read())
-            return "\n".join(out)
+            try:
+                with open(self.out_file, "r") as f:
+                    out.append(f.read())
+                return "\n".join(out)
+            except:
+                self.change_status(Status.Error)
+                log.exception("Result file is missing")
+                return "<error>Result file is missing </error>"
         else:
             out = ['<trace>' + escape(self.trace) + '</trace>',
                    '<stderr>' + escape(self.stderr) + '</stderr>',

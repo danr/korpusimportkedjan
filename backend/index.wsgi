@@ -32,20 +32,20 @@ os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
 # Loading handlers
 try:
     from handlers import handlers
-except ImportError as e:
+except:
     log.exception("Failed to import handlers")
 
 # Import make_trace
 try:
     from make_trace import make_trace
-except BaseException as e:
+except:
     log.exception("Failed to import trace")
 
 # Ongoing and finished builds
 try:
     from resume_builds import resume_builds
     builds = resume_builds()
-except ImportError as e:
+except:
     log.exception("Failed to resume builds")
     builds = dict()
 
@@ -75,9 +75,9 @@ def application(environ, start_response):
 
     try:
         return handlers(builds, environ).get(path.rstrip('/'), unknown)()
-    except BaseException as e:
+    except:
         log.exception("Error in handler code")
-        return ["Error in handler code: %s\n" % e, make_trace()]
+        return ["Error in handler code: %s\n", make_trace()]
 
 if __name__ == "__main__":
     """

@@ -29,7 +29,8 @@ def handlers(builds, environ):
         '/schema': schema,
         '/ping': ping,
         '/status': lambda: status(builds),
-        '/cleanup': lambda: cleanup(builds)
+        '/cleanup': lambda: cleanup(builds),
+        '/cleanup/errors': lambda: cleanup(builds, remove_errors=True)
     }
 
 # Open JSON Schema settings and the validator.
@@ -61,28 +62,37 @@ def status(builds):
     """
     Status of builds
     """
+    res = ""
     for h, b in builds.iteritems():
-        yield ("<build hash='%s' status='%s' since='%s' accessed='%s' accessed-secs-ago='%s'/>\n" %
-               (h, Status.lookup[b.status],
-                   pretty_epoch_time(b.status_change_time),
-                   pretty_epoch_time(b.accessed_time),
-                   round(time.time() - b.accessed_time,1)))
+        if b.status is not None:
+            res += ("<build hash='%s' status='%s' since='%s' accessed='%s' accessed-secs-ago='%s'/>\n" %
+                       (h, Status.lookup[b.status],
+                           pretty_epoch_time(b.status_change_time),
+                           pretty_epoch_time(b.accessed_time),
+                           round(time.time() - b.accessed_time,1)))
+
+    return [res]
 
 # /cleanup handler
-def cleanup(builds, timeout=86400):
+def cleanup(builds, timeout=86400, remove_errors=False):
     """
     Removes builds that are finished and haven't been accessed within the timeout,
     which is by default 24 hours.
+
+    With remove_errors, removes the all with status Error.
     """
     to_remove = []
     for h, b in builds.iteritems():
-        if finished(b.status) and time.time() - b.accessed_time > timeout:
+        if (finished(b.status) and time.time() - b.accessed_time > timeout
+            or b.status == Status.Error and remove_errors):
             log.info("Removing %s" % h)
             b.remove_files()
             to_remove.append(h)
+    res = ""
     for h in to_remove:
         del builds[h]
-        yield "<removed hash='%s'>\n" % h
+        res += "<removed hash='%s'>\n" % h
+    return [res]
 
 # /ping handler
 ping_error_msg = """<error>
@@ -104,13 +114,13 @@ def ping():
         stdout, stderr = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
         t1 = time.time()
     except BaseException as e:
-        yield "<error>Failed to ping catapult: %s</error>\n" % e
+        return ["<error>Failed to ping catapult: %s</error>\n" % e]
     else:
         t = round(t1 - t0,4)
         if not stderr and stdout == "PONG":
-            yield "<catapult time='%s'>%s</catapult>\n" % (t, stdout)
+            return ["<catapult time='%s'>%s</catapult>\n" % (t, stdout)]
         else:
-            yield ping_error_msg % (t, stdout, stderr)
+            return [ping_error_msg % (t, stdout, stderr)]
 
 # Starting and joining builds
 def build(builds, original_text, settings, incremental, fmt):
