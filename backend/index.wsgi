@@ -68,7 +68,7 @@ except ImportError as e:
 
 # Import make_trace
 try:
-    from trace import make_trace
+    from make_trace import make_trace
 except BaseException as e:
     log("Failed to import trace")
     log(e)
