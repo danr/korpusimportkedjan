@@ -230,7 +230,7 @@ def handle(builds, environ, cmd=None):
             if cmd == "makefile":
                 log.info("Returning makefile")
                 yield makefile(settings)
-            if cmd == "join":
+            elif cmd == "join":
                 log.info("Joining existing build")
                 yield "<result>\n"
                 hashnumber = query(environ, 'hash', '')
