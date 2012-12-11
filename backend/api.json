@@ -1,16 +1,15 @@
 {
     "apiVersion": "0.2",
     "swaggerVersion": "1.1",
-    "basePath": "http://localhost:8051/",
-    "resourcePath": "/",
+    "basePath": "http://spraakbanken.gu.se/ws",
     "apis": [
     {
-        "path": "/",
+        "path": "/korp/annotate",
         "description": "Run pipeline",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Runs the pipeline with given settings",
+            "summary": "Run the pipeline on a text",
             "responseClass": "void",
             "nickname": "getPipeline",
             "parameters": [
@@ -39,7 +38,7 @@
         },
         {
             "httpMethod": "POST",
-            "summary": "Runs the pipeline with given settings",
+            "summary": "Run the pipeline on a text",
             "responseClass": "void",
             "nickname": "getPipeline",
             "parameters": [
@@ -69,12 +68,12 @@
         ]
     },
     {
-        "path": "/join",
-        "description": "Joins an existing build",
+        "path": "/korp/annotate/join",
+        "description": "Join an existing build",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Joins an existing build given its hash ID",
+            "summary": "Join an existing build",
             "responseClass": "void",
             "nickname": "getMakefile",
             "parameters": [
@@ -97,12 +96,12 @@
         ]
     },
     {
-        "path": "/makefile",
+        "path": "/korp/annotate/makefile",
         "description": "Get makefile",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Views the Makefile for given settings",
+            "summary": "View the Makefile",
             "responseClass": "void",
             "nickname": "getMakefile",
             "parameters": [
@@ -118,36 +117,36 @@
         ]
     },
     {
-        "path": "/schema",
-        "description": "Get the json schema for the makefile settings",
+        "path": "/korp/annotate/schema",
+        "description": "Get the JSON schema",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Get the json schema for the makefile settings",
+            "summary": "Get JSON schema for the settings parameter",
             "responseClass": "void",
             "nickname": "getSchema"
         }
         ]
     },
     {
-        "path": "/ping",
-        "description": "Ping the pipeline and the catapult",
+        "path": "/korp/annotate/ping",
+        "description": "Ping the service and the catapult",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Ping the pipeline and the catapult",
+            "summary": "Ping the service and the catapult",
             "responseClass": "void",
             "nickname": "ping"
         }
         ]
     },
     {
-        "path": "/status",
-        "description": "Get the status of the pipeline",
+        "path": "/korp/annotate/status",
+        "description": "Get status of builds",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Get the status of the pipeline",
+            "summary": "Get status of builds",
             "responseClass": "void",
             "nickname": "status",
             "parameters": []
@@ -155,19 +154,19 @@
         ]
     },
     {
-        "path": "/cleanup",
+        "path": "/korp/annotate/cleanup",
         "description": "Remove builds that are older than 24 hours",
         "operations": [
         {
             "httpMethod": "GET",
-            "summary": "Remove builds that are older than 24 hours",
+            "summary": "Remove old builds",
             "responseClass": "void",
             "nickname": "cleanup"
         }
         ]
     },
     {
-        "path": "/cleanup/errors",
+        "path": "/korp/annotate/cleanup/errors",
         "description": "Remove erroneous builds",
         "operations": [
         {
