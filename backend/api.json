@@ -1,0 +1,183 @@
+{
+    "apiVersion": "0.2",
+    "swaggerVersion": "1.1",
+    "basePath": "http://localhost:8051/",
+    "resourcePath": "/",
+    "apis": [
+    {
+        "path": "/",
+        "description": "Run pipeline",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Runs the pipeline with given settings",
+            "responseClass": "void",
+            "nickname": "getPipeline",
+            "parameters": [
+            {
+                "name": "settings",
+                "description": "Settings",
+                "required": false,
+                "paramType": "query",
+                "dataType": "object"
+            },
+            {
+                "name": "text",
+                "description": "Text (or XML)",
+                "required": true,
+                "paramType": "query",
+                "dataType": "string"
+            },
+            {
+                "name": "incremental",
+                "description": "Incremental (show progress)",
+                "required": false,
+                "paramType": "query",
+                "dataType": "boolean"
+            }
+            ]
+        },
+        {
+            "httpMethod": "POST",
+            "summary": "Runs the pipeline with given settings",
+            "responseClass": "void",
+            "nickname": "getPipeline",
+            "parameters": [
+            {
+                "name": "settings",
+                "description": "Settings",
+                "required": false,
+                "paramType": "query",
+                "dataType": "object"
+            },
+            {
+                "name": "text",
+                "description": "Text (or XML)",
+                "required": true,
+                "paramType": "body",
+                "dataType": "string"
+            },
+            {
+                "name": "incremental",
+                "description": "Incremental (show progress)",
+                "required": false,
+                "paramType": "query",
+                "dataType": "boolean"
+            }
+            ]
+        }
+        ]
+    },
+    {
+        "path": "/join",
+        "description": "Joins an existing build",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Joins an existing build given its hash ID",
+            "responseClass": "void",
+            "nickname": "getMakefile",
+            "parameters": [
+            {
+                "name": "hash",
+                "description": "Hash",
+                "required": true,
+                "paramType": "query",
+                "dataType": "string"
+            },
+            {
+                "name": "incremental",
+                "description": "Incremental (show progress)",
+                "required": false,
+                "paramType": "query",
+                "dataType": "boolean"
+            }
+            ]
+        }
+        ]
+    },
+    {
+        "path": "/makefile",
+        "description": "Get makefile",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Views the Makefile for given settings",
+            "responseClass": "void",
+            "nickname": "getMakefile",
+            "parameters": [
+            {
+                "name": "settings",
+                "description": "Settings",
+                "required": false,
+                "paramType": "query",
+                "dataType": "object"
+            }
+            ]
+        }
+        ]
+    },
+    {
+        "path": "/schema",
+        "description": "Get the json schema for the makefile settings",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Get the json schema for the makefile settings",
+            "responseClass": "void",
+            "nickname": "getSchema"
+        }
+        ]
+    },
+    {
+        "path": "/ping",
+        "description": "Ping the pipeline and the catapult",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Ping the pipeline and the catapult",
+            "responseClass": "void",
+            "nickname": "ping"
+        }
+        ]
+    },
+    {
+        "path": "/status",
+        "description": "Get the status of the pipeline",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Get the status of the pipeline",
+            "responseClass": "void",
+            "nickname": "status",
+            "parameters": []
+        }
+        ]
+    },
+    {
+        "path": "/cleanup",
+        "description": "Remove builds that are older than 24 hours",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Remove builds that are older than 24 hours",
+            "responseClass": "void",
+            "nickname": "cleanup"
+        }
+        ]
+    },
+    {
+        "path": "/cleanup/errors",
+        "description": "Remove erroneous builds",
+        "operations": [
+        {
+            "httpMethod": "GET",
+            "summary": "Remove erroneous builds",
+            "responseClass": "void",
+            "nickname": "cleanupErrors"
+        }
+        ]
+    }
+    ]
+}
+

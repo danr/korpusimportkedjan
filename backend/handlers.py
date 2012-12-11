@@ -26,6 +26,8 @@ def handlers(builds, environ):
         '/join': lambda: handle(builds, environ, 'join'),
         '/makefile': lambda: handle(builds, environ, 'makefile'),
 
+        '/api': api,
+
         '/schema': schema,
         '/ping': ping,
         '/status': lambda: status(builds),
@@ -246,4 +248,9 @@ def handle(builds, environ, cmd=None):
             log.exception("Error in handle")
             yield '<trace>' + escape(trace) + '</trace>\n'
             yield '</result>\n'
+
+def api():
+    with open("api.json", "r") as f:
+        api = f.read()
+    return [api]
 
