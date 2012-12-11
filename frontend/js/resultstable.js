@@ -211,7 +211,7 @@
     w = window.open('', '_blank');
     w.document.open("text/plain", "replace");
     w.document.write("hello");
-    $("body", w.document).text(content);
+    $("body", w.document).empty().append($("<pre/>").text(content));
     return w.document.close();
   };
 

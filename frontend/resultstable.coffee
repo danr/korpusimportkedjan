@@ -151,7 +151,7 @@ new_window = (content) ->
     # This will make a body tag in the document
     w.document.write "hello"
     # Replace the body with the content
-    $("body", w.document).text(content)
+    $("body", w.document).empty().append($("<pre/>").text(content))
     # Without this, Firefox thinks the page is already loaded
     w.document.close()
 
