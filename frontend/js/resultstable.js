@@ -141,7 +141,7 @@
             en: "Show XML",
             se: "Visa XML"
           }).click(function() {
-            new_window("application/xml", (new XMLSerializer()).serializeToString(child));
+            new_window((new XMLSerializer()).serializeToString(child));
             return false;
           });
           closed = header.clone().removeClass("tag_header").addClass("tag_closed").addClass("hide");
@@ -206,11 +206,12 @@
     });
   });
 
-  new_window = function(mime, content) {
+  new_window = function(content) {
     var w;
-    w = window.open(",");
-    w.document.open(mime, "replace");
-    w.document.write(content);
+    w = window.open('', '_blank');
+    w.document.open("text/plain", "replace");
+    w.document.write("hello");
+    $("body", w.document).text(content);
     return w.document.close();
   };
 
@@ -267,7 +268,7 @@
       return (display(tabulate_sentence(columns, make_deptrees)))(corpus, tables_div);
     })();
     $("#extra_buttons").empty().append($("<button class=\"btn\">XML</button>").click(function() {
-      new_window("application/xml", (new XMLSerializer()).serializeToString(data));
+      new_window((new XMLSerializer()).serializeToString(data));
       return false;
     }));
     delay_viewport_change();

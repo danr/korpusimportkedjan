@@ -100,7 +100,7 @@ display = (sentence_handler) ->
                     en: "Show XML"
                     se: "Visa XML"
                 ).click ->
-                    new_window "application/xml", (new XMLSerializer()).serializeToString child
+                    new_window (new XMLSerializer()).serializeToString child
                     false
 
             closed = header.clone().removeClass("tag_header").addClass("tag_closed").addClass("hide")
@@ -145,10 +145,14 @@ $(document).ready ->
             query.addClass("disabled")
     return
 
-new_window = (mime, content) ->
-    w = window.open(",")
-    w.document.open mime, "replace"
-    w.document.write content
+new_window = (content) ->
+    w = window.open '', '_blank'
+    w.document.open "text/plain", "replace"
+    # This will make a body tag in the document
+    w.document.write "hello"
+    # Replace the body with the content
+    $("body", w.document).text(content)
+    # Without this, Firefox thinks the page is already loaded
     w.document.close()
 
 
@@ -193,7 +197,7 @@ window.make_table = (data) ->
         (display tabulate_sentence columns, make_deptrees) corpus, tables_div
 
     $("#extra_buttons").empty().append $("""<button class="btn">XML</button>""").click ->
-        new_window "application/xml", (new XMLSerializer()).serializeToString data
+        new_window (new XMLSerializer()).serializeToString data
         false
 
     delay_viewport_change()
