@@ -74,7 +74,7 @@
         table.append(header);
         append_array_to_table(table, (function() {
           var _j, _len1, _ref, _results;
-          _ref = sent.children;
+          _ref = $(sent).children();
           _results = [];
           for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
             word = _ref[_j];
@@ -99,7 +99,7 @@
           table.prepend($("<tr/>").append($("<td/>").attr("colspan", columns.length).css("background-color", "#FFFFFF").append(outer_div)));
           render_deprel = function() {
             console.log("Showing dependency tree for " + sent_id + " now", deprel_div, table);
-            draw_brat_tree(sent.children, sent_id, outer_div);
+            draw_brat_tree($(sent).children(), sent_id, outer_div);
             return false;
           };
           outer_div.one('inview', render_deprel);
@@ -125,7 +125,7 @@
     console.log("Disabled:", disabled);
     return rec = function(tag, div) {
       var child, _i, _len, _ref, _results;
-      _ref = tag.children;
+      _ref = $(tag).children();
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         child = _ref[_i];

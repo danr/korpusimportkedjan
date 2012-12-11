@@ -43,7 +43,7 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
         table.append header
 
         append_array_to_table table,
-            for word in sent.children
+            for word in $(sent).children()
                 cols = for col in columns
                     $("<span/>").html col.correct xml_attr_value word, col.id
                 cols.unshift $("<span/>").text word.textContent
@@ -64,7 +64,7 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
 
             render_deprel = ->
                 console.log "Showing dependency tree for #{sent_id} now", deprel_div, table
-                draw_brat_tree sent.children, sent_id, outer_div
+                draw_brat_tree $(sent).children(), sent_id, outer_div
                 false
 
             outer_div.one 'inview', render_deprel
@@ -89,7 +89,7 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
 display = (sentence_handler) ->
     disabled = $("#show_tags").attr("checked") isnt "checked"
     console.log "Disabled:", disabled
-    rec = (tag,div) -> for child in tag.children
+    rec = (tag,div) -> for child in $(tag).children()
         do (child) ->
             header = $ "<span class='tag_header'>#{child.nodeName}</span>"
             for attr in child.attributes
