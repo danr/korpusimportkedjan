@@ -1,17 +1,33 @@
 
+// Make text input fields a bit taller
 input[type=text]
   height: 2em
+
+// Set a minimum width on dropdowns, or they will be exactly as wide as the text
+.dropdown-toggle
+  min-width: 8em
 
 button.dropdown-toggle
   height: 2em
 
-hr
-  margin: 0 0 1em
+.dropdown-toggle > .icon-caret-down
+  float: right
+  position: relative
+  top: 3px
+  left: 3px
 
+.dropdown-toggle span:first-child
+  float: left
+
+// A little offset is needed on the icons in the buttons on the top or they look malplaced
 #example_buttons i, #language_buttons i, #btn_install i, #btn_submit i, #show_query i
   margin-top: 3px
   margin-left: -3px
 
+// The drawing hack!
+// While drawing the SVG dependency trees, they must be visible in the dom, but we don't
+// want to show them to the user yet. This uses Johan's hack to move them to a negative position
+// and seems to work alright in practice
 .drawing
   position: absolute
   left: -10000px
@@ -19,6 +35,8 @@ hr
   width: 800px
   height: 10000px
 
+// The results table styling
+// If tags are not viewed, they get the extra class .disabled
 #result
   .tag_outline:not(.disabled) > * > .table
     margin-bottom: 0px
@@ -87,22 +105,8 @@ hr
   .name
     padding-left: 0.4em
 
-.row-button
-  margin-left: .5em
-  padding: 0.45em 0.5em 0.2em
 
-.dropdown-toggle > .icon-caret-down
-  float: right
-  position: relative
-  top: 3px
-  left: 3px
-
-.dropdown-toggle span:first-child
-  float: left
-
-.dropdown-toggle
-  min-width: 8em
-
+// To view <pre> tags without bootstrap styling, use  this class
 .original-pre
   background-color: inherit
   font-size: inherit
@@ -110,8 +114,10 @@ hr
   padding: 0
 
 
+// Remove dependency tree borders
 svg
   border: none
 
+// Remove the sentence numbers in the dependency trees
 .sentnum
   display: none
