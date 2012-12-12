@@ -76,6 +76,9 @@ make_relation_from_rel = (r) ->
         targets: []
     ]
 
+# from http://stackoverflow.com/a/1830844/165544
+isNumber = (n) -> (!isNaN parseFloat n) and isFinite n
+
 ###
 # Draws a brat tree from a XML words array to a div given its id
 ###
@@ -104,7 +107,7 @@ window.draw_brat_tree = (words, to_div, attach_to) ->
         entity = ["T" + ref, pos, [[start, stop]]]
         entities.push entity
 
-        unless deprel is "ROOT"
+        if isNumber dephead
             relation =
                 [ "R" + ref, deprel
                 , [ ["parent", "T" + dephead ]

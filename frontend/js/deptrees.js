@@ -6,7 +6,7 @@
 
 
 (function() {
-  var color_from_chars, make_entity_from_pos, make_relation_from_rel, webFontURLs;
+  var color_from_chars, isNumber, make_entity_from_pos, make_relation_from_rel, webFontURLs;
 
   webFontURLs = void 0;
 
@@ -84,6 +84,10 @@
     };
   };
 
+  isNumber = function(n) {
+    return (!isNaN(parseFloat(n))) && isFinite(n);
+  };
+
   /*
   # Draws a brat tree from a XML words array to a div given its id
   */
@@ -119,7 +123,7 @@
       }
       entity = ["T" + ref, pos, [[start, stop]]];
       entities.push(entity);
-      if (deprel !== "ROOT") {
+      if (isNumber(dephead)) {
         relation = ["R" + ref, deprel, [["parent", "T" + dephead], ["child", "T" + ref]]];
         return relations.push(relation);
       }
