@@ -28,21 +28,6 @@
         }
     },
 
-    "segmenters": {
-        "title": "Segmenter",
-        "title_se": "Segmenterare",
-        "description": "Segmenter tool to use",
-        "type": "string",
-        "enum": ["whitespace", "linebreaks", "blanklines", "punkt_sentence", "punkt_word", "punctuation"],
-        "enum_loc": {
-            "se": {
-                "whitespace": "blanktecken",
-                "linebreaks": "radbrytning",
-                "blanklines": "blankrader"
-            }
-        }
-    },
-
     "title": "Corpus pipeline makefile settings",
     "title_se": "Makefilsinställningar till korpusimportkedjan",
     "description": "Settings that generate the Makefile for the corpus pipeline.",
@@ -65,7 +50,12 @@
             "default": "punkt_word",
             "type": [
                 {
-                    "$ref": "#/segmenters"
+                    "title": "Segmenter",
+                    "title_se": "Segmenterare",
+                    "description": "Segmenter tool to use for words",
+                    "type": "string",
+                    "enum": ["whitespace", "linebreaks", "blanklines", "punkt_word"],
+					"class": "typewriter"
                 },
                 {
                     "title": "Word tag",
@@ -125,7 +115,17 @@
             "title_se": "Meningssegmentering",
             "description": "Sentence segmenter to use, or a tag supplied with optional sentence attributes",
             "default": "punkt_sentence",
-            "type": [{"$ref": "#/segmenters"}, {"$ref": "#/struct_tag"}]
+            "type": [
+                {
+                    "title": "Segmenter",
+                    "title_se": "Segmenterare",
+                    "description": "Segmenter tool to use for sentences",
+                    "type": "string",
+                    "enum": ["whitespace", "linebreaks", "blanklines", "punkt_sentence", "punctuation"],
+					"class": "typewriter"
+                },
+                {"$ref": "#/struct_tag"}
+            ]
         },
 
         "paragraph_segmenter": {
@@ -134,7 +134,14 @@
             "description": "Paragraph segmenter to use, or a tag supplied with optional structural attributes",
             "default": "blanklines",
             "type": [
-				{"$ref": "#/segmenters"},
+                {
+                    "title": "Segmenter",
+                    "title_se": "Segmenterare",
+                    "description": "Segmenter tool to use for paragraphs",
+                    "type": "string",
+                    "enum": ["whitespace", "linebreaks", "blanklines"],
+					"class": "typewriter"
+                },
 				{"$ref": "#/struct_tag"},
 				{
 					"title": "No segmentation",

@@ -1,11 +1,10 @@
-to_array = (x) -> if !x? then [] else if not _.isArray(x) then [x] else x
-
 append_array_to_table = (tbl, array) ->
-    for row in array
-        tr = $("<tr/>")
-        for col in row
-            tr.append $("<td>").append(col)
-        tbl.append tr
+
+    tbl.append (for row in array
+        $("<tr/>").append (for col in row
+            $("<td>").append(col)
+        )...
+    )...
 
 split_pipes = (f) ->
     (s) ->
@@ -88,7 +87,6 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
 # display :: (XML -> ()) -> (XML, DOM) -> Coroutine
 display = (sentence_handler) ->
     disabled = $("#show_tags").attr("checked") isnt "checked"
-    console.log "Disabled:", disabled
     rec = (tag,div) -> for child in $(tag).children()
         do (child) ->
             header = $ "<span class='tag_header'>#{child.nodeName}</span>"

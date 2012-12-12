@@ -12,6 +12,7 @@ body {
   /* Items */
   /* Selects */
   /* Drop-downs */
+  /* Typewriter enums */
   /* Simple objects: objects that only contain strings.
    * Example: Word segmentation positional attributes */ }
   #settings > .inner > .nest {
@@ -103,6 +104,8 @@ body {
         display: inline; }
     #settings .dropdown-enum > .title {
       display: inline; }
+  #settings .typewriter > div > button {
+    font-family: monospace; }
   #settings .simple-object {
     display: inline;
     border: 0; }

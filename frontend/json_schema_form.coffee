@@ -87,6 +87,7 @@ generate = (schema, path) -> do ->
                 se: schema.description_se
 
         inner_div = $ """<div class="inner #{type_desc}-inner">/"""
+        inner_div.addClass schema.class if schema.class
         inner_div.append dom for dom in inner_dom
 
         obj.dom.append inner_div

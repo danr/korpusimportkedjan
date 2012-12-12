@@ -119,6 +119,9 @@
           }));
         }
         inner_div = $("<div class=\"inner " + type_desc + "-inner\">/");
+        if (schema["class"]) {
+          inner_div.addClass(schema["class"]);
+        }
         for (_i = 0, _len = inner_dom.length; _i < _len; _i++) {
           dom = inner_dom[_i];
           inner_div.append(dom);
