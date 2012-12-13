@@ -4,11 +4,11 @@
 
   main = function() {
     var example, example_buttons, lang, lang_key, language_buttons, xml_editor, _ref, _ref1;
-    load_form();
     init_brat();
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
       lineNumbers: true
     });
+    load_form(xml_editor);
     xml_editor.setValue("En exempeltext kommer lastad. Med vadå?");
     example_buttons = (function() {
       var _i, _len, _results;
@@ -17,7 +17,8 @@
         example = examples[_i];
         _results.push((function(example) {
           return $("<button class=\"btn btn-small btn-info\" style=\"margin:5px;\"\">\n    <i class=\"icon-book\"></i> " + example.title + "\n</button>").click(function() {
-            return with_form.set(xml_editor, example);
+            with_form.set(example);
+            return xml_editor.setValue(example.corpus_xml);
           });
         })(example));
       }
@@ -41,6 +42,7 @@
     (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
     $("#title_text").click(function() {
       with_form.load_defaults();
+      xml_editor.setValue("");
       window.location.hash = "";
       $("#result").empty();
       return false;
@@ -61,8 +63,7 @@
       submit(xml_editor);
       return false;
     });
-    $.fn.set_language('se');
-    return address.try_join_with_hash();
+    return $.fn.set_language('se');
   };
 
   $(document).ready(main);

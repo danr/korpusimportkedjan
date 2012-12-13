@@ -94,7 +94,6 @@
           outer_div = $("<div/>");
           table.prepend($("<tr/>").append($("<td/>").attr("colspan", columns.length).css("background-color", "#FFFFFF").append(outer_div)));
           render_deprel = function() {
-            console.log("Showing dependency tree for " + sent_id + " now", deprel_div, table);
             draw_brat_tree($(sent).children(), sent_id, outer_div);
             return false;
           };
@@ -105,7 +104,6 @@
       dom_load_more = $("<div/>");
       table.append(dom_load_more);
       show_more = function() {
-        console.log("Showing more from sentence " + (xml_attr_value(sent, 'id')), table);
         dom_load_more.detach();
         fill_table();
         return false;

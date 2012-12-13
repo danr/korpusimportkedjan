@@ -62,7 +62,7 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
                     .append(outer_div))
 
             render_deprel = ->
-                console.log "Showing dependency tree for #{sent_id} now", deprel_div, table
+                # console.log "Showing dependency tree for #{sent_id} now", deprel_div, table
                 draw_brat_tree $(sent).children(), sent_id, outer_div
                 false
 
@@ -73,7 +73,7 @@ tabulate_sentence = (columns, make_deptrees) -> (sent) ->
     dom_load_more = $ "<div/>"
     table.append dom_load_more
     show_more = ->
-        console.log "Showing more from sentence #{xml_attr_value sent, 'id'}", table
+        # console.log "Showing more from sentence #{xml_attr_value sent, 'id'}", table
         dom_load_more.detach()
         fill_table()
         false

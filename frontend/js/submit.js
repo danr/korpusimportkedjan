@@ -19,7 +19,7 @@
   };
 
   window.submit = function(xml_editor, makefile, join_with_hash) {
-    var incremental, req_url, settings, text;
+    var incremental, req_url, set, set_form_and_editor_when_joining, settings, text;
     if (makefile == null) {
       makefile = false;
     }
@@ -42,6 +42,20 @@
     if (incremental) {
       progress.initialize();
     }
+    set = false;
+    set_form_and_editor_when_joining = function(data_lazy) {
+      var data, original, _ref, _ref1, _ref2, _ref3;
+      if (!set && join_with_hash && (data = data_lazy())) {
+        set = true;
+        window.first_data = data;
+        if (settings = (_ref = data.getElementsByTagName("settings")) != null ? (_ref1 = _ref[0]) != null ? _ref1.textContent : void 0 : void 0) {
+          with_form.set(JSON.parse(settings));
+        }
+        if (original = (_ref2 = data.getElementsByTagName("original")) != null ? (_ref3 = _ref2[0]) != null ? _ref3.textContent : void 0 : void 0) {
+          return xml_editor.setValue(original);
+        }
+      }
+    };
     $.ajax({
       url: req_url,
       dataType: makefile ? "text" : "xml",
@@ -49,6 +63,9 @@
       type: "POST",
       data: text,
       success: function(data, textStatus, xhr) {
+        set_form_and_editor_when_joining(function() {
+          return data;
+        });
         progress.clear();
         if (makefile) {
           $("#query").text(data);
@@ -58,6 +75,9 @@
         }
       },
       progress: function(data, e) {
+        set_form_and_editor_when_joining(function() {
+          return progress.complete_partial_xml(e.target.response);
+        });
         if (incremental) {
           return progress.handle(e.target.response);
         }

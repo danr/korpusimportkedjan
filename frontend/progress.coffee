@@ -11,18 +11,24 @@ progress.clear = ->
     $('#progress-bar').css "width", "0%"
     $('#progress-text').text ""
 
-progress.handle = (data) ->
+# Returns null if it is already complete or if there is an
+# error in the XML, otherwise returns the parsed xml
+progress.complete_partial_xml = (data) ->
     if -1 != data.indexOf '</result>'
-        progress.clear()
-        return
+        return null
     else
         data += '</result>'
 
     try
-        data = $.parseXML data
+        xml = $.parseXML data
     catch e
+        return null
+
+    return xml
+
+progress.handle = (data) ->
+    if not data = progress.complete_partial_xml(data)
         progress.clear()
-        return
 
     address.set_from_xml data
 

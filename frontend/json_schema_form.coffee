@@ -73,7 +73,7 @@ generate = (schema, path) -> do ->
                 en: schema.title
                 se: schema.title_se
         else
-            console.log "no title:", schema
+            console.log "warning: no title on schema ", schema
 
         if schema.type == "object"
             if _.all _.map schema.properties, ((subschema) -> subschema.type == "string")
@@ -106,7 +106,6 @@ generate = (schema, path) -> do ->
             if schema.style_enum == "dropdown" and not type.multi
                 select = $ """<select>"""
 
-                console.log "Enum type: ", type
                 # TODO: Localize enums
                 for v in type.enum
                     select.append $("""<option value="#{v}"/>""").localize_element

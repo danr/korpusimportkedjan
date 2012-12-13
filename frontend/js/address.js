@@ -4,15 +4,15 @@
   window.address = {};
 
   window.address.set_from_xml = function(data) {
-    var build;
-    if ((build = data.getElementsByTagName("build")).length === 1) {
+    var build, _ref;
+    if (((_ref = (build = data != null ? data.getElementsByTagName("build") : void 0)) != null ? _ref.length : void 0) === 1) {
       return window.location.hash = build[0].attributes.getNamedItem("hash").value;
     }
   };
 
-  window.address.try_join_with_hash = function() {
+  window.address.try_join_with_hash = function(xml_editor) {
     if (window.location.hash.length === 41 && window.location.hash[0] === '#') {
-      return submit(void 0, false, window.location.hash.slice(1));
+      return submit(xml_editor, false, window.location.hash.slice(1));
     }
   };
 

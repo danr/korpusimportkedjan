@@ -20,17 +20,14 @@
     form = json_schema_form.generate(schema, "settings");
     $("#form").empty().append(form.dom);
     form.set(value);
-    window.with_form.set = function(xml_editor, example) {
-      xml_editor.setValue(example.corpus_xml);
-      return form.set(example);
-    };
+    window.with_form.set = form.set;
     window.with_form.load_defaults = function() {
       return form.set(value);
     };
     return window.with_form.get = form.get;
   };
 
-  window.load_form = function() {
+  window.load_form = function(xml_editor) {
     return $.ajax({
       url: config.address + "/schema",
       dataType: "json",
@@ -40,8 +37,8 @@
         var defaults, schema;
         schema = json_schema_utils.flatten_singleton_unions(json_schema_utils.follow_references(data));
         defaults = json_schema_utils.get_default(schema);
-        console.log(schema, defaults);
-        return set_form(schema, defaults);
+        set_form(schema, defaults);
+        return address.try_join_with_hash(xml_editor);
       },
       error: function() {
         var info;

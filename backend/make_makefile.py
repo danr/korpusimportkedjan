@@ -217,9 +217,7 @@ def makefile(d):
     Makes a makefile from a dictionary of settings, which should be
     validated against the schema in settings_schema.json.
     """
-
-    settings_str = makefile_comment(json.dumps(d, indent=2))
-    return str(linearise_Makefile([settings_str,""] + make_Makefile(d)))
+    return str(linearise_Makefile(make_Makefile(d)))
 
 if __name__ == '__main__':
 

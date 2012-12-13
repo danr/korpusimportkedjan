@@ -50,8 +50,8 @@ class Build(object):
 
         # and files
         self.makefile = os.path.join(self.directory, 'Makefile')
+        self.settings_file = os.path.join(self.directory, 'settings.json')
         self.text_file = os.path.join(self.original_dir, 'text.xml')
-
 
         # Deem this build as accessed now.
         self.access()
@@ -103,6 +103,26 @@ class Build(object):
             self.steps = new_steps
         self.send_to_all((Message.Increment, self.increment_msg()))
 
+    def get_settings(self):
+        # Open settings file
+        try:
+            with open(self.settings_file, 'r') as f:
+                settings = f.read()
+        except:
+            log.exception("Could not get settings for build")
+            settings = "{}"
+        return settings
+
+    def get_original(self):
+        # Open original file
+        try:
+            with open(self.text_file, 'r') as f:
+                original = f.read()
+        except:
+            log.exception("Could not get original for build")
+            original = ""
+        return original
+
     def make_files(self):
         """
         Makes the files for building this corpus:
@@ -114,8 +134,13 @@ class Build(object):
         map(mkdir, [self.original_dir, self.annotations_dir])
 
         # Make makefile
-        with open(self.makefile, 'w') as m:
-            m.write(makefile(self.settings))
+        with open(self.makefile, 'w') as f:
+            f.write(makefile(self.settings))
+
+        # Write settings file
+        with open(self.settings_file, 'w') as f:
+            import json
+            f.write(json.dumps(self.settings, indent=2))
 
         if os.path.isfile(self.text_file):
             # This file has probably been built by a previous incarnation of the pipeline

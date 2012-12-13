@@ -101,7 +101,7 @@
             se: schema.title_se
           }));
         } else {
-          console.log("no title:", schema);
+          console.log("warning: no title on schema ", schema);
         }
         if (schema.type === "object") {
           if (_.all(_.map(schema.properties, (function(subschema) {
@@ -142,7 +142,6 @@
         } else if (type["enum"] != null) {
           if (schema.style_enum === "dropdown" && !type.multi) {
             select = $("<select>");
-            console.log("Enum type: ", type);
             _ref = type["enum"];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               v = _ref[_i];

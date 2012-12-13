@@ -153,11 +153,12 @@ def join_from_hash(builds, hashnumber, incremental):
     """
     build = builds.get(hashnumber, None)
     if build is not None:
-        return join_build(build, incremental)
+        yield ("<settings>%s</settings>\n<original>%s</original>\n"
+                % (build.get_settings(), escape(build.get_original())))
+        for k in join_build(build, incremental):
+            yield k
     else:
-        def error():
-            yield "<error>No such build!</error>\n</result>\n"
-        return error()
+        yield "<error>No such build!</error>\n</result>\n"
 
 def join_build(build, incremental):
     """

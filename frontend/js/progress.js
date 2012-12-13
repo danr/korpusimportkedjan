@@ -15,19 +15,25 @@
     return $('#progress-text').text("");
   };
 
-  progress.handle = function(data) {
-    var command, increment, json, percent, step, steps;
+  progress.complete_partial_xml = function(data) {
+    var xml;
     if (-1 !== data.indexOf('</result>')) {
-      progress.clear();
-      return;
+      return null;
     } else {
       data += '</result>';
     }
     try {
-      data = $.parseXML(data);
+      xml = $.parseXML(data);
     } catch (e) {
+      return null;
+    }
+    return xml;
+  };
+
+  progress.handle = function(data) {
+    var command, increment, json, percent, step, steps;
+    if (!(data = progress.complete_partial_xml(data))) {
       progress.clear();
-      return;
     }
     address.set_from_xml(data);
     json = $.xml2json(data);

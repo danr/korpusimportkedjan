@@ -38,6 +38,16 @@ window.submit = (xml_editor, makefile=false, join_with_hash=null) ->
 
     progress.initialize() if incremental
 
+    set = false
+    set_form_and_editor_when_joining = (data_lazy) ->
+        if not set and join_with_hash and data = data_lazy()
+            set = true
+            window.first_data = data
+            if settings = data.getElementsByTagName("settings")?[0]?.textContent
+                with_form.set JSON.parse settings
+            if original = data.getElementsByTagName("original")?[0]?.textContent
+                xml_editor.setValue original
+
     $.ajax
         url: req_url
         dataType: if makefile then "text" else "xml"
@@ -45,6 +55,7 @@ window.submit = (xml_editor, makefile=false, join_with_hash=null) ->
         type: "POST"
         data: text
         success: (data, textStatus, xhr) ->
+            set_form_and_editor_when_joining -> data
             progress.clear()
             if makefile
                 $("#query").text data
@@ -54,6 +65,7 @@ window.submit = (xml_editor, makefile=false, join_with_hash=null) ->
             return
 
         progress: (data, e) ->
+            set_form_and_editor_when_joining -> progress.complete_partial_xml(e.target.response)
             progress.handle e.target.response if incremental
 
         error: (jqXHR, textStatus, errorThrown) ->

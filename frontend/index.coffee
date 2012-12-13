@@ -1,7 +1,4 @@
 main = ->
-    # Make the form
-    load_form()
-
     # Initialize brat
     init_brat()
 
@@ -9,6 +6,9 @@ main = ->
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"),
         lineNumbers: true
     )
+
+    # Make the form
+    load_form(xml_editor)
 
     # Set the initial text
     xml_editor.setValue "En exempeltext kommer lastad. Med vadå?"
@@ -20,7 +20,8 @@ main = ->
                 <button class="btn btn-small btn-info" style="margin:5px;"">
                     <i class="icon-book"></i> #{example.title}
                 </button>""").click ->
-                    with_form.set xml_editor, example
+                    with_form.set example
+                    xml_editor.setValue example.corpus_xml
 
     $("#example_buttons").append(example_buttons...)
 
@@ -36,6 +37,7 @@ main = ->
 
     $("#title_text").click ->
         with_form.load_defaults()
+        xml_editor.setValue ""
         window.location.hash = ""
         $("#result").empty()
         false
@@ -62,8 +64,8 @@ main = ->
     # Set initial language to Swedish. This also sets the text value of uninitialized items.
     $.fn.set_language('se')
 
-    # Check if we have a hash in the status bar, if so, load it
-    address.try_join_with_hash()
+    # We used to check if we have a hash in the status bar, but now we wait for this
+    # for after the form is loaded. See load_form.coffee
 
 $(document).ready main
 
