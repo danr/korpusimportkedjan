@@ -1,10 +1,3 @@
-append_array_to_table = (tbl, array) ->
-
-    tbl.append (for row in array
-        $("<tr/>").append (for col in row
-            $("<td>").append(col)
-        )...
-    )...
 
 split_pipes = (f) ->
     (s) ->
@@ -26,65 +19,88 @@ xml_attr_value = (x,a) -> x.attributes.getNamedItem(a).value
 
 delay_viewport_change = () -> window.setTimeout($.fn.handleViewPortChange, 100)
 
+# How to present the different columns (link to Karp etc)
+display_column = do ->
+    lookup =
+        msd:    (s) -> s.split(".").join ". "
+        lemma:  split_pipes _.identity
+        lex:    split_pipes lemgram_link
+        saldo:  split_pipes saldo_link
+        prefix: split_pipes lemgram_link
+        suffix: split_pipes lemgram_link
+    (attr) -> lookup[attr] or _.identity
+
 # Makes a table and deptree for a sentence
 # First argument is a tuple of settings, second argument is the sentence in XML
 #
-# tabulate_sentence :: ([Column], Bool) -> XML -> ()
-tabulate_sentence = (columns, make_deptrees) -> (sent) ->
+# tabulate_sentence :: ([Column], Bool) -> XML -> IO ()
+tabulate_sentence = (attributes, make_deptrees) -> (sent) ->
     table = $("""<table class="table table-striped table-bordered table-condensed"/>""")
 
     fill_table = ->
-        header = $("<tr/>")
-        header.append $("<th>").localize_element
-            se: "ord"
-            en: "word"
-        header.append $ """<th>#{col.name}</th>""" for col in columns
-        table.append header
 
-        append_array_to_table table,
-            for word in $(sent).children()
-                cols = for col in columns
-                    $("<span/>").html col.correct xml_attr_value word, col.id
-                cols.unshift $("<span/>").text word.textContent
-                cols
+        prepend_to_table = (div) ->
+            table
+                .prepend $("<tr/>")
+                .append($("<td/>")
+                    .attr("colspan", attributes.length + 1)  # word is not in attributes list
+                    .css("background-color", "#FFFFFF")
+                    .append(div))
+
+        append_array_to_table = (array) ->
+            table.append (for row in array
+                $("<tr/>").append (for col in row
+                    $("<td>").append(col)
+                )...
+            )...
+
+        # Add header
+        table.append $("<tr/>").append [
+                $("<th>").localize_element { se: "ord", en: "word" }
+            ].concat(
+                _.map attributes, (attr) -> $("<th>#{attr}</th>")
+            )...
+
+        # The info div on the top
+        info_div = $('<div style="padding-left: 24px"/>')
+
+        # Write information about the words and their attributes
+        append_array_to_table _.map $(sent).children(),
+            (word) ->
+                [$("<span/>").text word.textContent].concat _.map attributes,
+                    (attr) ->
+                        value = xml_attr_value word, attr
+                        span = $("<span/>").html (display_column attr) value
+                        if _.contains(["pos","deprel","msd"], attr)
+                            loc = localization_info attr, value
+                            span.hover -> info_div.localize_element loc
+                        span
 
         if make_deptrees
             sent_id = xml_attr_value sent, "id"
 
+            # Append the div to body with class drawing: puts it with a negative absolute position
             deprel_div = $("<div class='drawing'/>").attr("id", sent_id).show().appendTo("body")
 
-            outer_div = $("<div/>")
-            table
-                .prepend $("<tr/>")
-                .append($("<td/>")
-                    .attr("colspan", columns.length)
-                    .css("background-color", "#FFFFFF")
-                    .append(outer_div))
+            outer_div = $("<div/>").one 'inview', ->
+                draw_brat_tree $(sent).children(), sent_id, outer_div, info_div
 
-            render_deprel = ->
-                # console.log "Showing dependency tree for #{sent_id} now", deprel_div, table
-                draw_brat_tree $(sent).children(), sent_id, outer_div
-                false
+            prepend_to_table outer_div
 
-            outer_div.one 'inview', render_deprel
+        prepend_to_table info_div
 
         delay_viewport_change()
 
-    dom_load_more = $ "<div/>"
-    table.append dom_load_more
-    show_more = ->
+    table.append $("<div style='height: 30px'/>").one 'inview', ->
         # console.log "Showing more from sentence #{xml_attr_value sent, 'id'}", table
-        dom_load_more.detach()
+        $(this).detach()
         fill_table()
         false
-    dom_load_more.one 'inview', show_more
-
-    table
 
 # First argument is the sentence_handler (tabulate_sentence partially applied with settings),
 # second argument is the current position in the XML, and the div to append to.
 #
-# display :: (XML -> ()) -> (XML, DOM) -> Coroutine
+# display :: (XML -> IO ()) -> (XML, DOM) -> IO ()
 display = (sentence_handler) ->
     disabled = $("#show_tags").attr("checked") isnt "checked"
     rec = (tag,div) -> for child in $(tag).children()
@@ -156,43 +172,24 @@ new_window = (content) ->
 
 window.make_table = (data) ->
 
-    columns = []
     attributes = []
 
     words = data.getElementsByTagName("w")
     if words.length > 0
         for attr in words[0].attributes
             attributes.push attr.name
-            columns.push
-                name: attr.name
-                id: attr.name
-
-    # Remove pos if msd is present
-    if _.contains(attributes, "msd")
-        columns = _.reject columns, (col) -> col.id == "pos"
-
-    # How to present the different columns (link to Karp etc)
-    do ->
-        correct =
-            msd:    (s) -> s.split(".").join ". "
-            lemma:  split_pipes _.identity
-            lex:    split_pipes lemgram_link
-            saldo:  split_pipes saldo_link
-            prefix: split_pipes lemgram_link
-            suffix: split_pipes lemgram_link
-
-        for col in columns
-            col.correct = correct[col.id] or _.identity
 
     # Only make dependency trees if all required attributes are present
-    make_deptrees = true
-    for required in ["pos", "ref", "dephead", "deprel"]
-        make_deptrees = make_deptrees and _.contains(attributes, required)
+    make_deptrees = _.all ["pos", "ref", "dephead", "deprel"], (attr) -> _.contains(attributes, attr)
+
+    # Then remove pos if msd is present
+    if _.contains(attributes, "msd")
+        attributes = _.without attributes, "pos"
 
     do ->
         $("#result").empty().append tables_div = $ "<div/>"
         corpus = (data.getElementsByTagName "corpus")[0]
-        (display tabulate_sentence columns, make_deptrees) corpus, tables_div
+        (display tabulate_sentence attributes, make_deptrees) corpus, tables_div
 
     $("#extra_buttons").empty().append $("""<button class="btn">XML</button>""").click ->
         new_window (new XMLSerializer()).serializeToString data

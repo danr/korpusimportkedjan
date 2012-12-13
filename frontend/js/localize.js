@@ -49,4 +49,23 @@
     return $("body").localize();
   };
 
+  window.localization_info = (function() {
+    var lookup;
+    lookup = {
+      pos: pos_localization,
+      msd: msd_localization,
+      deprel: deprel_localization
+    };
+    return function(attr, value) {
+      var lang, loc, translations, _ref;
+      loc = {};
+      _ref = lookup[attr] || {};
+      for (lang in _ref) {
+        translations = _ref[lang];
+        loc[lang] = "" + value + ": " + translations[value];
+      }
+      return loc;
+    };
+  })();
+
 }).call(this);

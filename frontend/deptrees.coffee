@@ -82,7 +82,7 @@ isNumber = (n) -> (!isNaN parseFloat n) and isFinite n
 ###
 # Draws a brat tree from a XML words array to a div given its id
 ###
-window.draw_brat_tree = (words, to_div, attach_to) ->
+window.draw_brat_tree = (words, to_div, attach_to, info_div) ->
 
     entity_types = []
     relation_types = []
@@ -146,6 +146,17 @@ window.draw_brat_tree = (words, to_div, attach_to) ->
         div.removeClass("drawing")
         div.detach()
         div.appendTo(attach_to)
+        for g in div.find("g.arcs").children()
+            do ->
+                deprel = $(g).find("text").data("arc-role")
+                loc = localization_info "deprel", deprel
+                $(g).hover -> info_div.localize_element loc
+        for g in div.find("g.span text")
+            do ->
+                pos = $(g).text()
+                loc = localization_info "pos", pos
+                $(g).parent().hover -> info_div.localize_element loc
+
         # console.log "Done Rendering", div
 
 

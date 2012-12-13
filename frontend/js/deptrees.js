@@ -93,7 +93,7 @@
   */
 
 
-  window.draw_brat_tree = function(words, to_div, attach_to) {
+  window.draw_brat_tree = function(words, to_div, attach_to, info_div) {
     var add_word, added_pos, added_rel, collData, dispatcher, div, docData, entities, entity_types, ix, len, make_visible, relation_types, relations, text, word, _i, _len;
     entity_types = [];
     relation_types = [];
@@ -165,9 +165,37 @@
       return make_visible();
     });
     return dispatcher.on('doneRendering', function() {
+      var g, _fn, _j, _k, _len1, _len2, _ref, _ref1, _results;
       div.removeClass("drawing");
       div.detach();
-      return div.appendTo(attach_to);
+      div.appendTo(attach_to);
+      _ref = div.find("g.arcs").children();
+      _fn = function() {
+        var deprel, loc;
+        deprel = $(g).find("text").data("arc-role");
+        loc = localization_info("deprel", deprel);
+        return $(g).hover(function() {
+          return info_div.localize_element(loc);
+        });
+      };
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        g = _ref[_j];
+        _fn();
+      }
+      _ref1 = div.find("g.span text");
+      _results = [];
+      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+        g = _ref1[_k];
+        _results.push((function() {
+          var loc, pos;
+          pos = $(g).text();
+          loc = localization_info("pos", pos);
+          return $(g).parent().hover(function() {
+            return info_div.localize_element(loc);
+          });
+        })());
+      }
+      return _results;
     });
   };
 

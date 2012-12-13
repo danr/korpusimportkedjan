@@ -35,3 +35,18 @@ jQuery.fn.set_language = (new_language_key, new_fallback_key) ->
     fallback_key ?= new_fallback_key
     $("body").localize()
 
+# Localizes form the pos, deprel, msd information
+window.localization_info = do ->
+    lookup =
+        pos: pos_localization
+        msd: msd_localization
+        deprel: deprel_localization
+    (attr, value) ->
+        loc = {}
+        for lang, translations of lookup[attr] or {}
+            loc[lang] = "#{value}: #{translations[value]}"
+        return loc
+
+
+
+
