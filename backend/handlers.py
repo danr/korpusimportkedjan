@@ -76,7 +76,7 @@ def status(builds):
     """
     Status of builds
     """
-    res = ""
+    res = "<status>\n"
     for h, b in builds.iteritems():
         if b.status is not None:
             res += ("<build hash='%s' status='%s' since='%s' accessed='%s' accessed-secs-ago='%s'/>\n" %
@@ -85,6 +85,7 @@ def status(builds):
                            pretty_epoch_time(b.accessed_time),
                            round(time.time() - b.accessed_time,1)))
 
+    res += "</status>\n"
     return [res]
 
 # /cleanup handler
@@ -263,7 +264,7 @@ def handle(builds, environ, cmd=None):
             yield '</result>\n'
 
 def api():
-    with open("api.json", "r") as f:
+    with open("/export/htdocs_sb/annoteringslabb/api.json", "r") as f:
         api = f.read()
     return [api]
 
