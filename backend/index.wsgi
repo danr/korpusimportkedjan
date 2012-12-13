@@ -31,7 +31,7 @@ os.environ['PYTHONPATH'] = ":".join(filter(lambda s : s, sys.path))
 
 # Loading handlers
 try:
-    from handlers import handlers
+    from handlers import handlers, handler_content_type
 except:
     log.exception("Failed to import handlers")
 
@@ -66,7 +66,7 @@ def application(environ, start_response):
     log.info("Handling %s (request %s)" % (path, request))
 
     status = "200 OK"
-    response_headers = [('Content-Type', 'text/plain'),
+    response_headers = [('Content-Type', handler_content_type(path)),
                         ('Access-Control-Allow-Origin', '*')]
     start_response(status, response_headers)
 

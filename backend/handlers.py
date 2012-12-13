@@ -35,6 +35,18 @@ def handlers(builds, environ):
         '/cleanup/errors': lambda: cleanup(builds, remove_errors=True)
     }
 
+# The Content-Type for the different handlers
+def handler_content_type(path):
+    """
+    Returns the content type for a path
+    """
+    if path == "/schema" or path == "/api":
+        return "application/json; charset=utf-8"
+    elif path == "/makefile":
+        return "text/plain; charset=utf-8"
+    else:
+        return "application/xml; charset=utf-8"
+
 # Open JSON Schema settings and the validator.
 # Location of this file is set in config.py.
 try:
