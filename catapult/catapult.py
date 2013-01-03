@@ -103,11 +103,16 @@ def handle(client_sock, verbose, annotators):
 
     # Receive data
     data = ""
-    new_data = ""
+    new_data = None
     # Message is terminated with a lone \
-    while len(new_data) == 0 or new_data[-1] != '\\':
+    while new_data == None or new_data[-1] != '\\':
         new_data = client_sock.recv(RECV_LEN)
+        log.debug("Received %s", new_data)
         data += new_data
+        if len(new_data) == 0:
+            log.warning("Received null!")
+            chunk_send("Error when receiving: got an empty message")
+            return
 
     # Drop the terminating \
     data = data[0:-1]
@@ -117,7 +122,7 @@ def handle(client_sock, verbose, annotators):
              for arg in re.split(splitter, data) ]
 
     ### PING? ###
-    if len(args) == 2 and  args[1] == "PING":
+    if len(args) == 2 and args[1] == "PING":
         log.info("Ping requested")
         chunk_send("PONG")
         return
@@ -144,21 +149,24 @@ def handle(client_sock, verbose, annotators):
 
         # Run the command
         try:
-            sys.argv = ['?']
-            sys.argv.extend(args[1:])
+            sys.argv = args
             os.chdir(pwd)
             if module_flag:
+
                 annotator = annotators.get(args[0], None)
+
+                if not annotator:
+                    # some of Malin's annotators require two arguments
+                    annotator = annotators.get((args[0], args[1]), None)
+                    if annotator:
+                        # skip the first argument now
+                        sys.argv = args[0]
+                        sys.argv.extend(args[2:])
+
                 if annotator:
                     util.run.main(annotator)
                 else:
-                    annotator = annotators.get((args[0], args[1]), None)
-                    if annotator:
-                        sys.argv = ['?']
-                        sys.argv.extend(args[2:])
-                        util.run.main(annotator)
-                    else:
-                        runpy.run_module(args[0], run_name='__main__')
+                    runpy.run_module(args[0], run_name='__main__')
             else:
                 runpy.run_path(args[0], run_name='__main__')
         except (ImportError, IOError):
@@ -171,8 +179,8 @@ def handle(client_sock, verbose, annotators):
             chunk_send("%s\n" % sys.exc_info()[1])
             traceback.print_exception(*sys.exc_info())
             cleanup()
-            log.exception()
-        finally:
+            log.exception("Unknown error")
+        else:
             cleanup()
 
         os.chdir(old_pwd)
@@ -185,7 +193,6 @@ def handle(client_sock, verbose, annotators):
     else:
         log.info('Cannot handle %s', data)
         chunk_send('Cannot handle %s\n' % data)
-        client_sock.close()
 
 
 def worker(server_socket, verbose, annotators, malt_args=None):
@@ -228,8 +235,7 @@ def worker(server_socket, verbose, annotators, malt_args=None):
         except:
             log.exception('Error in handling code')
             traceback.print_exception(*sys.exc_info())
-        finally:
-            client_sock.close()
+        client_sock.close()
 
 def start(socket_path, processes=1, verbose='false',
           saldo_model=None, compound_model=None,
@@ -250,7 +256,6 @@ def start(socket_path, processes=1, verbose='false',
     Start processes using catalaunch.
     """
 
-
     if os.path.exists(socket_path):
         log.error('socket %s already exists', socket_path)
         exit(1)
@@ -258,7 +263,6 @@ def start(socket_path, processes=1, verbose='false',
     verbose = verbose.lower() == 'true'
 
     log.info('Verbose: %s', verbose)
-
 
     # If processes does not contain an int, set it to the number of processors
     try:
@@ -309,3 +313,4 @@ def start(socket_path, processes=1, verbose='false',
 
 if __name__ == '__main__':
     util.run.main(start)
+
