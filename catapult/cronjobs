@@ -1,0 +1,3 @@
+MAILTO=/dev/null
+1 0 * * * curl http://spraakbanken.gu.se/ws/korp/annotate/cleanup
+* * * * * /home/dan/annotate/webservice/catapult/keep-alive.sh
