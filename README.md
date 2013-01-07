@@ -65,15 +65,23 @@ somewhat ok. The file that creates the makefile from is
 
 ## Cron jobs
 
+The scripts mentioned here in the `catapult` directory have some absolute
+addresses that needs to be configured.
+
 The catapult is kept alive with `catapult/keep-alive.sh` and restarts it with
 `catapult/start-server.sh` if it does not respond to ping.
+
+The optional script `catapult/update-saldo.sh` updates saldo. This takes some
+time, and is therefore run during the night. The catapult is restarted
+afterwards by the `keep-alive.sh` script.
 
 Builds that have not been accessed for 24 hours are removed every midnight by
 issuing [http://spraakbanken.gu.se/ws/korp/annotate/cleanup](http://spraakbanken.gu.se/ws/korp/annotate/cleanup).
 
-The file looks like this:
+The cronjobs are in `catapult/cronjobs`, and looks like this:
 
     MAILTO=/dev/null
     1 0 * * * curl http://spraakbanken.gu.se/ws/korp/annotate/cleanup
-    * * * * * /home/dan/annotate/webservice/catapult/keep-alive.sh
+    */5 * * * * /home/dan/annotate/webservice/catapult/keep-alive.sh
+    1 3 * * * /home/dan/annotate/webservice/catapult/update-saldo.sh
 
