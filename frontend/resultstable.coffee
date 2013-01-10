@@ -77,15 +77,23 @@ tabulate_sentence = (attributes, make_deptrees) -> (sent) ->
                         span
 
         if make_deptrees
-            sent_id = xml_attr_value sent, "id"
 
-            # Append the div to body with class drawing: puts it with a negative absolute position
-            deprel_div = $("<div class='drawing'/>").attr("id", sent_id).show().appendTo("body")
+            iframe = $('<iframe src="http://localhost/deptrees/index.html">')
 
-            outer_div = $("<div/>").one 'inview', ->
-                draw_brat_tree $(sent).children(), sent_id, outer_div, info_div
+            prepend_to_table iframe
 
-            prepend_to_table outer_div
+            iframe.load ->
+
+                try
+                    i_window = iframe.get(0).contentWindow
+
+                    i_window.draw_deptree.call i_window, sent, (msg) -> do (info_div) ->
+                        [[k,v]] = _.pairs msg
+                        info_div.localize_element localization_info k,v
+                catch e
+                    console.log e
+
+                delay_viewport_change()
 
         prepend_to_table info_div
 

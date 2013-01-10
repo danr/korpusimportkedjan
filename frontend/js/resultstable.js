@@ -53,7 +53,7 @@
       var fill_table, table;
       table = $("<table class=\"table table-striped table-bordered table-condensed\"/>");
       fill_table = function() {
-        var append_array_to_table, deprel_div, info_div, outer_div, prepend_to_table, sent_id, _ref;
+        var append_array_to_table, iframe, info_div, prepend_to_table, _ref;
         prepend_to_table = function(div) {
           return table.prepend($("<tr/>").append($("<td/>").attr("colspan", attributes.length + 1).css("background-color", "#FFFFFF").append(div)));
         };
@@ -101,12 +101,24 @@
           }));
         }));
         if (make_deptrees) {
-          sent_id = xml_attr_value(sent, "id");
-          deprel_div = $("<div class='drawing'/>").attr("id", sent_id).show().appendTo("body");
-          outer_div = $("<div/>").one('inview', function() {
-            return draw_brat_tree($(sent).children(), sent_id, outer_div, info_div);
+          iframe = $('<iframe src="http://localhost/deptrees/index.html">');
+          prepend_to_table(iframe);
+          iframe.load(function() {
+            var i_window;
+            try {
+              i_window = iframe.get(0).contentWindow;
+              i_window.draw_deptree.call(i_window, sent, function(msg) {
+                return (function(info_div) {
+                  var k, v, _ref1;
+                  _ref1 = _.pairs(msg)[0], k = _ref1[0], v = _ref1[1];
+                  return info_div.localize_element(localization_info(k, v));
+                })(info_div);
+              });
+            } catch (e) {
+              console.log(e);
+            }
+            return delay_viewport_change();
           });
-          prepend_to_table(outer_div);
         }
         prepend_to_table(info_div);
         return delay_viewport_change();

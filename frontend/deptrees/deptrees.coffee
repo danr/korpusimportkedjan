@@ -1,37 +1,31 @@
-###
-# Initialise brat
-###
-webFontURLs = undefined
 
-window.init_brat = ->
-    bratLocation = "lib/brat"
-
-    head.js(
-
-        # brat helper modules
-        bratLocation + '/client/src/configuration.js',
-        bratLocation + '/client/src/util.js',
-        bratLocation + '/client/src/annotation_log.js',
-        bratLocation + '/client/lib/webfont.js',
-
-        # brat modules
-        bratLocation + '/client/src/dispatcher.js',
-        bratLocation + '/client/src/url_monitor.js',
-        bratLocation + '/client/src/visualizer.js'
-    )
-
-    webFontURLs = [
-        bratLocation + "/static/fonts/Astloch-Bold.ttf"
-        bratLocation + "/static/fonts/PT_Sans-Caption-Web-Regular.ttf"
-        bratLocation + "/static/fonts/Liberation_Sans-Regular.ttf"
-    ]
-
-###
+# Draw the sentence in sent
 #
+# If hover_fun is given, then it will be invoked with arguments of the form
+# { deprel: 'AA' } and { pos: 'PN' }
+window.draw_deptree = (sent, hover_fun=->) ->
+
+    # console.log "Drawing", sent, window
+
+    sent_id = "magic_secret_id"
+
+    deprel_div = $("<div>").attr("id", sent_id)
+
+    $('body').empty().append deprel_div
+
+    draw_brat_tree $(sent).children(), sent_id, hover_fun
+
+# Initialise brat
+$(document).ready head.js
+
+webFontURLs = [
+    "lib/brat/static/fonts/Astloch-Bold.ttf"
+    "lib/brat/static/fonts/PT_Sans-Caption-Web-Regular.ttf"
+    "lib/brat/static/fonts/Liberation_Sans-Regular.ttf"
+]
+
 # words are from one sentence and are Strings with extra attributes
 # including rel, dephead and deprel and pos
-#
-###
 color_from_chars = (w, sat_min, sat_max, lightness) ->
     v = 1.0
     hue = 0.0
@@ -52,18 +46,14 @@ color_from_chars = (w, sat_min, sat_max, lightness) ->
         lightness: lightness
     color.toHexString 0
 
-###
 # Makes a brat entity from a positional attribute
-###
 make_entity_from_pos = (p) ->
     type: p
     labels: [p]
     bgColor: color_from_chars(p, 0.8, 0.95, 0.95)
     borderColor: "darken"
 
-###
 # Makes a brat relation from a dependency relation
-###
 make_relation_from_rel = (r) ->
     type: r
     labels: [r]
@@ -79,10 +69,8 @@ make_relation_from_rel = (r) ->
 # from http://stackoverflow.com/a/1830844/165544
 isNumber = (n) -> (!isNaN parseFloat n) and isFinite n
 
-###
 # Draws a brat tree from a XML words array to a div given its id
-###
-window.draw_brat_tree = (words, to_div, attach_to, info_div) ->
+draw_brat_tree = (words, to_div, hover_fun) ->
 
     entity_types = []
     relation_types = []
@@ -92,6 +80,8 @@ window.draw_brat_tree = (words, to_div, attach_to, info_div) ->
     added_rel = []
 
     add_word = (word, start, stop) ->
+
+        # console.log "Adding word", word, start, stop
 
         [pos,ref,dephead,deprel] = for attr in ["pos", "ref", "dephead", "deprel"]
             word.attributes.getNamedItem(attr).value
@@ -132,31 +122,19 @@ window.draw_brat_tree = (words, to_div, attach_to, info_div) ->
         entities: entities
         relations: relations
 
-    div = $("#" + to_div)
-    make_visible = ->
-        div.appendTo("body")
-        div.show()
-        div.addClass("drawing")
-    make_visible()
-    dispatcher = Util.embed to_div, collData, docData, webFontURLs
-    dispatcher.on 'newSourceData', ->
-        make_visible()
-        # console.log "Starting Rendering", div
-    dispatcher.on 'doneRendering', ->
-        div.removeClass("drawing")
-        div.detach()
-        div.appendTo(attach_to)
-        for g in div.find("g.arcs").children()
-            do ->
+    head.ready ->
+
+        dispatcher = Util.embed to_div, collData, docData, webFontURLs
+
+        div = $("#" + to_div)
+        # Set up hover callbacks
+        dispatcher.on 'doneRendering', ->
+
+            _.map div.find("g.arcs").children(), (g) ->
                 deprel = $(g).find("text").data("arc-role")
-                loc = localization_info "deprel", deprel
-                $(g).hover -> info_div.localize_element loc
-        for g in div.find("g.span text")
-            do ->
+                $(g).hover -> hover_fun deprel: deprel
+
+            _.map div.find("g.span text"), (g) ->
                 pos = $(g).text()
-                loc = localization_info "pos", pos
-                $(g).parent().hover -> info_div.localize_element loc
-
-        # console.log "Done Rendering", div
-
+                $(g).parent().hover -> hover_fun pos: pos
 
