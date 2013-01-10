@@ -101,7 +101,7 @@
           }));
         }));
         if (make_deptrees) {
-          iframe = $('<iframe src="http://localhost/deptrees/index.html">');
+          iframe = $('<iframe src="deptrees/index.html">');
           prepend_to_table(iframe);
           iframe.load(function() {
             var i_window, json_sent;

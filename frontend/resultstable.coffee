@@ -78,7 +78,7 @@ tabulate_sentence = (attributes, make_deptrees) -> (sent) ->
 
         if make_deptrees
 
-            iframe = $('<iframe src="http://localhost/deptrees/index.html">')
+            iframe = $('<iframe src="deptrees/index.html">')
 
             prepend_to_table iframe
 
