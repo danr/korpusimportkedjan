@@ -87,7 +87,11 @@ tabulate_sentence = (attributes, make_deptrees) -> (sent) ->
                 try
                     i_window = iframe.get(0).contentWindow
 
-                    i_window.draw_deptree.call i_window, sent, (msg) -> do (info_div) ->
+                    json_sent = i_window.sentence_xml_to_json sent
+
+                    console.log json_sent
+
+                    i_window.draw_deptree.call i_window, json_sent, (msg) ->
                         [[k,v]] = _.pairs msg
                         info_div.localize_element localization_info k,v
                 catch e

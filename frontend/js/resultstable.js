@@ -104,15 +104,15 @@
           iframe = $('<iframe src="http://localhost/deptrees/index.html">');
           prepend_to_table(iframe);
           iframe.load(function() {
-            var i_window;
+            var i_window, json_sent;
             try {
               i_window = iframe.get(0).contentWindow;
-              i_window.draw_deptree.call(i_window, sent, function(msg) {
-                return (function(info_div) {
-                  var k, v, _ref1;
-                  _ref1 = _.pairs(msg)[0], k = _ref1[0], v = _ref1[1];
-                  return info_div.localize_element(localization_info(k, v));
-                })(info_div);
+              json_sent = i_window.sentence_xml_to_json(sent);
+              console.log(json_sent);
+              i_window.draw_deptree.call(i_window, json_sent, function(msg) {
+                var k, v, _ref1;
+                _ref1 = _.pairs(msg)[0], k = _ref1[0], v = _ref1[1];
+                return info_div.localize_element(localization_info(k, v));
               });
             } catch (e) {
               console.log(e);

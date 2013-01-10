@@ -10,7 +10,20 @@
     sent_id = "magic_secret_id";
     deprel_div = $("<div>").attr("id", sent_id);
     $('body').empty().append(deprel_div);
-    return draw_brat_tree($(sent).children(), sent_id, hover_fun);
+    return draw_brat_tree(sent, sent_id, hover_fun);
+  };
+
+  window.sentence_xml_to_json = function(sent) {
+    return _.map($(sent).children(), function(word) {
+      var obj;
+      obj = {
+        word: word.textContent
+      };
+      _.map(["pos", "ref", "dephead", "deprel"], function(attr) {
+        return obj[attr] = $(word).attr(attr);
+      });
+      return obj;
+    });
   };
 
   $(document).ready(head.js);
@@ -86,7 +99,7 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           attr = _ref[_i];
-          _results.push(word.attributes.getNamedItem(attr).value);
+          _results.push(word[attr]);
         }
         return _results;
       })(), pos = _ref[0], ref = _ref[1], dephead = _ref[2], deprel = _ref[3];
@@ -110,14 +123,14 @@
       _results = [];
       for (_i = 0, _len = words.length; _i < _len; _i++) {
         word = words[_i];
-        _results.push(word.textContent);
+        _results.push(word.word);
       }
       return _results;
     })()).join(" ");
     ix = 0;
     for (_i = 0, _len = words.length; _i < _len; _i++) {
       word = words[_i];
-      len = word.textContent.length;
+      len = word.word.length;
       add_word(word, ix, ix + len);
       ix += len + 1;
     }

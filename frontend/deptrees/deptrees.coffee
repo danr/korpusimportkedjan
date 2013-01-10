@@ -13,7 +13,15 @@ window.draw_deptree = (sent, hover_fun=->) ->
 
     $('body').empty().append deprel_div
 
-    draw_brat_tree $(sent).children(), sent_id, hover_fun
+    draw_brat_tree sent, sent_id, hover_fun
+
+
+window.sentence_xml_to_json = (sent) ->
+    _.map $(sent).children(), (word) ->
+        obj = word: word.textContent
+        _.map ["pos", "ref", "dephead", "deprel"], (attr) ->
+            obj[attr] = $(word).attr attr
+        obj
 
 # Initialise brat
 $(document).ready head.js
@@ -83,8 +91,7 @@ draw_brat_tree = (words, to_div, hover_fun) ->
 
         # console.log "Adding word", word, start, stop
 
-        [pos,ref,dephead,deprel] = for attr in ["pos", "ref", "dephead", "deprel"]
-            word.attributes.getNamedItem(attr).value
+        [pos,ref,dephead,deprel] = (word[attr] for attr in ["pos", "ref", "dephead", "deprel"])
 
         unless _.contains added_pos, pos
             added_pos.push pos
@@ -106,10 +113,10 @@ draw_brat_tree = (words, to_div, hover_fun) ->
                 ]
             relations.push relation
 
-    text = (word.textContent for word in words).join(" ")
+    text = (word.word for word in words).join(" ")
     ix = 0
     for word in words
-        len = word.textContent.length
+        len = word.word.length
         add_word word, ix, ix + len
         ix += len + 1
 
