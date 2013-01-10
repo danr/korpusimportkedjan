@@ -20,13 +20,6 @@ button.dropdown-toggle {
   margin-top: 3px;
   margin-left: -3px; }
 
-.drawing {
-  position: absolute;
-  left: -10000px;
-  top: -10000px;
-  width: 800px;
-  height: 10000px; }
-
 #result .tag_outline:not(.disabled) > * > .table {
   margin-bottom: 0px; }
 #result .hide {
@@ -81,12 +74,6 @@ button.dropdown-toggle {
   font-size: inherit;
   border: none;
   padding: 0; }
-
-svg {
-  border: none; }
-
-.sentnum {
-  display: none; }
 
 iframe {
   border: none;

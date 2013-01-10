@@ -24,17 +24,6 @@ button.dropdown-toggle
   margin-top: 3px
   margin-left: -3px
 
-// The drawing hack!
-// While drawing the SVG dependency trees, they must be visible in the dom, but we don't
-// want to show them to the user yet. This uses Johan's hack to move them to a negative position
-// and seems to work alright in practice
-.drawing
-  position: absolute
-  left: -10000px
-  top: -10000px
-  width: 800px
-  height: 10000px
-
 // The results table styling
 // If tags are not viewed, they get the extra class .disabled
 #result
@@ -112,15 +101,6 @@ button.dropdown-toggle
   font-size: inherit
   border: none
   padding: 0
-
-
-// Remove dependency tree borders
-svg
-  border: none
-
-// Remove the sentence numbers in the dependency trees
-.sentnum
-  display: none
 
 iframe
   border: none
