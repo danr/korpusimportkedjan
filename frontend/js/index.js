@@ -4,7 +4,6 @@
 
   main = function() {
     var example, example_buttons, lang, lang_key, language_buttons, xml_editor, _ref, _ref1;
-    init_brat();
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
       lineNumbers: true
     });

@@ -1,6 +1,4 @@
 main = ->
-    # Initialize brat
-    init_brat()
 
     # Make the xml editor
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"),
