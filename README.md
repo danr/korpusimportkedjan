@@ -43,7 +43,8 @@ is built by issuing `make` in the `catapult` directory.
 ### Configuration
 
 Directories are hard-coded into the keep alive script `keep-alive.sh`, and
-the start server script `start-server.sh`. Go nuts!
+the start server script `start-server.sh` and the saldo update script
+`update-saldo.sh`. Go nuts!
 
 ## Frontend
 
