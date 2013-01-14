@@ -4,15 +4,21 @@
   window.address = {};
 
   window.address.set_from_xml = function(data) {
-    var build, _ref;
+    var build, new_hash, _ref;
     if (((_ref = (build = data != null ? data.getElementsByTagName("build") : void 0)) != null ? _ref.length : void 0) === 1) {
-      return window.location.hash = build[0].attributes.getNamedItem("hash").value;
+      new_hash = build[0].attributes.getNamedItem("hash").value;
+      console.log("pushing bbq hash " + new_hash);
+      return $.bbq.pushState({
+        hash: new_hash
+      });
     }
   };
 
   window.address.try_join_with_hash = function(xml_editor) {
-    if (window.location.hash.length === 41 && window.location.hash[0] === '#') {
-      return submit(xml_editor, false, window.location.hash.slice(1));
+    var hash;
+    hash = $.bbq.getState("hash");
+    if ((hash != null) && hash.length === 40) {
+      return submit(xml_editor, false, hash);
     }
   };
 

@@ -28,7 +28,7 @@ display_column = do ->
         saldo:  split_pipes saldo_link
         prefix: split_pipes lemgram_link
         suffix: split_pipes lemgram_link
-    (attr) -> lookup[attr] or _.identity
+    (attr) -> lookup[attr] or (x) -> if x == "" then '&nbsp;' else x
 
 # Makes a table and deptree for a sentence
 # First argument is a tuple of settings, second argument is the sentence in XML
@@ -89,7 +89,7 @@ tabulate_sentence = (attributes, make_deptrees) -> (sent) ->
 
                     json_sent = i_window.sentence_xml_to_json sent
 
-                    console.log json_sent
+                    # console.log json_sent
 
                     i_window.draw_deptree.call i_window, json_sent, (msg) ->
                         [[k,v]] = _.pairs msg

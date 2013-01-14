@@ -28,8 +28,11 @@ main = ->
             $("""
                 <button class="btn btn-small btn-warning" style="margin:5px;"">
                     <i class="icon-flag"></i> #{lang}
-                </button>""").click ->
-                    $.fn.set_language(lang_key)
+                </button>""").click -> $.bbq.pushState lang: lang_key
+
+    $(window).bind 'hashchange', (e) ->
+        console.log "HASHCHANGE!!!!!!"
+        $.fn.set_language $.bbq.getState "lang"
 
     $("#language_buttons").append(language_buttons...)
 
@@ -62,6 +65,8 @@ main = ->
     # Set initial language to Swedish. This also sets the text value of uninitialized items.
     $.fn.set_language('se')
 
+    $(window).trigger 'hashchange'
+
     # We used to check if we have a hash in the status bar, but now we wait for this
     # for after the form is loaded. See load_form.coffee
 
@@ -75,6 +80,7 @@ $ -> $.reject
         msie6: true
         msie7: true
         msie8: true
+        msie9: true
     imagePath: "lib/jquery-reject/images/"
     display: ['firefox','chrome','safari','opera']
     browserShow: true

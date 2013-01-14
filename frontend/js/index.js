@@ -32,12 +32,18 @@
         _ref2 = _ref1[_i], lang_key = _ref2[0], lang = _ref2[1];
         _results.push((function(lang_key, lang) {
           return $("<button class=\"btn btn-small btn-warning\" style=\"margin:5px;\"\">\n    <i class=\"icon-flag\"></i> " + lang + "\n</button>").click(function() {
-            return $.fn.set_language(lang_key);
+            return $.bbq.pushState({
+              lang: lang_key
+            });
           });
         })(lang_key, lang));
       }
       return _results;
     })();
+    $(window).bind('hashchange', function(e) {
+      console.log("HASHCHANGE!!!!!!");
+      return $.fn.set_language($.bbq.getState("lang"));
+    });
     (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
     $("#title_text").click(function() {
       with_form.load_defaults();
@@ -62,7 +68,8 @@
       submit(xml_editor);
       return false;
     });
-    return $.fn.set_language('se');
+    $.fn.set_language('se');
+    return $(window).trigger('hashchange');
   };
 
   $(document).ready(main);
@@ -74,7 +81,8 @@
         msie5: true,
         msie6: true,
         msie7: true,
-        msie8: true
+        msie8: true,
+        msie9: true
       },
       imagePath: "lib/jquery-reject/images/",
       display: ['firefox', 'chrome', 'safari', 'opera'],

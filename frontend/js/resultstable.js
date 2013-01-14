@@ -44,7 +44,13 @@
       suffix: split_pipes(lemgram_link)
     };
     return function(attr) {
-      return lookup[attr] || _.identity;
+      return lookup[attr] || function(x) {
+        if (x === "") {
+          return '&nbsp;';
+        } else {
+          return x;
+        }
+      };
     };
   })();
 
@@ -108,7 +114,6 @@
             try {
               i_window = iframe.get(0).contentWindow;
               json_sent = i_window.sentence_xml_to_json(sent);
-              console.log(json_sent);
               i_window.draw_deptree.call(i_window, json_sent, function(msg) {
                 var k, v, _ref1;
                 _ref1 = _.pairs(msg)[0], k = _ref1[0], v = _ref1[1];
