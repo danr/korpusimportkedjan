@@ -51,7 +51,7 @@ main = ->
     $("#title_text").click ->
         with_form.load_defaults()
         xml_editor.setValue ""
-        window.location.hash = ""
+        $.bbq.removeState "hash"
         $("#result").empty()
         false
 
