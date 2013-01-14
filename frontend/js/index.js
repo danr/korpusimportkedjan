@@ -2,6 +2,14 @@
 (function() {
   var main;
 
+  $.fn.set_show = function(b) {
+    if (b) {
+      return $(this).show();
+    } else {
+      return $(this).hide();
+    }
+  };
+
   main = function() {
     var example, example_buttons, lang, lang_key, language_buttons, xml_editor, _ref, _ref1;
     xml_editor = CodeMirror.fromTextArea(document.getElementById("corpus_xml"), {
@@ -40,11 +48,30 @@
       }
       return _results;
     })();
-    $(window).bind('hashchange', function(e) {
-      console.log("HASHCHANGE!!!!!!");
-      return $.fn.set_language($.bbq.getState("lang"));
-    });
     (_ref1 = $("#language_buttons")).append.apply(_ref1, language_buttons);
+    $("#activate_form").click(function() {
+      return $.bbq.pushState({
+        advanced: true
+      });
+    });
+    $("#deactivate_form").click(function() {
+      return $.bbq.pushState({
+        advanced: false
+      });
+    });
+    $(window).bind('hashchange', function(e) {
+      var advanced;
+      lang = $.bbq.getState("lang");
+      if (!lang) {
+        lang = "se";
+      }
+      $.fn.set_language(lang);
+      advanced = "true" === $.bbq.getState("advanced");
+      $("#deactivate_form").set_show(advanced);
+      $("#activate_form").set_show(!advanced);
+      $(".advanced").set_show(advanced);
+      return $(".not-advanced").set_show(!advanced);
+    });
     $("#title_text").click(function() {
       with_form.load_defaults();
       xml_editor.setValue("");
@@ -64,11 +91,10 @@
       $("#query").text(JSON.stringify(with_form.get(), void 0, 4));
       return false;
     });
-    $("#btn_submit").click(function() {
+    $(".btn_submit").click(function() {
       submit(xml_editor);
       return false;
     });
-    $.fn.set_language('se');
     return $(window).trigger('hashchange');
   };
 

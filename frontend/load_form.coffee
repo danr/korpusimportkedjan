@@ -1,7 +1,7 @@
 window.with_form =
-    get: () -> console.log "Error: Form not loaded!"
+    get: () -> {}
     set: () -> console.log "Error: Form not loaded!"
-    load_defaults: () -> console.log "Error: Form not loaded!"
+    load_defaults: () -> {}
 
 set_form = (schema, value) ->
 

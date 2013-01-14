@@ -1,3 +1,5 @@
+$.fn.set_show = (b) -> if b then $(this).show() else $(this).hide()
+
 main = ->
 
     # Make the xml editor
@@ -30,11 +32,21 @@ main = ->
                     <i class="icon-flag"></i> #{lang}
                 </button>""").click -> $.bbq.pushState lang: lang_key
 
-    $(window).bind 'hashchange', (e) ->
-        console.log "HASHCHANGE!!!!!!"
-        $.fn.set_language $.bbq.getState "lang"
-
     $("#language_buttons").append(language_buttons...)
+
+    $("#activate_form").click   -> $.bbq.pushState advanced: true
+    $("#deactivate_form").click -> $.bbq.pushState advanced: false
+
+    $(window).bind 'hashchange', (e) ->
+        lang = $.bbq.getState "lang"
+        if not lang
+            lang = "se"
+        $.fn.set_language lang
+        advanced = "true" == $.bbq.getState "advanced"
+        $("#deactivate_form").set_show advanced
+        $("#activate_form").set_show !advanced
+        $(".advanced").set_show advanced
+        $(".not-advanced").set_show !advanced
 
     $("#title_text").click ->
         with_form.load_defaults()
@@ -58,13 +70,11 @@ main = ->
         false
 
     # Submit
-    $("#btn_submit").click ->
+    $(".btn_submit").click ->
         submit xml_editor
         false
 
     # Set initial language to Swedish. This also sets the text value of uninitialized items.
-    $.fn.set_language('se')
-
     $(window).trigger 'hashchange'
 
     # We used to check if we have a hash in the status bar, but now we wait for this

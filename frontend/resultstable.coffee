@@ -203,7 +203,7 @@ window.make_table = (data) ->
         corpus = (data.getElementsByTagName "corpus")[0]
         (display tabulate_sentence attributes, make_deptrees) corpus, tables_div
 
-    $("#extra_buttons").empty().append $("""<button class="btn">XML</button>""").click ->
+    $("#extra_buttons").empty().append $("""<button class="btn advanced">XML</button>""").click ->
         new_window (new XMLSerializer()).serializeToString data
         false
 

@@ -254,7 +254,7 @@
       corpus = (data.getElementsByTagName("corpus"))[0];
       return (display(tabulate_sentence(attributes, make_deptrees)))(corpus, tables_div);
     })();
-    $("#extra_buttons").empty().append($("<button class=\"btn\">XML</button>").click(function() {
+    $("#extra_buttons").empty().append($("<button class=\"btn advanced\">XML</button>").click(function() {
       new_window((new XMLSerializer()).serializeToString(data));
       return false;
     }));

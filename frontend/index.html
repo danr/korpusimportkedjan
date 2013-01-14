@@ -93,11 +93,30 @@
         </div>
       </div>
 
-      <div id="form" style="margin-bottom: 2em;">
-        <span
-          data-loc-en="Loading form..."
-          data-loc-se="Laddar formulär...">
-        </span>
+      <div class="row">
+        <div class="span12">
+          <button class="btn" id="activate_form"
+              data-loc-se="Visa avancerade inställningar"
+              data-loc-en="Show advanced settings"></button>
+          <button class="btn" id="deactivate_form"
+              data-loc-se="Dölj avancerade inställningar"
+              data-loc-en="Hide advanced settings"></button>
+
+          <div id="form" class="advanced">
+            <span
+              data-loc-se="Laddar formulär..."
+              data-loc-en="Loading form...">
+            </span>
+          </div>
+
+          <button class="btn not-advanced pull-right btn_submit">
+            <i class="icon-cogs"></i>
+            <span
+              data-loc-en="Run!"
+              data-loc-se="Kör!">
+            </span>
+          </button>
+        </div>
       </div>
 
       <div class="row">
@@ -109,11 +128,9 @@
         </div>
       </div>
 
-      <pre id="query" class="original-pre">
-      </pre>
+      <pre id="query" class="original-pre"></pre>
 
-
-      <div class="row">
+      <div class="row advanced">
         <div class="span12" style="margin-bottom: 1em;">
           <span class="btn-group">
             <button class="btn" id="show_query">
@@ -133,12 +150,14 @@
           </span>
           <span id="extra_buttons" class="btn-group"></span>
           <span class="pull-right">
-            <input type="checkbox" id="show_tags">
-            <span
-              data-loc-en="Show tags"
-              data-loc-se="Visa taggar">
+            <span>
+              <input type="checkbox" id="show_tags">
+              <span
+                data-loc-en="Show tags"
+                data-loc-se="Visa taggar">
+              </span>
             </span>
-            <button class="btn" id="btn_submit">
+            <button class="btn btn_submit">
               <i class="icon-cogs"></i>
               <span
                 data-loc-en="Run!"

@@ -7,10 +7,11 @@
     var build, new_hash, _ref;
     if (((_ref = (build = data != null ? data.getElementsByTagName("build") : void 0)) != null ? _ref.length : void 0) === 1) {
       new_hash = build[0].attributes.getNamedItem("hash").value;
-      console.log("pushing bbq hash " + new_hash);
-      return $.bbq.pushState({
-        hash: new_hash
-      });
+      if (new_hash !== $.bbq.getState("hash")) {
+        return $.bbq.pushState({
+          hash: new_hash
+        });
+      }
     }
   };
 

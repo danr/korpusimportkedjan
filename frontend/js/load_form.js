@@ -5,13 +5,13 @@
 
   window.with_form = {
     get: function() {
-      return console.log("Error: Form not loaded!");
+      return {};
     },
     set: function() {
       return console.log("Error: Form not loaded!");
     },
     load_defaults: function() {
-      return console.log("Error: Form not loaded!");
+      return {};
     }
   };
 
